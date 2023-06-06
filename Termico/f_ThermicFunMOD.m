@@ -1,4 +1,4 @@
-function [Tdd,T3Dt,PTherm,T_Contributi,fattore_correttivo]=f_ThermicFun(Tprec,mesh,mode,StrTT,IPLOT)
+function [Tdd,T3Dt,PTherm,T_Contributi,fattore_correttivo]=f_ThermicFunMOD(Tprec,mesh,mode,StrTT,IPLOT)
 
 %clear all
 %close all
@@ -1077,7 +1077,8 @@ PTherm=2*pi*xdxN*qtot*dzN*1000;
 % 'prima di termici', keyboard
 
 % fattore_correttivo=mode.PDiss(end)/PTherm;
-fattore_correttivo=mode.PDissPred(end)/PTherm;
+fattore_correttivo=mode.PDissPred(end)/PTherm
+% fattore_correttivo=1
 %Tdd=Tdd*fattore_correttivo;
 if max(max(Tprec))>7
 %'qui tempo', keyboard
@@ -1217,7 +1218,7 @@ rho(1)=min(min(xxd));
 
  
  
- Contributi_Termici
+ Contributi_Termici     % T_Contributi is computed
  
  K = interp2(xxd,zzd,Fcondz,rho,Tbuf_aggiunto+z');
  K = [K(1,:);K;K(end,:)];

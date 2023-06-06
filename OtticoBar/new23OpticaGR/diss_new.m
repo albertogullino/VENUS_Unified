@@ -1062,8 +1062,8 @@ if (ie==1 & min(abs(xf-ze))<st) | ie==0
 
 %  An0=reshape(Anu(:,pou(nso,fiAz),fiAz),sA(1),1);
 clear As
-%  for iaf=1:length(Fint)
-  for iaf=1:length(pou)
+ for iaf=1:length(Fint)
+%   for iaf=1:length(pou)
   Pun=pou(nso,iaf);
   if Pun>0
    Ada=reshape(Anu(:,Pun,iaf),sA(1),1);

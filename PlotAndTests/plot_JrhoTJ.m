@@ -3,7 +3,7 @@ close all
 if exist('JN_X')==0
     ITJ_finder
 
-    mode=MODEplot{1};
+    mode=MODEplot{end};
     
     JN_X=mode.JXn;    % actually MODEplot{1} or modePlot
     JN_Y=(mode.JYn);

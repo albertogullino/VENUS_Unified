@@ -13,8 +13,6 @@ warning off
 % VELM solver parameters
 %==========================================================================
 
-
-
 fclose('all') 
 num_azim=VelmOptions.num_azim;
 ivett=VelmOptions.ivett;
@@ -70,16 +68,20 @@ NPxQW=mesh.nnxQW{1};
 
 dox=ParVet(1);
 
-%'NPx', keyboard
-ired_int=0;    % riduce la zona dei fenomeni trasversali
-Fat_ox=2.5;
-Fat_ox=4;
-%Fat_ox=2;
+'NPx'%, keyboard
+ired_int=0   % 1 riduce la zona dei fenomeni trasversali
+% Fat_ox=2.5;
+% Fat_ox=4;
+Fat_ox=3;
 if ired_int==1
- Rmax=max([Fat_ox*dox 8]);
+%  Rmax=max([Fat_ox*dox 8]);
+ Rmax=Fat_ox*dox;
  fianti=find(NPx<=Rmax);
 else
  fianti=1:NPxQW;
+ 
+ %% Here the full DD radial mesh is used instead of a portion: be careful to N and Nref!
+%  fianti=1:length(mesh.xgrid);
 end
 
 % x=linspace(min(xdd),max(xdd),101);
@@ -120,9 +122,10 @@ ro_in=NPx(fianti);
 
 ro_Fie=NPx;
 
-
-ro_campo=linspace(0,NPx(fianti(end)),351);
-ro_campoF=linspace(0,NPx(end),351);
+nnxVELM=351;    % original VELM for 2019JSTQE articles
+% nnxVELM=401;
+ro_campo=linspace(0,NPx(fianti(end)),nnxVELM);
+ro_campoF=linspace(0,NPx(end),nnxVELM);
 
 
 
@@ -286,6 +289,11 @@ if VelmOptions.ianti_gui==1
    Nref=0;
   else 
    Nref=(Dn-Dn(end))/del_n_ag;
+   
+   if fianti(end)>NPxQW
+       'Nref=0'%,keyboard
+       Nref(end+1:fianti(end))=0;
+   end
    del_n_ag=del_n_ag*mode.fat_ag; 
 
    %del_n_ag=del_n_ag*(1-Nref_du(end));
@@ -326,26 +334,31 @@ if length(matgain)==1
     %g0=0;
 %    'quio', keyboard
 else
-  if length(matgain)>length(fianti)
-    matgain=matgain(:,fianti);
-  end	
+    if length(matgain)>length(fianti)
+        matgain=matgain(:,fianti);
+    end
     if max(matgain)>-100
-     g0=abs(min(matgain));  % in 1/cm % Tibaldi    
-     N=matgain-min(matgain); N=N./max(N);
-     if N(1)<0
-      N=-N;
-     end
-     g0=abs((matgain(end)));  % in 1/cm % Tibaldi         
-     N=matgain-matgain(end); N=N./max(N);
-%      N=0;
-     if N(1)<0
-      N=-N;
-     end     
+%         g0=abs(min(matgain));  % in 1/cm % Tibaldi
+        N=matgain-min(matgain); N=N./max(N);
+        if N(1)<0
+            N=-N;
+        end
+        g0=abs((matgain(end)));  % in 1/cm % Tibaldi
+        N=matgain-matgain(end); N=N./max(N);
+        
+        if fianti(end)>NPxQW
+            'N=0'%,keyboard
+            N(end+1:fianti(end))=0;
+        end
+        %      N=0;
+        if N(1)<0
+            N=-N;
+        end
     else
-     roadd=dox+1;
-     N=exp(-(ro_in/roadd).^4);
-     g0=0; 
-     g0=abs(min(matgain));      
+        roadd=dox+1;
+        N=exp(-(ro_in/roadd).^4);
+%         g0=0;
+        g0=abs(min(matgain));
     end
 %    if(max(matgain)<0)
 %%     g0=0;
@@ -406,10 +419,14 @@ global EO ABS
 %' abs', keyboard
 ABS.zAbs=zAbs;
 
-elec=reshape(mode.elecABS,mesh.nny,mesh.nnx);
-eleccentro=elec(:,fianti(end));
-hole=reshape(mode.holeABS,mesh.nny,mesh.nnx);
-holecentro=hole(:,fianti(end));
+rFCA=dox*2/3;
+[~,indox]=min(abs(NPx-rFCA));
+% indox=NPxQW;
+
+elec=reshape(mode.elecABSvelm,mesh.nny,mesh.nnx);
+eleccentro=elec(:,indox);
+hole=reshape(mode.holeABSvelm,mesh.nny,mesh.nnx);
+holecentro=hole(:,indox);
 
 xmo=reshape(mesh.xmol,mesh.nny,mesh.nnx);
 xmol=xmo(:,1);
@@ -422,40 +439,41 @@ ABS.zT=zT;
 
  % effetti termici
  
- 
-%   ABS.eleccentro=ABS.eleccentro.*(1+Tdd(:,end)/300).^mode.ABS_Texp;
-%   ABS.holecentro=ABS.holecentro.*(1+Tdd(:,end)/300).^mode.ABS_Texp;
 Al=mode.ABS_Apor;
-ABS_Texp=mode.ABS_Texp+mode.PerCoefExT*Tdd(:,end);
+
+'Check proper Tvelm',% keyboard
+% Tvelm=Tdd(:,end);
+Tvelm=Tdd(:,indox);
+ABS_Texp=mode.ABS_Texp+mode.PerCoefExT*Tvelm;
 
 if Al>0
- N0=1; % per N=1 tutte coincidono
- InDe=1/log(Al*N0+1);  
- if isfield(mode,'IOLDsw')
-  if mode.IOLDsw==1
-   N0=mode.ABS_Ader;
-  end
-   InDe=(Al*N0+1)/Al;  
- end 
-
- ABS.eleccentro=InDe*log(Al*ABS.eleccentro+1).*(1+Tdd(:,end)/T300).^ABS_Texp;
- ABS.holecentro=InDe*log(Al*ABS.holecentro+1).*(1+Tdd(:,end)/T300).^ABS_Texp;
+    N0=1; % per N=1 tutte coincidono
+    InDe=1/log(Al*N0+1);
+    if isfield(mode,'IOLDsw')
+        if mode.IOLDsw==1
+            N0=mode.ABS_Ader;
+        end
+        InDe=(Al*N0+1)/Al;
+    end
+    
+    ABS.eleccentro=InDe*log(Al*ABS.eleccentro+1).*(1+Tvelm/T300).^ABS_Texp;
+    ABS.holecentro=InDe*log(Al*ABS.holecentro+1).*(1+Tvelm/T300).^ABS_Texp;
 else
-   ABS.eleccentro=ABS.eleccentro.*(1+Tdd(:,end)/T300).^ABS_Texp;
-   ABS.holecentro=ABS.holecentro.*(1+Tdd(:,end)/T300).^ABS_Texp;
+    ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
+    ABS.holecentro=ABS.holecentro.*(1+Tvelm/T300).^ABS_Texp;
 end
 %  'qui ABS f_callVelm', keyboard
 
- if isfield(mode,'Fat_PerCoefTemp')
-  Fat_Perd=mode.Fat_Perd0+Tdd(:,end)*mode.Fat_PerCoefTemp;
-  ABSh=mode.ABSh0.*Fat_Perd;
-  ABSe=mode.ABSe0.*Fat_Perd;
- else
-  ABSh=mode.ABSh;
-  ABSe=mode.ABSe;
- end 
- ABS.e=ABSe;
- ABS.h=ABSh; 
+if isfield(mode,'Fat_PerCoefTemp')
+    Fat_Perd=mode.Fat_Perd0+Tvelm*mode.Fat_PerCoefTemp;
+    ABSh=mode.ABSh0.*Fat_Perd;
+    ABSe=mode.ABSe0.*Fat_Perd;
+else
+    ABSh=mode.ABSh;
+    ABSe=mode.ABSe;
+end
+ABS.e=ABSe;
+ABS.h=ABSh;
  
  %alN3=(mode.holeABS.*ABSh+mode.elecABS.*ABSe)*100;
   
@@ -588,76 +606,103 @@ tyPmod_0,omP0_0,eta_eff_0,Tper,Pa,Ppol,Plot,Eo_x,Eo_y]=...
  %figure,plot(xro,cam2_0),ylabel('campo al quadrato'), keyboard
 %  ' DOPO di calop in set_opt ', keyboard
  
-iold=1; % 1: OLD E2 fit
- 
-if iold==1
-fiox=find(xro>ParVet(1));
-xro=ro_Fie/1e4;
-
-Fdox=1.3;
-% comment for 1D simulation
-fifit1=find(ro_campo>dox*Fdox);
-fifi(1)=fifit1(1);
-fifit1=find(ro_campo<=dox*Fdox);
-fifit2=find(ro_campo>dox*Fdox*1.1);
-fifi(2)=fifit2(1);
-% 
-
-fi1=find(ro_Fie<=dox*Fdox);
-fi2=find(ro_Fie>dox*Fdox);
-
-% tolgo fit coda
-% fi1=1:length(ro_Fie);
-% fi2=[];
-fifit1=1:length(ro_campoF);
-
-for indMode=1:length(gain_0)
-    E2tmp=cam2_0(indMode,:);
-    colog=polyfit(ro_campo(fifi),log10(E2tmp(fifi)),1);
-%         Etmp=E2tmp(fifi(1):end);
-%     xtmp=ro_campo(fifi(1):end);
-%     dE=diff(Etmp);
-%     dE0=dE(1:end-1).*dE(2:end);
-%     fin=find(dE0<0);
-%     Ema=Etmp(fin);
-%     xma=xtmp(fin);
-%     if Ema(1)>Ema(2)
-%         Emafin=Ema(1:2:end);
-%         xmafin=xma(1:2:end);
-%     else
-%         Emafin=Ema(2:2:end);
-%         xmafin=xma(2:2:end);
-%     end
-%     colog=polyfit(xmafin,log10(Emafin),1); % comment for 1D simulation
-
-    Efit1=spline(ro_campo(fifit1),E2tmp(fifit1),ro_Fie(fi1));
-    if length(fi2)>0
-     Efit2=10.^(polyval(colog,ro_Fie(fi2)));
-    else
-     Efit2=[];
-    end
-    E2t=[Efit1 Efit2];
-    Norm2=trapz(xro,2*pi*xro.*E2t);
-    mode.E2(indMode,:)=E2t/Norm2;
-    ca2(indMode,:)=E2tmp/Norm2;
+if fianti(end)>NPxQW || ired_int==1
+    'ioldE2fit'%,keyboard
+    ioldE2fit=0 % 1: OLD E2 fit
+else
+    ioldE2fit=1 % 1: OLD E2 fit
 end
 
+% ioldE2fit=0
 
-else
+if ioldE2fit==1
     xro=ro_Fie/1e4;
+    
     Fdox=1.3;
-    fi1=find(ro_Fie<=dox*Fdox);
+    % comment for 1D simulation
+    fifit1=find(ro_campo>dox*Fdox);
+    fifi(1)=fifit1(1);
+    fifit2=find(ro_campo>dox*Fdox*1.1);
+    fifi(2)=fifit2(1);
+    %
+    fi1=find(ro_Fie<=dox*Fdox); % spline in a region slightly larger than OX
     fi2=find(ro_Fie>dox*Fdox);
-
+    
+    % tolgo fit coda
+    % fi1=1:length(ro_Fie);
+    % fi2=[];
+    fifit1=1:length(ro_campoF);
+    
     for indMode=1:length(gain_0)
-        E2tmp=cam2_0(indMode,:);
-        Efit1=spline(ro_campo,E2tmp,ro_Fie);
+        E2tmp=cam2_0(indMode,:);    % Extracted by VELM on its mesh
+        colog=polyfit(ro_campo(fifi),log10(E2tmp(fifi)),1);
+        %         Etmp=E2tmp(fifi(1):end);
+        %     xtmp=ro_campo(fifi(1):end);
+        %     dE=diff(Etmp);
+        %     dE0=dE(1:end-1).*dE(2:end);
+        %     fin=find(dE0<0);
+        %     Ema=Etmp(fin);
+        %     xma=xtmp(fin);
+        %     if Ema(1)>Ema(2)
+        %         Emafin=Ema(1:2:end);
+        %         xmafin=xma(1:2:end);
+        %     else
+        %         Emafin=Ema(2:2:end);
+        %         xmafin=xma(2:2:end);
+        %     end
+        %     colog=polyfit(xmafin,log10(Emafin),1); % comment for 1D simulation
         
-        E2t=Efit1;
+        % spline in a region slightly larger than OX
+        Efit1=spline(ro_campo(fifit1),E2tmp(fifit1),ro_Fie(fi1));
+        
+        % Exponential fit on a region just after the ox, extended to whole
+        % radius
+        if length(fi2)>0
+            Efit2=10.^(polyval(colog,ro_Fie(fi2)));
+        else
+            Efit2=[];
+        end
+        E2t=[Efit1 Efit2];
         Norm2=trapz(xro,2*pi*xro.*E2t);
         mode.E2(indMode,:)=E2t/Norm2;
         ca2(indMode,:)=E2tmp/Norm2;
     end
+    
+    
+elseif ired_int==1
+    %% Brings the fields to zero after a certain radius beyond
+    % the oxide
+    xro=ro_Fie/1e4;
+%     Fdox=2;
+%     Fat_ox=2;    % Same defined in ired_int
+    fi1=find(ro_Fie<=dox*Fat_ox);
+    fi2=find(ro_Fie>dox*Fat_ox);
+
+    for indMode=1:length(gain_0)
+        E2tmp=cam2_0(indMode,:);
+        Efit1=spline(ro_campo,E2tmp,ro_Fie(fi1));
+        Efit2=zeros(size(ro_Fie(fi2)));
+        
+        E2t=[Efit1 Efit2];
+        Norm2=trapz(xro,2*pi*xro.*E2t);
+        mode.E2(indMode,:)=E2t/Norm2;
+        ca2(indMode,:)=E2tmp/Norm2;
+    end
+else
+    %% Used when fianti=indexes of DD, including the PASSIVATION!
+    % Be careful that N and Nref that come from matgain has set to zero
+    % from the mesa to the end of passivation, otherwise dimension mismatch
+    % arise in vel_DD!
+    xro=ro_Fie/1e4;
+    for indMode=1:length(gain_0)
+        E2tmp=cam2_0(indMode,:);
+        
+        E2t=spline(ro_campo,E2tmp,ro_Fie);
+        Norm2=trapz(xro,2*pi*xro.*E2t);
+        mode.E2(indMode,:)=E2t/Norm2;
+        ca2(indMode,:)=E2tmp/Norm2;
+    end
+    
 end
  
 iverfitCa=0;

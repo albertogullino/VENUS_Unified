@@ -9,8 +9,6 @@ colordef white
 dbstop if error
 
 addpathVENUS
-rmpath OtticoBar/new23OpticaGR
-% rmpath OtticoBar/new22Optica
 
 % Flag to avoid slow geom generation of lithographic structures (load geom file)
 flgGEOM=1;     % 1, carica vecchia geom

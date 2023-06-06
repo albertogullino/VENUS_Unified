@@ -44,35 +44,24 @@ mode.quasi1D=0;
 mode.stairs=0;
 
 %  mode.heteromode=2; % if 2 puts the "heteropoints"; if 1 doesn't
- mode.heteromode=1; % if 2 puts the "heteropoints"; if 1 doesn't
- 
- % Scaling of equations/matrices/unknowns
- mode.CarrierNorm=1; % 1D: 1e8; 3D: 1
- mode.CarrierNorm2D=mode.CarrierNorm;
+mode.heteromode=1; % if 2 puts the "heteropoints"; if 1 doesn't
 
- mode.C1=1;   % matrix scaling (in place of mode.CarrierNorm)
- mode.EqPermutazione=0;
- 
- mode.Cpot=1e3; % 1e3 original VENUS
- 
- if mode.quasi1D==0 
-    if mode.flgBTJ==0
+% Scaling of equations/matrices/unknowns
+mode.CarrierNorm=1; % 1D: 1e8; 3D: 1
+mode.CarrierNorm2D=mode.CarrierNorm;
+
+mode.C1=1;   % matrix scaling (in place of mode.CarrierNorm)
+mode.EqPermutazione=0;
+
+mode.Cpot=1e3; % 1e3 original VENUS
+
+if mode.quasi1D==0
      MEsa=[20.5:1:27.5]+3.5; % VENUS3 mesa vector
     % MEsa=[27.5:1:32.5]; % mesa vector for oxide diameters [6:11] um, VENUS1 
      OX=MEsa-11.5*2;
 	 % OX=ones(size(MEsa))*5; % forzato a 5
      
      COnt=MEsa-4*2;
-    else
-        MEsa=[22.5:1:27.5];%+.35; % VENUS3 mesa vector
-
-        OX=MEsa-10.75*2;   % VENUS3 mesa vector
-
-%         COnt=13.85*ones(1,Isize);  % TOP CONTACT DIAMETER
-%         COnt=MEsa-4*2;
-
-
-    end
 
         Oxide=OX(Isize)/2;      % oxide radius, um, original
     Width_Contact=6.3500; % rout - rin
@@ -169,7 +158,7 @@ FatAuger23D=0.7;
 C_Temp_DD=1;
 
 
-mode.AugerExpulsion=0; % se 1, attiva il modello di Auger expulsion 
+mode.AugerExpulsion=0; % se 1, attiva il modello di Auger expulsion
 mode.AugerExpulsion3D=0;
 Fat_regeneration=1;
 
@@ -346,7 +335,6 @@ VelmOptions.gain_gui=1;
 mode.verbVELM=0;
 %  mode.verbVELM=-1;   % <0 to see VELM results only the first time; >0: always
 
-CalcoloVelm=1;
 
 
 itutmir=0; % if 1, the "entire" optical structure is studied with thermal (strong discretization)
@@ -374,7 +362,7 @@ end
 
 NUM_Azim=NUM_Azim_v(Isize); % numero massimo variazioni radiali, modi azimutali nu (if =3 -> palle: 1,2,4)
 NUMERO_MODI=NUMERO_MODI_v(Isize);   % numero modi in VENUS (nmodes)
-
+Pf.nmasce=-2;  % modi radiali per ogni modo azimutale, in FREQUENZA sul plot(Fint,alvet)
  
 VelmOptions.isoga=0;    % order modes in VELM, based on wavelength (0), gain (1)
 
@@ -388,8 +376,7 @@ NP_k=[30 30 25 25 25 20 20 20];
 VelmOptions.NP_k=NP_k(Isize);
 % VelmOptions.NP_k=20;
 % VelmOptions.NP_k=60; % 2 etched TJ case
-VelmOptions.num_azim=NUMERO_MODI; % example, 3 is 0, 1, 2
-Pf.nmasce=-1;  % modi radiali per ogni modo azimutale, in FREQUENZA sul plot(Fint,alvet)
+VelmOptions.num_azim=NUM_Azim; % example, 3 is 0, 1, 2
 VelmOptions.Dlam=[-.5 2.5 5 0 .4]; % ORIGINAL
 if NUMERO_MODI<=2
     VelmOptions.Dlam=[-.5 2 5 0 .4]; % ORIGINAL
@@ -536,13 +523,6 @@ mode.AdjustWAR = 0.57;
 % with respect to the actual AR width. If the pin structure is considered,
 % this parameter is not used
 mode.AdjustWTJ = 0.32;
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Comparison with experimental data: IV, LI and lambda vs current
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-mode.ShowExpData = 1; % flag allowing the visualization of experimental data
-mode.DataFileName = 'Stephan_experimental_data.mat'; % file name associated to the experimental data, you must know what the content of the file is!
-mode.TExp = Temperaturei; % temperature of the data you want to visualize
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Adiabatic section (not working)

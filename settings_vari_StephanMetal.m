@@ -311,8 +311,8 @@ VelmOptions.ivett=0;    % VELM scalar mode
 VelmOptions.imod_acc=0;  % 0 per LP
 
 fat_ag=1;     % fattore antiguiding (per ridurlo o aumentarlo); per toglierlo, agire su ianti_gui [0 o 1]
-VelmOptions.ianti_gui=1; % 1 in VENUS quasi 1D (as in D1ANA); 0 in VENUS 3D
-VelmOptions.ianti_gui=0; % 
+VelmOptions.ianti_gui=1; 
+VelmOptions.ianti_gui=0; 
 VelmOptions.gain_gui=1;
 
 mode.verbVELM=2;
@@ -367,6 +367,7 @@ KMax=[.25 .25 .2 .15 .11 .10 .10 .10];
 VelmOptions.krel_max=KMax(Isize);               %kmax; 0.1 va bene per aperture normali (3-4 um)
 mode.mintempVELM=200; % degrees, minimum temperature such that VELM is called
 mode.mintempVELM=1; % degrees, minimum temperature such that VELM is called
+mode.minthermalvoltage=0.1; % min. voltage to activate thermic simulator
 mode.IsoThermal=0;
 % mode.DT0=100; % degrees, minimum temperature for estimating Dlam_mod
 mode.DT0=200; % degrees, minimum temperature for estimating Dlam_mod
@@ -415,7 +416,6 @@ mode.BULK=1; % include quantum effects and stimulated recombination
 mode.iTfig=0; % if 1 the thermal simulator plots intermediate results, -1 solo la prima volta
 mode.maxScheckRepeat=0; % maximum times of Scheck>1 condition before acting
 mode.ScheckMultiplicationFactor=200; % multiplication factor to reset Pst
-mode.minthermalvoltage=0.01; % min. voltage to activate thermic simulator
 mode.Pmin_Pfit=0.01; % prediction of PDiss (PDissPred); set 50 to avoid it
 mode.minPorVELM=.5e12; % 1/cm2, minimum 2D carrier such that VELM is called
 

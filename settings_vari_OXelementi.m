@@ -1,28 +1,23 @@
 mode.flgBTJ=0;  % flag to TJ presence
-mode.flgBTJ_lithographic=0;     % infinite TJ+oxide, or TJ with oxide around
+mode.flgBTJ_lithographic=0; % 0: no etching; 1: etching in VELM only; 2: etching in VELM and in DD
 
-irel=1; % if 1, relief; if 0, standard VCSEL
-
-if irel==1
-	RelSize=4.5;
-end
+irel=0; % if 1, relief; if 0, standard VCSEL
 
 mode.NumJac=0;  % flag for numerical jacobian computation
-mode.Vnum=0.8;
+mode.Vnum=0;
 
 % Shunt resistance section - by D'Alessandro
 mode.VmaxStable=4.5; % turns off the recombination after VmaxStable
 mode.Shunt=0;  % to enable Shunt generation rate
 mode.K=-1e24;  % coefficient U=K(phi-phi_0)
 mode.Ymat=0;   % adds a parallel conductance when mode.IdriveON=1;
-mode.MoveON=1; % impose res=0 after a max number of iterations
-mode.ImoveON=1.5; % current threshold to disable mode.MoveON
+mode.MoveON=0; % impose res=0 after a max number of iterations
+mode.ImoveON=0.5; % current threshold to disable mode.MoveON
 mode.MAXiterMoveOn=8; % max iteration when mode.MoveON is enabled
-mode.Imax=10; % maximum current which reaches "before roll off"
 mode.TQWFake=0; 
-mode.Elementi=1; 
+mode.Elementi=1;    % DD with temperature on the elements (1) or nodes (0) 
 mode.ThermalDB=0; 
-mode.ThermalFake=0 ;  %interpolated Temperature
+mode.ThermalFake=0;  %interpolated Temperature
 
 Effetti=0;
 STIMA_Temp=1;
@@ -32,6 +27,23 @@ irest=IREST; % restart flag; 0 restarts from 0, 2 restarts from last point
 if IPAR~=11
     T0=273+Temperature;         % environment temperature, K
 end
+
+% Needed for parametric loops
+T0a=T0-273;
+if T0a==110
+    Vadd=[1.55:0.02:2.2];
+    Imassimo=8;  % massima corrente analizzata
+elseif T0a==80
+    Vadd=[1.55:0.03:2.4];
+    Imassimo=12;  % massima corrente analizzata
+elseif T0a==50
+    Vadd=[1.55:0.04:2.7];
+    Imassimo=14;  % massima corrente analizzata
+elseif  T0a==20
+    Imassimo=16;  % massima corrente analizzata
+    Vadd=[1.55:0.05:2.8] ;
+end
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % VCSEL, and environmental parameters
@@ -56,38 +68,44 @@ mode.EqPermutazione=0;
 mode.Cpot=1e3; % 1e3 original VENUS
 
 if mode.quasi1D==0
-     MEsa=[20.5:1:27.5]+3.5; % VENUS3 mesa vector
-    % MEsa=[27.5:1:32.5]; % mesa vector for oxide diameters [6:11] um, VENUS1 
-     OX=MEsa-11.5*2;
-	 % OX=ones(size(MEsa))*5; % forzato a 5
-     
-     COnt=MEsa-4*2;
-
-        Oxide=OX(Isize)/2;      % oxide radius, um, original
-    Width_Contact=6.3500; % rout - rin
-
-     COnt=MEsa-Width_Contact*2; % VENUS3 mesa vector
-%      COnt=OX+Width_Contact/2;   % VENUS3 mesa vector (TJ)
-    Contact=COnt(Isize)/2;      % Contact radius, um   
-    Contact_e=Contact+Width_Contact;
-    Contact=9.3/2;   % valore vero
-%     Contact=10.3/2;
-    Contact_e=22/2;
-    % Contact=12/2;  
-%    Contact_e=30/2;
-%'verC;', keyboard
- else
-     
-                OX=9.52*ones(1,Isize);    % DIAMETERS (D1ANA - MDPIAS)
-%             OX=10.50*ones(1,Isize);    % DIAMETERS (D1ANA - MDPIAS) - TJ fitting od 3D case 
-
-                OX=2*(0.76+2.5:0.5:6);
-
-            Contact=OX;
-            Contact_e=OX;
-            
- end
-     
+    % pin
+    MEsa=[22.5:1:27.5]+.35; % VENUS3 mesa vector (JSTQE)
+    % MEsa=[27.5:1:32.5]; % mesa vector for oxide diameters [6:11] um, VENUS1
+    OX=MEsa-10.75*2;
+    
+    % DelOx=2
+    DelOx=1.5;
+%     DelOx=1 % smaller value --> earlier threshold of superior modes
+    
+    % Radial grading of the oxide
+    OX1=OX+0.4;
+%     OX1=OX+0.2
+    OX2=OX1+DelOx;
+    OX3=OX2+DelOx;
+    
+%     OX1=OX;
+%     OX2=OX1;
+%     OX3=OX2;
+    
+    OxTot=[OX; OX1; OX2; OX3;];
+    OxT=OxTot(:,Isize)/2;
+    
+    Width_Contact=6;
+    Relief=0;      % oxide radius, um
+    
+    COnt=MEsa-Width_Contact*2; % VENUS3 mesa vector
+    Contact=COnt(Isize)/2;      % Contact radius, um
+    Contact_e=Contact+Width_Contact;    
+else
+    % quasi 1D simulation
+    OX=9.52*ones(1,Isize);    % DIAMETERS (D1ANA - MDPIAS)
+    %             OX=10.50*ones(1,Isize);    % DIAMETERS (D1ANA - MDPIAS) - TJ fitting od 3D case
+    
+    Contact=OX;
+    Contact_e=OX;
+    
+    Relief=0;      % oxide radius, um
+end
 
 
 mode.OptScaling=0;    % area reduction w.r.t. to the eletrical area
@@ -150,11 +168,14 @@ end
 tauRat=1000;      % taucapture/tauescap ratio, only for iTappo=2 (Debernardi)
 fat_gain=1;     % factor to be multiplied times LUT parameters (gain, Rsp)
 % fat_gain=1e-3;     % factor to be multiplied times LUT parameters (gain, Rsp), EXCLUDE OPTICAL simulation
-CN_Auger=.5;
-FatNP_Auger=1;     % questo lo tratto come un fattore, vedi mw_phmat
-CTemp_Auger=1.;
-%CTemp_Auger=2;
+CN_Auger=.5;        % moltiplica 1e-30 in mw_phmat, original
+% CN_Auger=.1        % moltiplica 1e-30 in mw_phmat
+% CN_Auger=0        % moltiplica 1e-30 in mw_phmat
+FatNP_Auger=1;      % Cppn=FatNP_Auger*Cnnp, vedi mw_phmat
+CTemp_Auger=1.;     % beta_aug in (8) of 2019Debernardi_JSTQE, original
+% CTemp_Auger=.2;     % beta_aug in (8) of 2019Debernardi_JSTQE
 FatAuger23D=1;
+% FatAuger23D=5
 C_Temp_DD=1;
 
 
@@ -178,8 +199,7 @@ for ks=1:length(LUT)
     LUT{ks}=[nomeLUT,LUT{ks}];
 end
 
-% Deltalam=3;
-Deltalam=0
+Deltalam=3;
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -190,15 +210,16 @@ C_TempGain=1;  % Coeff. Temperatura Gain
 dndT=2.3e-4;  % dn/dT  2.3e-4 da dati sperimentali
 dndT1D=4e-4;  % for 1D fitting
 fat_RAD=0.50;   % self-absorption heating from spont. recombination
+fat_RAD=5e-2   % self-absorption heating from spont. recombination
 
 mode.FatQtot=115;    % scaling factor for Q to fit 3D and 1D deltaT
 mode.FatV=46;   % kT scaling between substrate and VCSEL regions
-% mode.FatQcontact=0.65; % scaling at the contact (0.65 for Oxide; 1.00 for TJ)
-mode.FatQcontact=0.90; % scaling at the contact (0.65 for Oxide; 1.00 for TJ)
+mode.FatQcontact=1.00; % 1D simulation: scaling at the contact (0.65 for Oxide; 1.00 for TJ)
 
-fCondTer=1;   % transverse thermal conducibility
-fCondTerZ=0.8;   % Longitudinal thermal conducibility
-%fCondTerZ=.8;   % Longitudinal thermal conducibility
+% fCondTer=1;   % transverse thermal conducibility
+% fCondTerZ=.8;   % Longitudinal thermal conducibility
+fCondTer=0.9;   % transverse thermal conducibility
+fCondTerZ=0.8*fCondTer;   % Longitudinal thermal conducibility
 
 
 AlTarocco=1;    % multiplication factor for optical absorption heating
@@ -209,27 +230,36 @@ if mode.quasi1D==1
     fatt_dndT=1;  % dn/dT  2.3e-4 da dati sperimentali
 else
     Exp_Temp0=-1.30;	% VENUS
-    fatt_dndT=0.95;  % dn/dT  2.3e-4 da dati sperimentali
+    Exp_Temp0=-1.1
+%     fatt_dndT=0.95;  % dn/dT  2.3e-4 da dati sperimentali
+    fatt_dndT=1.03  % dn/dT  2.3e-4 da dati sperimentali
 end
 TARde=1;
 mode.ABSe=5;
 mode.ABSh=11;
-mode.ABSe0=3;
+mode.ABSe0=3;   % these are multiplied by Fat_Perd0 in ASSEGNO_mode: f_alpha in 2019Debernardi_JSTQE, (7)
 mode.ABSh0=7;
 
-Fat_Perd0=2.6;  % con Log 1
-Fat_Perd0=2.4  % con Log 1, useless with new ASSEGNO_mode, be careful!
-%Fat_Perd0=0.1  % con Log 1
-%Fat_PerCoefTemp=0;
-PerCoefExT=0;
-Fat_PerCoefTemp=(.9-Fat_Perd0)/90;
+% Fat_Perd0=2.6;  % con Log 1
+Fat_Perd0=2.9  % con Log 1
+
+% increase ABS_Texp with Tvelm=DeltaT+T0, in f_CallVELM:
+% ABS_Texp=mode.ABS_Texp+mode.PerCoefExT*Tvelm;
+PerCoefExT=0
+%PerCoefExT=2e-3 
+
+% changes Fat_Perd0 in ASSEGNO_mode: Fat_Perd_mod=Fat_Perd0+Fat_PerCoefTemp*(mode.T0-T300);
+% Fat_PerCoefTemp=(.9-Fat_Perd0)/90;
+% Fat_PerCoefTemp=0   
+Fat_PerCoefTemp=0.002
 if IPAR==42
     Fat_PerCoefTemp=0;
 end
 
 
-% ABS_Texp=2.5;
-ABS_Texp=2.4;
+% ABS_Texp=2.4
+ABS_Texp=0      % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
+% ABS_Texp=1.2      % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
 
 ABS_Apor=0;   %dipendenza lineare !!!!!!!
 ABS_Ader=0;
@@ -254,10 +284,11 @@ if mode.quasi1D==0
 else
     IHILS=1;   % 0 fisso, 1 variabile
 end
-N_X=1.5e17;      % Hilsum model parameter
+% N_X=1.5e17;      % Hilsum model parameter
+N_X=2.5e17      % Hilsum model parameter
 NxCoe=.011;
 if IPAR==4
-    NxCoe=0
+    NxCoe=0;
 end
 
 Fat_Dop=1.;
@@ -274,17 +305,12 @@ mode.ireno=0;
 
 mode.FatMob=1;
 % cot=[3.5e-2 1.2];   % factor for mobility dependence on T: f(T)=cot(1)*T+cot(2)
-T=[0 30 80];
-y=[1.2 3.5 10];
-tv1=linspace(1,80,101);
-cot=polyfit(T,y,2);
-% figure(2222),hold on, plot(T,y,'o',tv1,polyval(cot,tv1))
-% save COT cot
-% load COT
+load COT
 
-% FAT_Diff_E=0.3;   % factor to be multiplied times QW electron mobility
-FAT_Diff_E=0.4;   % factor to be multiplied times QW electron mobility
+ FAT_Diff_E=0.4;   % factor to be multiplied times QW electron mobility
+% FAT_Diff_E=0.5   % factor to be multiplied times QW electron mobility
 FAT_Diff_H=1;   % factor to be multiplied times QW hole mobility
+% FAT_Diff_H=0.2   % factor to be multiplied times QW hole mobility
 mode.idiffusioneQW=3;   % 0: no QW diffusion; 1: QW diffusion; 2: NO; 3: drift-diffusion in QW
 % mode.idiffusioneQW=2;   % 0: no QW diffusion; 1: QW diffusion; 2: NO; 3: drift-diffusion in QW
 mode.iambipolarQW=0;    % use ambipolar mobility in QW
@@ -298,8 +324,10 @@ else
     mode.GR={'SRH','rad','Auger'}; % generation/recombination, {} for none
 end
 % mode.GR={}; % generation/recombination, {} for none
-mode.taun = 1e-9; % electron SRH time, s
-mode.taup = 1e-9; % hole SRH time, s
+% mode.taun = 1e-9; % electron SRH time, s
+% mode.taup = 1e-9; % hole SRH time, s
+mode.taun = 10e-9; % electron SRH time, s
+mode.taup = 10e-9; % hole SRH time, s
 mode.taunQW = 100e-9; % QW electron SRH time, s
 mode.taupQW = 100e-9; % QW hole SRH time, s
 % Brad = 1.8e-10; % Brad 3D
@@ -317,30 +345,32 @@ ipolar=1; %-1 TE, 1 TM. Con 2 calcola le due polarizzazioni separatamente: neces
 VelmOptions.ipolar=ipolar; % 1: modo coseno; se vuoi il modo "seno", metti ipolar=-1; (1, -1, 2 (both))
 % VelmOptions.ivett=1;  % VELM vectorial mode
 VelmOptions.ivett=0;    % VELM scalar mode
+VelmOptions.iany=0;
 VelmOptions.imod_acc=0;  % 0 per LP
 
 fat_ag=1;     % fattore antiguiding (per ridurlo o aumentarlo); per toglierlo, agire su ianti_gui [0 o 1]
-VelmOptions.ianti_gui=1; 
-VelmOptions.ianti_gui=0; 
+VelmOptions.ianti_gui=1; % 1 in VENUS quasi 1D (as in D1ANA); 0 in VENUS 3D
+% VelmOptions.ianti_gui=0;
 VelmOptions.gain_gui=1;
 
 mode.verbVELM=0;
-%  mode.verbVELM=-1;   % <0 to see VELM results only the first time; >0: always
-
-
+if mode.quasi1D==1
+    mode.verbVELM=-1;   % <0 to see VELM results only the first time; >0: always
+end
+mode.verbVELM=-2;   % <0 to see VELM results only the first time; >0: always
 
 itutmir=0; % if 1, the "entire" optical structure is studied with thermal (strong discretization)
 
 
 if mode.flgBTJ==1
-NUMERO_MODI_v=[1 1 1 2 3 4 4];
+    NUMERO_MODI_v=[1 1 1 2 3 4 4]; % numero modi in VENUS
 else
-NUMERO_MODI_v=[1 1 1 3 4 4 4];
+    NUMERO_MODI_v=[1 1 1 3 4 4 4];
 end
-NUM_Azim_v=[1 1 1 2 3 3 3];
+NUM_Azim_v=[1 1 1 2 3 3 3]; % modi azimutali
 
-NUMERO_MODI_v=[1 1 1 1 1 1 1];	% modi azimutali
-NUM_Azim_v=[1 1 1 1 1 1 1]; 	% numero modi in VENUS
+% NUMERO_MODI_v=[1 1 1 1 1 1 1];
+% NUM_Azim_v=[1 1 1 1 1 1 1];
 
 if isfield(mode,'quasi1D') & mode.quasi1D==1
     NUMERO_MODI_v=ones(size(NUMERO_MODI_v));
@@ -362,47 +392,36 @@ if NUMERO_MODI>1
     % 0: ordina in FREQUENZA; 1: ordina in GAIN
     VelmOptions.isoga=0;    % SACRO ed intoccabile per VENUS
 end
-
-NP_k=[30 30 25 25 95 20 20 20];
-NP_k=[30 30 25 25 25 20 20 20];
+NP_k=[30 30 25 20 20 20];
 VelmOptions.NP_k=NP_k(Isize);
 % VelmOptions.NP_k=20;
 % VelmOptions.NP_k=60; % 2 etched TJ case
 VelmOptions.num_azim=NUM_Azim; % example, 3 is 0, 1, 2
-VelmOptions.Dlam=[-.5 2.5 5 0 .4]; % ORIGINAL
+VelmOptions.Dlam=[-.5 4.5 5 0 .4]; % ORIGINAL
 if NUMERO_MODI<=2
-    VelmOptions.Dlam=[-.5 2 5 0 .4]; % ORIGINAL
-%     VelmOptions.Dlam=[-.2 2.5 10 0 .4]; % Modified for Stephan at high temperature!
+    VelmOptions.Dlam=[-.5 3.5 5 0 .4]; % ORIGINAL
 %     VelmOptions.Dlam=[1 5 5 0 .4]; % ORIGINAL, 2 modes, dox=2 um
 %     VelmOptions.Dlam=[-10 5 5 0 .4]; % ORIGINAL, Isise=4, 2 TJ (etched)
 end
 % KMax=[.21 .18 .15 .12];
 % KMax=[.18 .15 .14 .12 .11 .10];
-KMax=[.25 .25 .2 .18 .18 .15 .12 .10];
+KMax=[.25 .20 .16 .12 .11 .10];
 VelmOptions.krel_max=KMax(Isize);               %kmax; 0.1 va bene per aperture normali (3-4 um)
-mode.mintempVELM=200; % degrees, minimum temperature such that VELM is called
-mode.mintempVELM=1; % degrees, minimum temperature such that VELM is called
-mode.minthermalvoltage=0.1; % min. voltage to activate thermic simulator
+% mode.mintempVELM=200; % degrees, minimum temperature such that VELM is called
+mode.mintempVELM=.5; % degrees, minimum temperature such that VELM is called
 mode.IsoThermal=0;
-% mode.DT0=100; % degrees, minimum temperature for estimating Dlam_mod
-mode.DT0=200; % degrees, minimum temperature for estimating Dlam_mod
+mode.DT0=100; % degrees, minimum temperature for estimating Dlam_mod
 mode.frsp=1/90; %.5 x sopra e sotto,  .3 per cono ricezione, 100 fattore tras specchio
 mode.frsp=1/150; %.5 x sopra e sotto,  .3 per cono ricezione, 100 fattore tras specchio
 %
 
 % Altri settings per VELM diversi da default
 %VelmOptions.dissfun='diss_fillRET1';
-VelmOptions.dissfun='diss_SimaZoom';
-VelmOptions.igraef_new=0;
-VelmOptions.iBWnew=1;   %0 BW, 1 f_Nefficace
-VelmOptions.iany=3;  %necessario per anisotropia finita
-if iStruttura==27
-VelmOptions.iany=0;  %necessario per anisotropia finita
-end
-
+%VelmOptions.igraef_new=2;
+%VelmOptions.iBWnew=2;
+%VelmOptions.iany=3;
 Pf.ipolar=ipolar;
 %Pf.emme='emme_navyNEWlastAny';
-Pf.emme='emme_GR';
 VelmOptions.Pf=Pf;
 
 % Sub Losses, Temperature
@@ -431,7 +450,8 @@ mode.BULK=1; % include quantum effects and stimulated recombination
 mode.iTfig=0; % if 1 the thermal simulator plots intermediate results, -1 solo la prima volta
 mode.maxScheckRepeat=0; % maximum times of Scheck>1 condition before acting
 mode.ScheckMultiplicationFactor=200; % multiplication factor to reset Pst
-mode.Pmin_Pfit=0.01; % prediction of PDiss (PDissPred); set 50 to avoid it
+mode.minthermalvoltage=0.01; % min. voltage to activate thermic simulator
+mode.Pmin_Pfit=.1; % prediction of PDiss (PDissPred); set 50 to avoid it; 100 for old StimaTempWU=1.05
 mode.minPorVELM=.5e12; % 1/cm2, minimum 2D carrier such that VELM is called
 
 mode.tolconv_neutr=1e-13; % expected relative tolerance
@@ -457,11 +477,21 @@ mode.Ilog=0;
 
 % minimum power or applied bias at which current driving is turned ON
 mode.Pmin=0.5;
-mode.Vmin=1.75;
+mode.Vmin=1.7;
 
-mode.Imin=1.5e-3/mode.CarrierNorm;  % 1.5 in case of "etched" TJ
 mode.Istep=0.2e-3/mode.CarrierNorm; % A, current step for current driving below Imin
 mode.IstepLarge=0.5e-3/mode.CarrierNorm; % A, current step for current driving above Imin
+
+if T0a==20
+    mode.Imin=1.5e-3/mode.CarrierNorm;  % 1.5 in case of "etched" TJ
+elseif T0a==50
+    mode.Imin=3.5e-3/mode.CarrierNorm;  % 1.5 in case of "etched" TJ
+elseif T0a==80
+    mode.Imin=3e-3/mode.CarrierNorm;  % 1.5 in case of "etched" TJ
+elseif T0a==110
+    mode.Imin=2.5e-3/mode.CarrierNorm;  % 1.5 in case of "etched" TJ
+    mode.IstepLarge=mode.IstepLarge/2; % A, current step for current driving above Imin
+end
 
 if mode.Idrive==1
     Imassimo=18;

@@ -454,7 +454,7 @@ if(not(mode.firstrun)) % At equilibrium, R=0
                 %
                 Vint=mode.EFp(ITJp_vet)-mode.EFn(ITJn_vet);
                 Vint(isnan(Vint))=0;
-                mode.VTJ(indexBTJ,mode.ind_v0,:)=Vint;
+                mode.VTJ(indexBTJ,mode.ind_v0)=Vint(1);
                 % Initialization of Vinterp derivatives for Jacobian matrix
                 % dn -> right (end); dp -> left (1); 1 -> right; 2 -> left
                 % Vt,ecb, evb, EFn, EFp should ALL be taken from "real"
@@ -467,7 +467,7 @@ if(not(mode.firstrun)) % At equilibrium, R=0
                 % + altro,
                 % dphi1 --> dRphi1, TJ(end); dphin --> dRphi2, TJ(1)
                 dVint_dphip = -1; % derivata rispetto a EFp (-1 per colpa di Ev = -q*phi + puffi)
-                dVint_dphin = +1; % derivata rispetto a EFn (-1 per colpa di Ev = -q*phi + puffi, altro -1 perché ha segno -)
+                dVint_dphin = +1; % derivata rispetto a EFn (-1 per colpa di Ev = -q*phi + puffi, altro -1 perchÃ© ha segno -)
                 
                 % TIBALDI JACOBIAN GBTBT
                 % lunghezza della regione dove spalmo il tasso
@@ -478,18 +478,9 @@ if(not(mode.firstrun)) % At equilibrium, R=0
                 VV=zeros(length(ITJp_vet),pDeg+1);
                 dVV=zeros(length(ITJp_vet),pDeg);
                 %
-                if mode.flgBTJ_lithographic>0
-                    [~,iRagTJ]=min(abs(mesh.xgrid*1e4-mode.rAperture));
-                else
-                    if mode.oflg==1
-                        iRagTJ=nnQW;
-                    else
-%                     iRagTJ=37
-                        iRagTJ=mesh.nnx;
-                    end
-                end
-                    
+                [~,iRagTJ]=min(abs(mesh.xgrid*1e4-mode.rAperture));
                 %
+                %                     for iRad=1:length(ITJp_vet)
                 for iRad=1:iRagTJ
                     
                     [~,iT]=min(abs(mode.T_NEGF-mean(mesh.T(ITJp_vet(iRad):ITJn_vet(iRad)))));
@@ -505,28 +496,16 @@ if(not(mode.firstrun)) % At equilibrium, R=0
                 end
                 
                 I_interp=10.^(VV*cT')-mode.I0_NEGF(iT); % A/cm^2 !!!!
-                I_interp(iRagTJ+1:end)=0;
-                mode.JTJ(indexBTJ,mode.ind_v0,:)=I_interp;
-                
                 II=1/LTJ*(-I_interp/qel);
+                II(iRagTJ+1:end)=0;
                 GBTBT(IBTJ)=II(IIBTJP(IBTJ))/mode.CarrierNorm;
                 %   'BTBT',keyboard
-%                 drho=diff([0 mesh.xgrid]);
-% %                 ITJ=I_interp'*(mesh.xgrid'.*drho')*2*pi;       % A
-%                 ITJ=I_interp'.*(mesh.xgrid.*drho)*2*pi;       % A
-
-                JTJ=I_interp;                           % A/cm^2
-                RTJ=abs(Vint)'./abs(JTJ);               % Ohm*cm^2
-                RTJ(isnan(RTJ))=0;
-                mode.sigmaTJ(:,indexBTJ)=1./RTJ.*LTJ;   % S/cm (compatible with f_EvalHeatingsTerms.m)
-                 
-%                 RTJ=abs(Vint)./abs(ITJ);               % Ohm
-%                 RTJ(1)=spline(mesh.xgrid(2:iRagTJ),RTJ(2:iRagTJ),0);
-% 
-%                 RTJ(isnan(RTJ))=0;
-%                 mode.sigmaTJ(:,indexBTJ)=1./RTJ./LTJ;   % S/cm (compatible with f_EvalHeatingsTerms.m)
+                ITJ=I_interp*mode.AreaOx;   % A
+                RTJ=abs(Vint)'./abs(ITJ);   % Ohm
+                mode.sigmaTJ(indexBTJ)=1./RTJ(1)./LTJ;   % S/cm (compatible with f_EvalHeatingsTerms.m)
                 
-                mode.HeatTJ(indexBTJ,mode.ind_v0,:)=abs(JTJ.*Vint'./repmat(LTJ,mesh.nnx,1));
+                JTJ=I_interp;
+                mode.HeatTJ=abs(JTJ.*Vint'./repmat(LTJ,mesh.nnx,1));
                 
                 dI_interp=log(10)*10.^(VV*cT').*(dVV*dc');
                 dII=1/LTJ*(-dI_interp/qel)'/mode.CarrierNorm;
@@ -673,7 +652,7 @@ if(mode.nflg) % ################################################################
         offset_nn=zeros(1,nn);
         
         offset_n(iq)=affinity(iq);  % Vt(iq).*log(Nc(iq))
-        offset_nn(iq)=log(Nc(iq));
+        offset_nn(iq)=log(Nc(iq)) ;
         offset_n1=offset_n(in1); offset_n2=offset_n(in2); offset_n3=offset_n(in3);
         offset_nn1=offset_nn(in1) ;offset_nn2=offset_nn(in2) ;offset_nn3=offset_nn(in3) ;
         
@@ -896,33 +875,18 @@ if(mode.pflg) % ################################################################
     Jmat0=Jmat0+sparse(iit   ,jjt,MM(mask_iit),neq,neq);
     % Fermi statistics ============================================================================100
     if((isfield(mode,'stats'))&&(strcmp(mode.stats,'Fermi')))
-    	if mode.Elementi==1
-    		M11=Dp.*((-s3./l3.*dB21.*VT12-s2./l2.*dB31.*VT13).*hole1-s3./l3.*dB12.*VT12.*hole2-s2./l2.*hole3.*dB13.*VT13);
-        	M12=Dp.*(s3./l3.*dB21.*VT12.*hole1+s3./l3.*dB12.*VT12.*hole2);
-        	M13=Dp.*(s2./l2.*dB31.*VT13.*hole1+s2./l2.*hole3.*dB13.*VT13);
-        	M21=Dp.*(s3./l3.*dB21.*VT12.*hole1+s3./l3.*dB12.*VT12.*hole2);
-        	M22=Dp.*(-s3./l3.*dB21.*VT12.*hole1+(-s1./l1.*dB32.*VT23-s3./l3.*dB12.*VT12).*hole2-s1./l1.*hole3.*dB23.*VT23);
-        	M23=Dp.*(s1./l1.*dB32.*VT23.*hole2+s1./l1.*hole3.*dB23.*VT23);
-        	M31=Dp.*(s2./l2.*dB31.*VT13.*hole1+s2./l2.*hole3.*dB13.*VT13);
-        	M32=Dp.*(s1./l1.*dB32.*VT23.*hole2+s1./l1.*hole3.*dB23.*VT23);
-        	M33=Dp.*(-s2./l2.*dB31.*VT13.*hole1-s1./l1.*dB32.*VT23.*hole2+(-s2./l2.*dB13.*VT13-s1./l1.*dB23.*VT23).*hole3);
-        	MM=-qel.*[M11.*dlGp1 M12.*dlGp2 M13.*dlGp3 ...
-            	M21.*dlGp1 M22.*dlGp2 M23.*dlGp3 ...
-            	M31.*dlGp1 M32.*dlGp2 M33.*dlGp3];
-    	else
-        	M11=Dp.*((-s3./l3.*dB21-s2./l2.*dB31).*hole1-s3./l3.*dB12.*hole2-s2./l2.*hole3.*dB13);
-        	M12=Dp.*(s3./l3.*dB21.*hole1+s3./l3.*dB12.*hole2);
-        	M13=Dp.*(s2./l2.*dB31.*hole1+s2./l2.*hole3.*dB13);
-        	M21=Dp.*(s3./l3.*dB21.*hole1+s3./l3.*dB12.*hole2);
-        	M22=Dp.*(-s3./l3.*dB21.*hole1+(-s1./l1.*dB32-s3./l3.*dB12).*hole2-s1./l1.*hole3.*dB23);
-        	M23=Dp.*(s1./l1.*dB32.*hole2+s1./l1.*hole3.*dB23);
-        	M31=Dp.*(s2./l2.*dB31.*hole1+s2./l2.*hole3.*dB13);
-        	M32=Dp.*(s1./l1.*dB32.*hole2+s1./l1.*hole3.*dB23);
-        	M33=Dp.*(-s2./l2.*dB31.*hole1-s1./l1.*dB32.*hole2+(-s2./l2.*dB13-s1./l1.*dB23).*hole3);
-        	MM=-qel.*[Vt1.*M11.*dlGp1 Vt2.*M12.*dlGp2 Vt3.*M13.*dlGp3 ...
-            	Vt1.*M21.*dlGp1 Vt2.*M22.*dlGp2 Vt3.*M23.*dlGp3 ...
-            	Vt1.*M31.*dlGp1 Vt2.*M32.*dlGp2 Vt3.*M33.*dlGp3];
-        end
+        M11=Dp.*((-s3./l3.*dB21-s2./l2.*dB31).*hole1-s3./l3.*dB12.*hole2-s2./l2.*hole3.*dB13);
+        M12=Dp.*(s3./l3.*dB21.*hole1+s3./l3.*dB12.*hole2);
+        M13=Dp.*(s2./l2.*dB31.*hole1+s2./l2.*hole3.*dB13);
+        M21=Dp.*(s3./l3.*dB21.*hole1+s3./l3.*dB12.*hole2);
+        M22=Dp.*(-s3./l3.*dB21.*hole1+(-s1./l1.*dB32-s3./l3.*dB12).*hole2-s1./l1.*hole3.*dB23);
+        M23=Dp.*(s1./l1.*dB32.*hole2+s1./l1.*hole3.*dB23);
+        M31=Dp.*(s2./l2.*dB31.*hole1+s2./l2.*hole3.*dB13);
+        M32=Dp.*(s1./l1.*dB32.*hole2+s1./l1.*hole3.*dB23);
+        M33=Dp.*(-s2./l2.*dB31.*hole1-s1./l1.*dB32.*hole2+(-s2./l2.*dB13-s1./l1.*dB23).*hole3);
+        MM=-qel.*[Vt1.*M11.*dlGp1 Vt2.*M12.*dlGp2 Vt3.*M13.*dlGp3 ...
+            Vt1.*M21.*dlGp1 Vt2.*M22.*dlGp2 Vt3.*M23.*dlGp3 ...
+            Vt1.*M31.*dlGp1 Vt2.*M32.*dlGp2 Vt3.*M33.*dlGp3];
         %
         Jmat0=Jmat0+sparse(iis+pp,jjs+pp,MM(mask_iis),neq,neq); % Assembly hole eqs.
         Jmat0=Jmat0+sparse(iit   ,jjt+pp,MM(mask_iit),neq,neq); % Assembly current eq.
@@ -1109,10 +1073,10 @@ if(mode.oflg)
         Vt2D = Vt(inQW);
         
         if mode.TQWFake==1 && mode.indv> 2
-            load('DTfit');
-            Iq=mode.ii_dd(end)*1e3;
-            TQWfit=interp1(Ifit,DTfit,Iq)+293;
-            Vt2D = ones(1,length(inQW))*TQWfit*kB/qel;
+            load('DTfit') ;
+            Iq=mode.ii_dd(end)*1e3 ;
+            TQWfit=interp1(Ifit,DTfit,Iq)+293 ;
+            Vt2D = ones(1,length(inQW))*TQWfit*kB/qel ;
             disp('Warning! Tqw fake!')
         end
         

@@ -15,7 +15,7 @@ mode.MoveON=0; % impose res=0 after a max number of iterations
 mode.ImoveON=0.5; % current threshold to disable mode.MoveON
 mode.MAXiterMoveOn=8; % max iteration when mode.MoveON is enabled
 mode.TQWFake=0; 
-mode.Elementi=0; 
+mode.Elementi=0;    % DD with temperature on the elements (1) or nodes (0) 
 mode.ThermalDB=0; 
 mode.ThermalFake=0;  %interpolated Temperature
 
@@ -152,10 +152,11 @@ end
 tauRat=1000;      % taucapture/tauescap ratio, only for iTappo=2 (Debernardi)
 fat_gain=1;     % factor to be multiplied times LUT parameters (gain, Rsp)
 % fat_gain=1e-3;     % factor to be multiplied times LUT parameters (gain, Rsp), EXCLUDE OPTICAL simulation
-CN_Auger=.5;
-FatNP_Auger=1;     % questo lo tratto come un fattore, vedi mw_phmat
-CTemp_Auger=1.;
-%CTemp_Auger=2;
+CN_Auger=.5;        % moltiplica 1e-30 in mw_phmat, original
+% CN_Auger=.1;        % moltiplica 1e-30 in mw_phmat
+FatNP_Auger=1;      % Cppn=FatNP_Auger*Cnnp, vedi mw_phmat
+CTemp_Auger=1.;     % beta_aug in (8) of 2019Debernardi_JSTQE, original
+% CTemp_Auger=.2;     % beta_aug in (8) of 2019Debernardi_JSTQE
 FatAuger23D=1;
 C_Temp_DD=1;
 
@@ -188,7 +189,8 @@ Deltalam=3;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 C_Temp=1;  % Coeff. Temperatura totale
 C_TempGain=1;  % Coeff. Temperatura Gain
-dndT=2.3e-4;  % dn/dT  2.3e-4 da dati sperimentali
+% dndT=2.3e-4;  % dn/dT  2.3e-4 da dati sperimentali
+dndT=2.8e-4;  % dn/dT  2.3e-4 da dati sperimentali
 dndT1D=4e-4;  % for 1D fitting
 fat_RAD=0.50;   % self-absorption heating from spont. recombination
 
@@ -209,7 +211,8 @@ if mode.quasi1D==1
     fatt_dndT=1;  % dn/dT  2.3e-4 da dati sperimentali
 else
     Exp_Temp0=-1.30;	% VENUS
-    fatt_dndT=0.95;  % dn/dT  2.3e-4 da dati sperimentali
+%     fatt_dndT=0.95;  % dn/dT  2.3e-4 da dati sperimentali
+    fatt_dndT=1;  % dn/dT  2.3e-4 da dati sperimentali
 end
 TARde=1;
 mode.ABSe=5;
@@ -217,9 +220,10 @@ mode.ABSh=11;
 mode.ABSe0=3;
 mode.ABSh0=7;
 
-Fat_Perd0=2.6;  % con Log 1
+% Fat_Perd0=2.6  % con Log 1
 Fat_Perd0=2.4  % con Log 1
-% Fat_Perd0=2  % con Log 1, at 80C! (Lg)
+% Fat_Perd0=2.5  % con Log 1
+% Fat_Perd0=2.0  % con Log 1, 80C, Lg!!!
 %Fat_PerCoefTemp=0;
 PerCoefExT=0;
 Fat_PerCoefTemp=(.9-Fat_Perd0)/90;
@@ -230,6 +234,7 @@ end
 
 % ABS_Texp=2.5;
 ABS_Texp=2.4;
+ABS_Texp=1.2       % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
 
 ABS_Apor=0;   %dipendenza lineare !!!!!!!
 ABS_Ader=0;
@@ -254,7 +259,7 @@ if mode.quasi1D==0
 else
     IHILS=1;   % 0 fisso, 1 variabile
 end
-N_X=1.5e17;      % Hilsum model parameter
+N_X=2.5e17;      % Hilsum model parameter
 NxCoe=.011;
 if IPAR==4
     NxCoe=0
@@ -276,8 +281,8 @@ mode.FatMob=1;
 % cot=[3.5e-2 1.2];   % factor for mobility dependence on T: f(T)=cot(1)*T+cot(2)
 load COT
 
-% FAT_Diff_E=0.3;   % factor to be multiplied times QW electron mobility
-FAT_Diff_E=0.4;   % factor to be multiplied times QW electron mobility
+% FAT_Diff_E=0.4;   % factor to be multiplied times QW electron mobility
+FAT_Diff_E=0.2;   % factor to be multiplied times QW electron mobility
 FAT_Diff_H=1;   % factor to be multiplied times QW hole mobility
 mode.idiffusioneQW=3;   % 0: no QW diffusion; 1: QW diffusion; 2: NO; 3: drift-diffusion in QW
 % mode.idiffusioneQW=2;   % 0: no QW diffusion; 1: QW diffusion; 2: NO; 3: drift-diffusion in QW
@@ -323,7 +328,7 @@ mode.verbVELM=0;
 if mode.quasi1D==1
     mode.verbVELM=-1;   % <0 to see VELM results only the first time; >0: always
 end
-% mode.verbVELM=-2;   % <0 to see VELM results only the first time; >0: always
+mode.verbVELM=-2;   % <0 to see VELM results only the first time; >0: always
 
 itutmir=0; % if 1, the "entire" optical structure is studied with thermal (strong discretization)
 
@@ -350,7 +355,7 @@ end
 
 NUM_Azim=NUM_Azim_v(Isize); % numero massimo variazioni radiali, modi azimutali nu (if =3 -> palle: 1,2,4)
 NUMERO_MODI=NUMERO_MODI_v(Isize);   % numero modi in VENUS (nmodes)
-Pf.nmasce=-3;  % modi radiali per ogni modo azimutale, in FREQUENZA sul plot(Fint,alvet)
+Pf.nmasce=-2;  % modi radiali per ogni modo azimutale, in FREQUENZA sul plot(Fint,alvet)
  
 VelmOptions.isoga=0;    % order modes in VELM, based on wavelength (0), gain (1)
 
@@ -439,7 +444,7 @@ mode.taucarrier=0;      %mette Vallone se 1
 % mode.ContactPosition='left'; % put "line" contact at "left" or "right".
 mode.ContactPosition='right'; % put "line" contact at "left" or "right".
 
-mode.Idrive=1;	% current driving flag
+mode.Idrive=0;	% current driving flag
 mode.Ilog=0;
 
 % minimum power or applied bias at which current driving is turned ON

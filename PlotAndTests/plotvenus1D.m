@@ -24,21 +24,21 @@ plot(mesh.node(2,puntatore)*1e4,mode.EFp(puntatore),'k--')
 figure(80),hold on,plot(mode.vv_dd,mode.ii_dd*1e3*mode.CarrierNorm)
 
 % QW population
-for ii=1:length(mode.vv_dd)
-    n2D(ii)=mode.nQW{ii}{1}(1);
-    p2D(ii)=mode.pQW{ii}{1}(1);
-end
-
-figure
-grid on,hold on,box on
-plot(mode.ii_dd*1e3*mode.CarrierNorm,n2D*mode.CarrierNorm/mesh.vWMQW{1},'.-')
-plot(mode.ii_dd*1e3*mode.CarrierNorm,p2D*mode.CarrierNorm/mesh.vWMQW{1},'.-')
-chold
-plot(mode.ii_dd*1e3,mode.n3MaxVet,'--')
-plot(mode.ii_dd*1e3,mode.p3MaxVet,'--')
-xlabel('Current, mA'),ylabel('nQW, pQW, cm^{-3}')
-legend('n2D','p2D','n3D','p3D','location','northwest')
-set(gca,'FontSize',12)
+% for ii=1:length(mode.vv_dd)
+%     n2D(ii)=mode.nQW{ii}{1}(1);
+%     p2D(ii)=mode.pQW{ii}{1}(1);
+% end
+% 
+% figure
+% grid on,hold on,box on
+% plot(mode.ii_dd*1e3*mode.CarrierNorm,n2D*mode.CarrierNorm/mesh.vWMQW{1},'.-')
+% plot(mode.ii_dd*1e3*mode.CarrierNorm,p2D*mode.CarrierNorm/mesh.vWMQW{1},'.-')
+% chold
+% plot(mode.ii_dd*1e3,mode.n3MaxVet,'--')
+% plot(mode.ii_dd*1e3,mode.p3MaxVet,'--')
+% xlabel('Current, mA'),ylabel('nQW, pQW, cm^{-3}')
+% legend('n2D','p2D','n3D','p3D','location','northwest')
+% set(gca,'FontSize',12)
 
 % Lmod - Gmod
 figure
@@ -51,7 +51,7 @@ xlabel('Current, mA')
 
 %%
 iV=25;
-% iV=36;
+iV=60;
 % Bands
 figure
 grid on,hold on,box on
@@ -59,7 +59,7 @@ plot(mesh.node(2,1:mesh.nny)*1e4,modes.Ec(iV,:),'.-','linewidth',2)
 plot(mesh.node(2,1:mesh.nny)*1e4,modes.Ev(iV,:),'.-','linewidth',2)
 plot(mesh.node(2,1:mesh.nny)*1e4,modes.EFc(iV,:),'k-.')
 plot(mesh.node(2,1:mesh.nny)*1e4,modes.EFv(iV,:),'k--')
-xlim([110 118])
+% xlim([110 118])
 title(['I = ',num2str(mode.ii_dd(iV)*1e3),' mA'])
 
 % Current densities

@@ -1146,10 +1146,10 @@ global la1Dr ga1Dr
 
   ifpBEL=ifp;
 
-if ifp==-10
- 'campi 1D', keyboard
- %ipcam=input(' vuoi plot campi? ')
- ipcam=1;
+if Ps.ifpstop==1
+ 'campi 1D'%, keyboard
+ ipcam=input(' vuoi plot campi? ')
+
  if length(ipcam)==0
   ifp=-4;
  else
@@ -1772,8 +1772,10 @@ end
     g_n2=ngrating(2);
     par_BW=par_grat;
     Period=par_BW.period*1000;
-    lambda1000=lambda0*1e9;
- 
+    lambda1000=lambda*1000;
+    if length(lambda1000)==0
+     lambda1000=lambda0*1e9;
+    end
     thickness=Litot(fireBW-1)*1000;
     DC=par_BW.DC;
 

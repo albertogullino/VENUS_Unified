@@ -25,7 +25,7 @@ fvet = logspace(7,11,121);   % frequencies for small-signal simulation, Hz
 % CurDynRef = [1:3:13];       %     values of current where small-signal analysis is performed
 CurDynRef = 1:0.5:7;       % values of current where small-signal analysis is performed
 
-minPerc = 5;
+minPerc=5;
 
 IOLDsw=0;
 
@@ -38,8 +38,7 @@ IPLOT=1;  % Structure details + live plots of simulation results
 % Imassimo=1;  % massima corrente analizzata
 PotMin=.1;        % potenza finale
 
-%%
-%
+%% 
 prompt = 'Insert the prefix to append at the begin pmat file: ';
 nomeSav = input(prompt,'s'); % Suffix appended at the end of the save file, to distinguish the various tries
 %
@@ -54,7 +53,8 @@ Last_Workspac='LW';
 Last_Workspace=[nomeSW,Last_Workspac];
 
 % radi='_JSTQE_dotLU3'; % JSTQE results
-radi='_OX'; % OC-VCSEL: use for comparison with TJ!
+% radi='_OX'; % OC-VCSEL: use for comparison with TJ!
+radi='_OXelementi'; % OC-VCSEL: use for comparison with TJ!
 
 rad_settingV{100}=radi;    %vale anche per IPAR = 0
 for k=1:70
@@ -124,21 +124,20 @@ if iloop==0 && iSavNome==1
 end
 
 %% Definition of the bias condition (cell of tension: DDstr{itemp})
-% DD0=[0:0.4:1.2 1.3 1.4 1.5]; % col bulk, per res
 clear DDstr
 
 % Bias values BELOW threshold condition
 DDin=[0:0.4:1.2 1.3:0.1:1.5];
 
 % Different bias conditions ABOVE threshold are investigated for different temperatures
-% TTve=[80:-30:20];
-TTve=20;
+TTve=[110:-30:20];
+TTve=20
 Tpelt=TTve;
 for itemp=1:length(TTve)
     Temperaturei=TTve(itemp);
     if Temperaturei == 110
         Vadd=[1.55:0.02:2.2];
-        Imassimo=7;  % massima corrente analizzata
+        Imassimo=8;  % massima corrente analizzata
     elseif Temperaturei == 80
         Vadd=[1.55:0.03:2.4];
         Imassimo=11;  % massima corrente analizzata
@@ -148,7 +147,7 @@ for itemp=1:length(TTve)
     elseif Temperaturei == 20
 %         Imassimo=16;  % massima corrente analizzata
         Vadd=[1.55:0.05:2.8];
-%         Vadd=[1.55:0.03:2.3];
+%         Vadd=[1.62:0.02:1.8 1.85:0.05:2.3];
 %         Imassimo=7;
         Imassimo=14;
     end

@@ -9,7 +9,6 @@ colordef white
 dbstop if error
 
 addpathVENUS    % add the folders needed for a VENUS simulation
-rmpath OtticoBar/new23OpticaGR
 
 % Flag to avoid slow geom generation of lithographic structures (load geom file)
 % flgGEOM=1;     % 1, carica vecchia geom
@@ -39,17 +38,16 @@ minPerc=5;
 
 IOLDsw=0;
 
-iSavNome=0;
+iSavNome=1;
 
 IPLOT=1;  % Structure details + live plots of simulation results
 % IPLOT=-2;   % Structure details plot
-% IPLOT=0;    % Not intermediate plots
+IPLOT=0;    % Not intermediate plots
 
 % Imassimo=1;  % massima corrente analizzata
 PotMin=.1;        % potenza finale
 
-%%
-%
+%% 
 prompt = 'Insert the prefix to append at the begin pmat file: ';
 nomeSav = input(prompt,'s'); % Suffix appended at the end of the save file, to distinguish the various tries
 %

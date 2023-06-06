@@ -17,7 +17,7 @@ mode.MAXiterMoveOn=8; % max iteration when mode.MoveON is enabled
 mode.TQWFake=0; 
 mode.Elementi=0; 
 mode.ThermalDB=0; 
-mode.ThermalFake=0 ;  %interpolated Temperature
+mode.ThermalFake=0;  %interpolated Temperature
 
 Effetti=0;
 STIMA_Temp=1;
@@ -149,10 +149,11 @@ end
 tauRat=1000;      % taucapture/tauescap ratio, only for iTappo=2 (Debernardi)
 fat_gain=1;     % factor to be multiplied times LUT parameters (gain, Rsp)
 % fat_gain=1e-3;     % factor to be multiplied times LUT parameters (gain, Rsp), EXCLUDE OPTICAL simulation
-CN_Auger=.5;
-FatNP_Auger=1;     % questo lo tratto come un fattore, vedi mw_phmat
-CTemp_Auger=1.;
-%CTemp_Auger=2;
+CN_Auger=.5;        % moltiplica 1e-30 in mw_phmat, original
+% CN_Auger=.1;        % moltiplica 1e-30 in mw_phmat
+FatNP_Auger=1;      % Cppn=FatNP_Auger*Cnnp, vedi mw_phmat
+CTemp_Auger=1.;     % beta_aug in (8) of 2019Debernardi_JSTQE, original
+% CTemp_Auger=.2;     % beta_aug in (8) of 2019Debernardi_JSTQE
 FatAuger23D=1;
 C_Temp_DD=1;
 
@@ -185,7 +186,8 @@ Deltalam=3;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 C_Temp=1;  % Coeff. Temperatura totale
 C_TempGain=1;  % Coeff. Temperatura Gain
-dndT=2.3e-4;  % dn/dT  2.3e-4 da dati sperimentali
+% dndT=2.3e-4;  % dn/dT  2.3e-4 da dati sperimentali
+dndT=2.8e-4;  % dn/dT  2.3e-4 da dati sperimentali
 dndT1D=4e-4;  % for 1D fitting
 fat_RAD=0.50;   % self-absorption heating from spont. recombination
 
@@ -206,7 +208,8 @@ if mode.quasi1D==1
     fatt_dndT=1;  % dn/dT  2.3e-4 da dati sperimentali
 else
     Exp_Temp0=-1.30;	% VENUS
-    fatt_dndT=0.95;  % dn/dT  2.3e-4 da dati sperimentali
+%     fatt_dndT=0.95;  % dn/dT  2.3e-4 da dati sperimentali
+    fatt_dndT=1;  % dn/dT  2.3e-4 da dati sperimentali
 end
 TARde=1;
 mode.ABSe=5;
@@ -214,10 +217,11 @@ mode.ABSh=11;
 mode.ABSe0=3;
 mode.ABSh0=7;
 
-Fat_Perd0=2.6;  % con Log 1
+% Fat_Perd0=2.6  % con Log 1
 Fat_Perd0=2.4  % con Log 1
 % Fat_Perd0=2.5  % con Log 1
-% Fat_Perd0=2.0  % con Log 1, 80C, Lg!!!
+% Fat_Perd0=2.1  % con Log 1, 80C, Lg!!!
+% Fat_Perd0=2.2  % con Log 1, 80C, Lg!!!
 %Fat_PerCoefTemp=0;
 PerCoefExT=0;
 Fat_PerCoefTemp=(.9-Fat_Perd0)/90;
@@ -228,6 +232,7 @@ end
 
 % ABS_Texp=2.5;
 ABS_Texp=2.4;
+ABS_Texp=1.2       % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
 
 ABS_Apor=0;   %dipendenza lineare !!!!!!!
 ABS_Ader=0;
@@ -252,7 +257,8 @@ if mode.quasi1D==0
 else
     IHILS=1;   % 0 fisso, 1 variabile
 end
-N_X=1.5e17;      % Hilsum model parameter
+% N_X=1.5e17;      % Hilsum model parameter
+N_X=2.5e17;      % Hilsum model parameter
 NxCoe=.011;
 if IPAR==4
     NxCoe=0
@@ -274,8 +280,8 @@ mode.FatMob=1;
 % cot=[3.5e-2 1.2];   % factor for mobility dependence on T: f(T)=cot(1)*T+cot(2)
 load COT
 
-% FAT_Diff_E=0.3;   % factor to be multiplied times QW electron mobility
-FAT_Diff_E=0.4;   % factor to be multiplied times QW electron mobility
+% FAT_Diff_E=0.4;   % factor to be multiplied times QW electron mobility
+FAT_Diff_E=0.2   % factor to be multiplied times QW electron mobility
 FAT_Diff_H=1;   % factor to be multiplied times QW hole mobility
 mode.idiffusioneQW=3;   % 0: no QW diffusion; 1: QW diffusion; 2: NO; 3: drift-diffusion in QW
 % mode.idiffusioneQW=2;   % 0: no QW diffusion; 1: QW diffusion; 2: NO; 3: drift-diffusion in QW
@@ -371,7 +377,7 @@ end
 % KMax=[.18 .15 .14 .12 .11 .10];
 KMax=[.25 .20 .16 .12 .11 .10];
 VelmOptions.krel_max=KMax(Isize);               %kmax; 0.1 va bene per aperture normali (3-4 um)
-mode.mintempVELM=200; % degrees, minimum temperature such that VELM is called
+% mode.mintempVELM=200; % degrees, minimum temperature such that VELM is called
 mode.mintempVELM=1; % degrees, minimum temperature such that VELM is called
 mode.IsoThermal=0;
 mode.DT0=100; % degrees, minimum temperature for estimating Dlam_mod
@@ -441,7 +447,7 @@ mode.Ilog=0;
 
 % minimum power or applied bias at which current driving is turned ON
 mode.Pmin=0.5;
-mode.Vmin=100;
+mode.Vmin=1.7;
 
 if Temperaturei==20
     mode.Imin=1.5e-3/mode.CarrierNorm;  % 1.5 in case of "etched" TJ

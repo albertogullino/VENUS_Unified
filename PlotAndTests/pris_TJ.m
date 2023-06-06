@@ -71,7 +71,12 @@ iV=25;
 iV=input('iV?\n');
 % iV=36;
 
-modep=MODEplot{1};
+if length(MODEplot)>1
+    iT=input('iT?\n');
+    modep=MODEplot{iT};
+else
+    modep=MODEplot{1};
+end
 
 % Bands
 figure
@@ -172,5 +177,5 @@ xlabel('\rho, \mum'),ylabel('J_y(\rho), A/cm^2')
 
 
 
-HeatSourcePlot
+HeatSourcePlot(mesh,mode,MODEplot)
 

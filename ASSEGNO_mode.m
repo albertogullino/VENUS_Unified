@@ -16,14 +16,14 @@ else
     
     Oxide=OX(Isize)/2;          % oxide radius, um (already defined in "settings")
     
-    if exist('DelOx')
-        OX1=OX+.4;              % (already defined in "settings")
-        OX2=OX1+DelOx;
-        OX3=OX2+DelOx;
-        %         if mode.flgBTJ==1
-        %             clear OX2 OX3
-        %         end
-    end
+%     if exist('DelOx')
+%         OX1=OX+.4;              % (already defined in "settings")
+%         OX2=OX1+DelOx;
+%         OX3=OX2+DelOx;
+%         %         if mode.flgBTJ==1
+%         %             clear OX2 OX3
+%         %         end
+%     end
     
     %     COnt=MEsa-Width_Contact*2;
     %     Contact=COnt(Isize)/2;      % Contact radius, um
@@ -255,7 +255,7 @@ mode.ABS_Apor=ABS_Apor;
 
 
 
-Fat_Perd_mod=Fat_Perd0+Fat_PerCoefTemp*(T0-T300);
+Fat_Perd_mod=Fat_Perd0+Fat_PerCoefTemp*(mode.T0-T300);
 mode.Fat_Perd0=Fat_Perd0;
 
 mode.PerCoefExT=PerCoefExT;

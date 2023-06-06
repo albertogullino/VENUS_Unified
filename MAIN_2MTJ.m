@@ -1,4 +1,4 @@
-%========================================================================76
+    %========================================================================76
 % 2TJ-VCSEL (infinite + oxide)
 %========================================================================76
 clc
@@ -8,8 +8,7 @@ clear global
 colordef white
 dbstop if error
 
-addpathVENUS
-rmpath OtticoBar/new23OpticaGR
+addpathVENUS    % add the folders needed for a VENUS simulation
 
 % Flag to avoid slow geom generation of lithographic structures (load geom file)
 flgGEOM=1;     % 1, carica vecchia geom
@@ -22,15 +21,15 @@ fvet = logspace(7,11,121);   % frequencies for small-signal simulation, Hz
 % CurDynRef = [1:3:13];       %     values of current where small-signal analysis is performed
 CurDynRef = 1:0.5:7;       % values of current where small-signal analysis is performed
 
-minPerc = 5;
+minPerc=5;
 
 IOLDsw=0;
 
-iSavNome=0;
+iSavNome=1;
 
 IPLOT=1;  % Structure details + live plots of simulation results
 % IPLOT=-2;   % Structure details plot
-IPLOT=0;    % Not intermediate plots
+% IPLOT=0;    % Not intermediate plots
 
 % Imassimo=1;  % massima corrente analizzata
 PotMin=.1;        % potenza finale
@@ -41,8 +40,16 @@ nomeSav = input(prompt,'s'); % Suffix appended at the end of the save file, to d
 %
 nomeSave=[nomeSW,nomeSav];
 %eval(['save ',nomeSave,' h'])
+% 
+% iStruttura=30   % 1TJ for recycling for a 2nd AR; TOP p-DBR!
+% iStruttura=31   % 1TJ for recycling for a 2nd AR; TOP p-DBR! (alternative)
+iStruttura=60    
+% 
 
-iStruttura=39; % 35, 36, 37, 38, 39: see List_strNames.m
+if ~exist('iStruttura')
+    iStruttura=input('iStruttura?\n');
+end
+    
  
 %  Last_Workspac='dud';  
 Last_Workspac='LW';  
@@ -128,7 +135,7 @@ DDin=[0:0.4:2.8]; % for 2 TJ
 
 % Different bias conditions ABOVE threshold are investigated for different temperatures
 % TTve=[80:-30:20];
-TTve=20;
+TTve=20
 Tpelt=TTve;
 for itemp=1:length(TTve)
     Temperaturei=TTve(itemp);
@@ -270,7 +277,7 @@ for IPAR=IPvet
 						%%%% save geom
 						load([DirName,'geom_' strName])
 						ParMore=StrDD.ParMore;
-						mode.nBTJ=StrDD.nBTJ;
+						mesh.nBTJ=StrDD.nBTJ;
 						fprintf('Structure loaded\n'),keyboard
                     end
 					

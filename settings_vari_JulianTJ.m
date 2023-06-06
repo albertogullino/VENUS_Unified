@@ -1,5 +1,5 @@
 mode.flgBTJ=1;  % flag to TJ presence
-mode.flgBTJ_lithographic=0;     % infinite TJ+oxide, or TJ with oxide around
+mode.flgBTJ_lithographic=0; % 0: no etching; 1: etching in VELM only; 2: etching in VELM and in DD
 
 irel=0; % if 1, relief; if 0, standard VCSEL
 
@@ -15,7 +15,7 @@ mode.MoveON=1; % impose res=0 after a max number of iterations
 mode.ImoveON=0.5; % current threshold to disable mode.MoveON
 mode.MAXiterMoveOn=8; % max iteration when mode.MoveON is enabled
 mode.TQWFake=0; 
-mode.Elementi=0; 
+mode.Elementi=1;    % DD with temperature on the elements (1) or nodes (0) 
 mode.ThermalDB=0; 
 mode.ThermalFake=0;  %interpolated Temperature
 
@@ -138,10 +138,11 @@ end
 tauRat=1000;      % taucapture/tauescap ratio, only for iTappo=2 (Debernardi)
 fat_gain=1;     % factor to be multiplied times LUT parameters (gain, Rsp)
 % fat_gain=1e-3;     % factor to be multiplied times LUT parameters (gain, Rsp), EXCLUDE OPTICAL simulation
-CN_Auger=.5;
-FatNP_Auger=1;     % questo lo tratto come un fattore, vedi mw_phmat
-CTemp_Auger=1.;
-%CTemp_Auger=2;
+CN_Auger=.5;        % moltiplica 1e-30 in mw_phmat, original
+% CN_Auger=.1;        % moltiplica 1e-30 in mw_phmat
+FatNP_Auger=1;      % Cppn=FatNP_Auger*Cnnp, vedi mw_phmat
+CTemp_Auger=1.;     % beta_aug in (8) of 2019Debernardi_JSTQE, original
+% CTemp_Auger=.2;     % beta_aug in (8) of 2019Debernardi_JSTQE
 FatAuger23D=1;
 C_Temp_DD=1;
 
@@ -177,14 +178,16 @@ C_TempGain=1;  % Coeff. Temperatura Gain
 dndT=2.3e-4;  % dn/dT  2.3e-4 da dati sperimentali
 dndT1D=4e-4;  % for 1D fitting
 fat_RAD=0.50;   % self-absorption heating from spont. recombination
+fat_RAD=5e-2   % self-absorption heating from spont. recombination
 
 mode.FatQtot=115;    % scaling factor for Q to fit 3D and 1D deltaT
 mode.FatV=46;   % kT scaling between substrate and VCSEL regions
 mode.FatQcontact=1.00; % 1D simulation: scaling at the contact (0.65 for Oxide; 1.00 for TJ)
 
-fCondTer=1;   % transverse thermal conducibility
-fCondTerZ=0.8;   % Longitudinal thermal conducibility
-%fCondTerZ=.8;   % Longitudinal thermal conducibility
+% fCondTer=1;   % transverse thermal conducibility
+% fCondTerZ=.8;   % Longitudinal thermal conducibility
+fCondTer=0.9;   % transverse thermal conducibility
+fCondTerZ=0.8*fCondTer;   % Longitudinal thermal conducibility
 
 
 AlTarocco=1;    % multiplication factor for optical absorption heating
@@ -195,27 +198,36 @@ if mode.quasi1D==1
     fatt_dndT=1;  % dn/dT  2.3e-4 da dati sperimentali
 else
     Exp_Temp0=-1.30;	% VENUS
-    fatt_dndT=0.95;  % dn/dT  2.3e-4 da dati sperimentali
+    Exp_Temp0=-1.1
+%     fatt_dndT=0.95;  % dn/dT  2.3e-4 da dati sperimentali
+    fatt_dndT=1.03  % dn/dT  2.3e-4 da dati sperimentali
 end
 TARde=1;
 mode.ABSe=5;
 mode.ABSh=11;
-mode.ABSe0=3;
+mode.ABSe0=3;   % these are multiplied by Fat_Perd0 in ASSEGNO_mode: f_alpha in 2019Debernardi_JSTQE, (7)
 mode.ABSh0=7;
 
-Fat_Perd0=2.6;  % con Log 1
-Fat_Perd0=2.4  % con Log 1
-%Fat_Perd0=0.1  % con Log 1
-%Fat_PerCoefTemp=0;
-PerCoefExT=0;
-Fat_PerCoefTemp=(.9-Fat_Perd0)/90;
+% Fat_Perd0=2.6;  % con Log 1
+Fat_Perd0=2.9  % con Log 1
+
+% increase ABS_Texp with Tvelm=DeltaT+T0, in f_CallVELM:
+% ABS_Texp=mode.ABS_Texp+mode.PerCoefExT*Tvelm;
+PerCoefExT=0
+%PerCoefExT=2e-3 
+
+% changes Fat_Perd0 in ASSEGNO_mode: Fat_Perd_mod=Fat_Perd0+Fat_PerCoefTemp*(mode.T0-T300);
+% Fat_PerCoefTemp=(.9-Fat_Perd0)/90;
+% Fat_PerCoefTemp=0   
+Fat_PerCoefTemp=0.002
 if IPAR==42
     Fat_PerCoefTemp=0;
 end
 
 
-% ABS_Texp=2.5;
-ABS_Texp=2.4;
+% ABS_Texp=2.4
+ABS_Texp=0      % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
+% ABS_Texp=1.2      % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
 
 ABS_Apor=0;   %dipendenza lineare !!!!!!!
 ABS_Ader=0;
@@ -240,7 +252,7 @@ if mode.quasi1D==0
 else
     IHILS=1;   % 0 fisso, 1 variabile
 end
-N_X=1.5e17;      % Hilsum model parameter
+N_X=2.5e17;      % Hilsum model parameter
 NxCoe=.011;
 if IPAR==4
     NxCoe=0
@@ -262,8 +274,8 @@ mode.FatMob=1;
 % cot=[3.5e-2 1.2];   % factor for mobility dependence on T: f(T)=cot(1)*T+cot(2)
 load COT
 
-% FAT_Diff_E=0.3;   % factor to be multiplied times QW electron mobility
-FAT_Diff_E=0.4;   % factor to be multiplied times QW electron mobility
+% FAT_Diff_E=0.4;   % factor to be multiplied times QW electron mobility
+FAT_Diff_E=0.2;   % factor to be multiplied times QW electron mobility
 FAT_Diff_H=1;   % factor to be multiplied times QW hole mobility
 mode.idiffusioneQW=3;   % 0: no QW diffusion; 1: QW diffusion; 2: NO; 3: drift-diffusion in QW
 % mode.idiffusioneQW=2;   % 0: no QW diffusion; 1: QW diffusion; 2: NO; 3: drift-diffusion in QW
@@ -278,8 +290,10 @@ else
     mode.GR={'SRH','rad','Auger'}; % generation/recombination, {} for none
 end
 % mode.GR={}; % generation/recombination, {} for none
-mode.taun = 1e-9; % electron SRH time, s
-mode.taup = 1e-9; % hole SRH time, s
+% mode.taun = 1e-9; % electron SRH time, s
+% mode.taup = 1e-9; % hole SRH time, s
+mode.taun = 10e-9; % electron SRH time, s
+mode.taup = 10e-9; % hole SRH time, s
 mode.taunQW = 100e-9; % QW electron SRH time, s
 mode.taupQW = 100e-9; % QW hole SRH time, s
 % Brad = 1.8e-10; % Brad 3D
@@ -309,7 +323,7 @@ mode.verbVELM=0;
 if mode.quasi1D==1
     mode.verbVELM=-1;   % <0 to see VELM results only the first time; >0: always
 end
-% mode.verbVELM=1;   % <0 to see VELM results only the first time; >0: always
+% mode.verbVELM=-2;   % <0 to see VELM results only the first time; >0: always
 
 itutmir=0; % if 1, the "entire" optical structure is studied with thermal (strong discretization)
 
@@ -399,8 +413,8 @@ mode.report=1; % verbose mode
 mode.nflg=1; % include electron continuity equation
 mode.pflg=1; % include hole continuity equation
 mode.tflg=0; % include trap equations
-mode.Tflg=1; % include thermal effects
-mode.oflg=1; % include quantum effects and stimulated recombination
+mode.Tflg=0; % include thermal effects
+mode.oflg=0; % include quantum effects and stimulated recombination
 mode.RAD_spalmato=1;
 if mode.oflg==0
     mode.RAD_spalmato=0;
@@ -409,7 +423,7 @@ mode.BULK=1; % include quantum effects and stimulated recombination
 
 mode.iTfig=0; % if 1 the thermal simulator plots intermediate results, -1 solo la prima volta
 mode.maxScheckRepeat=0; % maximum times of Scheck>1 condition before acting
-mode.ScheckMultiplicationFactor=1e6; % multiplication factor to reset Pst
+mode.ScheckMultiplicationFactor=200; % multiplication factor to reset Pst
 mode.minthermalvoltage=2.5; % min. voltage to activate thermic simulator
 mode.Pmin_Pfit=0.01; % prediction of PDiss (PDissPred); set 50 to avoid it
 mode.minPorVELM=.5e12; % 1/cm2, minimum 2D carrier such that VELM is called

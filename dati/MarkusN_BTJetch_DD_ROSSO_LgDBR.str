@@ -30,7 +30,7 @@ Wavelength 850 nm
 
 FATTORE_Z 1.0031
 FATTORE_Z 1.00
-%FATTORE_Z 1.0015
+FATTORE_Z 1.0015
 
 Reference Ref 3.6 0 2.5
 
@@ -54,7 +54,8 @@ Lca  Nd=3.75e18 		   18 32        AlGaAs 0.90 1  Nmesh=2
 Lga  Nd=3.57e18 Nd=9.00e18 18 18.6      AlGaAs 0.86 0.57 1 1 Ndis=2 Nmesh=3
 Lga  Nd=9.00e18 Nd=3.11e18 18 14.9      AlGaAs 0.57 0.23 1 1 Ndis=2 Nmesh=2
 Lca  Nd=2.24e18 		   18 31.9      AlGaAs 0.17 1  Nmesh=2
-Lga  Nd=3.84e18 Nd=3.08e18 18 14.9      AlGaAs 0.17 0.57 1 1 Ndis=2 Nmesh=3
+Lga  Nd=3.84e18 Nd=3.08e18 18 14.9      AlGaAs 0.17 0.57 1 1 Ndis=3 Nmesh=3
+
 % 
 % Slightly lower doping level
 Lga  Nd=2.62e18 Nd=3.57e18 1   18.6     AlGaAs 0.57 0.86 1 1 Ndis=2 Nmesh=2
@@ -70,7 +71,7 @@ Lca  Nd=3.75e18 		   1   32        AlGaAs 0.90 	  1   Nmesh=2
 
 % (Former) Oxide region 
 Lga  Nd=3.57e18 Nd=7.15e18 1 18.6      AlGaAs 0.86 0.57 1 1 Ndis=2 Nmesh=3
-Lga  Nd=9.00e18 Nd=2.24e18 1 42        AlGaAs 0.57 0.17 1 1 Ndis=4 Nmesh=5
+Lga  Nd=9.00e18 Nd=2.24e18 1 45        AlGaAs 0.57 0.17 1 1 Ndis=4 Nmesh=5
 
 
 %%%%%%%%%%%%% BTJ %%%%%%%%%%%%%%%%%
@@ -82,10 +83,10 @@ LcNEGF      Nd=3e19 1 10    AlGaAs 0.12  1    Nmesh=10
 LcNEGF      Na=2e20 1  3 	AlGaAs 0.12  1    Nmesh=3
 Lc          Na=2e20 1  7   	AlGaAs 0.12  1    Nmesh=3
 
-Lga  Na=6.00e18 Na=6.00e18 1 17      AlGaAs 0.17 0.17 1 1 Ndis=1 Nmesh=2
+Lga  Na=6.00e18 Na=6.00e18 1 14      AlGaAs 0.17 0.17 1 1 Ndis=1 Nmesh=2
 Lga  Na=4.84e18 Na=4.84e18 1 3       AlGaAs 0.23 0.23 1 1 Ndis=1 Nmesh=1
 Lga  Na=4.11e18 Na=4.11e18 1 4       AlGaAs 0.29 0.29 1 1 Ndis=1 Nmesh=1
-Lga  Na=4.84e18 Na=4.08e18 1 8       AlGaAs 0.29 0.57 1 1 Ndis=1 Nmesh=1
+Lga  Na=4.84e18 Na=4.08e18 1 5       AlGaAs 0.29 0.57 1 1 Ndis=1 Nmesh=1
 Lga  Na=4.08e18 Na=4.57e18 1 2       AlGaAs 0.57 0.86 1 1 Ndis=1 Nmesh=1   
 Lga  Na=4.08e18 Na=4.57e18 1 11.     AlGaAs 0.57 0.86 1 1 Ndis=1 Nmesh=1   
 TJ_PARAM End
@@ -94,20 +95,22 @@ TJ_PARAM End
 % EBL - TOP DBR like
 Lca  Na=5.75e18 		   1 5.5       AlGaAs 0.86      1 Nmesh=1
 Lca  Na=6.75e18 		   1 32        AlGaAs 0.90 	    1 Nmesh=2
-Lga  Na=5.75e18 Na=2.50e18 1 18.6      AlGaAs 0.90 0.60 1 1 Ndis=1 Nmesh=3
+Lga  Na=5.75e18 Na=2.50e18 1 20      AlGaAs 0.90 0.60 1 1 Ndis=2 Nmesh=3
 
 % Cavity region
-LcaC Na=1.00e18 1  14        AlGaAs 0.50  1 Nmesh=2
-Lga     1  25.2                AlGaAs 0.50  0.29 0 0 Ndis=2 Nmesh=4
-Lca     1  32.7                AlGaAs 0.29  0 Nmesh=10
+LcaC Na=1.00e18 1  7.4         AlGaAs 0.50  1 Nmesh=2
+Lga     1  25.8                AlGaAs 0.50  0.29 0 0 Ndis=2 Nmesh=4
+Lca     1  40.7                AlGaAs 0.29  0 Nmesh=10
 Lc     -1  7.7                 AlGaAs 0.00  0 Nmesh=8
 Lc      1  5                   AlGaAs 0.29  0 Nmesh=5
 Lcr    -1  7.7                 AlGaAs 0.00  0  circle 3|P1 Nmesh=8
 Lc      1  5                   AlGaAs 0.29  0 Nmesh=5
 Lc     -1  7.7                 AlGaAs 0.00  0 Nmesh=8
-Lc      1  48.7                AlGaAs 0.29  0 Nmesh=10
-Lga     1  27.1                AlGaAs 0.29  0.50 0 0 Ndis=2 Nmesh=4
-LgaC Nd=3.29e17 Nd=1.00e18 1  92      AlGaAs 0.50 0.50 0 0 Ndis=1 Nmesh=11
+Lc      1  40.7                AlGaAs 0.29  0 Nmesh=10
+Lga     1  25.8                AlGaAs 0.29  0.50 0 0 Ndis=2 Nmesh=4
+LgaC Nd=3.29e17 Nd=1.00e18 1 102.1   AlGaAs 0.50 0.50 0 0 Ndis=1 Nmesh=11
+
+
 
 Lga  Nd=1.00e18 Nd=3.10e18 1  14.9      AlGaAs 0.50 0.23 1 1 Ndis=3 Nmesh=3
 Lca  Nd=2.24e18 		   1  32        AlGaAs 0.17 1  Nmesh=2

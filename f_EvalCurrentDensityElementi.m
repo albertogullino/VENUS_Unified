@@ -4,7 +4,7 @@ function [Jn_x,Jn_y,Jp_x,Jp_y] = f_EvalCurrentDensityElementi(geom,mesh,mode)
 % function [Jn_x,Jn_y,Jp_x,Jp_y] = f_EvalCurrentDensity(geom,mesh,mode)
 %
 % The idea exploited to compute these currents is to treat each node as a
-% contact. This can be obtained fby assembling the contributions from a
+% contact. This can be obtained by assembling the contributions from a
 % row/column (for y and x directed current components, respectively), but
 % not the adjacent. In other words, only one row/column every two is
 % assembled. This can be also seen as assembling half of the control box
@@ -159,6 +159,7 @@ dnF = mesh.Nc.*ferdr((mode.EFn - mode.ecb)./Vt,-1/2);
 nB =  mesh.Nc.*exp  ((mode.EFn - mode.ecb)./Vt); % 1/cm^3; 
 gamman = nF./nB; gamman(not(iq)) = 1;
 dgamman = (1 - nF./dnF)./nB;
+
 if(not(mode.firstrun))
 ii = tmp<1e-9; dgamman(ii) = - sqrt(2)/4./mesh.Nc(ii); % non-degenerate limit
 end 
@@ -208,22 +209,18 @@ dlGp1 = dlGp(in1); dlGp2 = dlGp(in2); dlGp3 = dlGp(in3); end % ------------
 %
 
 
-VT12=(Vt(in1)+Vt(in2))/2 ;
-VT13=(Vt(in1)+Vt(in3))/2 ;
-VT23=(Vt(in2)+Vt(in3))/2 ;
+VT12=(Vt(in1)+Vt(in2))/2;
+VT13=(Vt(in1)+Vt(in3))/2;
+VT23=(Vt(in2)+Vt(in3))/2;
 
 offset_n=zeros(1,nn);
 offset_nn=zeros(1,nn);
 
 
 offset_n(iq)=affinity(iq); % Vt(iq).*log(Nc(iq))
-offset_nn(iq)=log(Nc(iq)) ;
+offset_nn(iq)=log(Nc(iq));
 offset_n1=offset_n(in1); offset_n2=offset_n(in2); offset_n3=offset_n(in3);
-offset_nn1=offset_nn(in1) ;offset_nn2=offset_nn(in2) ;offset_nn3=offset_nn(in3) ;
-
-
-
-
+offset_nn1=offset_nn(in1); offset_nn2=offset_nn(in2); offset_nn3=offset_nn(in3);
 
 %
 [Dn, Dp, dDndphi1, dDndphi2, dDndphi3, dDpdphi1, dDpdphi2, dDpdphi3] = ...
@@ -237,10 +234,9 @@ mesh.mobn_t=Dn./mode.Vt_tr; mesh.mobp_t=Dp./mode.Vt_tr; % save field-dependent m
 % =============================================================================================100
 % Computing electron current densities
 % =============================================================================================100
-
-delta12 = (phi1 + offset_n1 )./VT12+log(gamman(in1))+offset_nn1 - (phi2 + offset_n2 )./VT12-log(gamman(in2))-offset_nn2;
-delta23 = (phi2 + offset_n2 )./VT23+log(gamman(in2))+offset_nn2 - (phi3 + offset_n3 )./VT23-log(gamman(in3))-offset_nn3;
-delta31 = (phi3 + offset_n3 )./VT13+log(gamman(in3))+offset_nn3 - (phi1 + offset_n1 )./VT13-log(gamman(in1))-offset_nn1;
+delta12 = (phi1 + offset_n1)./VT12+log(gamman(in1))+offset_nn1 - (phi2 + offset_n2)./VT12-log(gamman(in2))-offset_nn2;
+delta23 = (phi2 + offset_n2)./VT23+log(gamman(in2))+offset_nn2 - (phi3 + offset_n3)./VT23-log(gamman(in3))-offset_nn3;
+delta31 = (phi3 + offset_n3)./VT13+log(gamman(in3))+offset_nn3 - (phi1 + offset_n1)./VT13-log(gamman(in1))-offset_nn1;
 %
 B12=bern(delta12);
 B21=bern(-delta12);
@@ -373,8 +369,8 @@ offset_pp1=offset_pp(in1); offset_pp2=offset_pp(in2); offset_pp3=offset_pp(in3);
 % Computing hole current densities
 % =============================================================================================100
 delta12 = (phi1 + offset_p1)./VT12-log(gammap(in1))+offset_pp1 - (phi2 + offset_p2)./VT12+log(gammap(in2))-offset_pp2;
-delta23 = (phi2 + offset_p2 )./VT23-log(gammap(in2))+offset_pp2 - (phi3 + offset_p3 )./VT23+log(gammap(in3))-offset_pp3;
-delta31 = (phi3 + offset_p3)./VT13-log(gammap(in3))+offset_pp3 - (phi1 + offset_p1 )./VT13+log(gammap(in1))-offset_pp1;
+delta23 = (phi2 + offset_p2)./VT23-log(gammap(in2))+offset_pp2 - (phi3 + offset_p3)./VT23+log(gammap(in3))-offset_pp3;
+delta31 = (phi3 + offset_p3)./VT13-log(gammap(in3))+offset_pp3 - (phi1 + offset_p1)./VT13+log(gammap(in1))-offset_pp1;
 %
 B12=bern(delta12);
 B21=bern(-delta12);
@@ -536,5 +532,3 @@ grid on
 box on
 quiver(XX,YY,JX,JY,arrow_normalization)
 axis equal
-
-

@@ -23,7 +23,8 @@ alMAX=1e15;
 %alMAX=200;
 isofg=1;
 isoga=0;
-isoga=1;
+%isoga=1;
+%'qui', keyboard
 if isfield(Ps,'isoga')==1
  isoga=Ps.isoga;
 end
@@ -511,7 +512,7 @@ if min(sga)>1
    return
   end
   fia=find((-aou(:,1))>0);
-  if iaoud>1 & isoga==0
+  if iaoud>1 & isoga==20
    [du,icsa]=sort(-aou(fia,1));
     ics=fia(icsa);
     fou=fou(ics,:);

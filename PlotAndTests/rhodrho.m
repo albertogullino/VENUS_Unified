@@ -3,7 +3,12 @@
 % load('C:\Users\albig\Politecnico\Dottorato\3b_VENUS\20230213_VENUS_TJlitho\out\LW_MarkusN_FINALE_LgDBR_Thesis.mat')
 
 if exist('modePlot')==0
-    modePlot=MODEplot{1};
+    if length(MODEplot)>1
+    iT=input('iT?\n');
+    modep=MODEplot{iT};
+else
+    modep=MODEplot{1};
+end
     % % xQW=P.mesh.xgrid(1:P.mesh.nnxQW{1})*1e4;
     xQW=mesh.xgrid(1:mesh.nnxQW{1})*1e4;
 end

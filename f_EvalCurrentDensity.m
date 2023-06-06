@@ -163,6 +163,7 @@ dnF = mesh.Nc.*ferdr((mode.EFn - mode.ecb)./Vt,-1/2);
 nB =  mesh.Nc.*exp  ((mode.EFn - mode.ecb)./Vt); % 1/cm^3; 
 gamman = nF./nB; gamman(not(iq)) = 1;
 dgamman = (1 - nF./dnF)./nB;
+
 if(not(mode.firstrun))
 ii = tmp<1e-9; dgamman(ii) = - sqrt(2)/4./mesh.Nc(ii); % non-degenerate limit
 end 

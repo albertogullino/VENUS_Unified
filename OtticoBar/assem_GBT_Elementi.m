@@ -351,7 +351,7 @@ mode.mobn=Dn./mode.Vt_tr; mode.mobp=Dp./mode.Vt_tr; % save field-dependent mobil
 % =============================================================================================100
 R=zeros(1,nn); dRn=zeros(1,nn); dRp=zeros(1,nn);
 RSRH=zeros(1,nn);
-Rrad=zeros(1,nn);
+Rrad=zeros(1,nn);   PspBulk=0;
 RAuger=zeros(1,nn);
 GBTBT=zeros(1,nn);
 
@@ -549,11 +549,18 @@ if(not(mode.firstrun)) % At equilibrium, R=0
             end
         end
     end
+    
+%     MM = [Lp1.*Rrad2D(iiQW1) Lp2.*Rrad2D(iiQW2)];
+    MM=[Se1.*Rrad(in1) Se2.*Rrad(in2) Se3.*Rrad(in3)];
+    PspBulk=1000*sum(sparse(MM))*h*(Clight*1e-2/mean(1e-9*mode.vlambda)); % milliwatt
+    
     mode.RSRH = RSRH;
     mode.Rrad = Rrad;
     mode.RAuger = RAuger;
     mode.GBTBT = GBTBT;
 end
+mode.PspBulk=PspBulk;
+
 % =============================================================================================100
 % assem Poisson equation
 % =============================================================================================100
@@ -631,9 +638,9 @@ if(mode.nflg) % ################################################################
     %
     
     
-    VT12=(Vt(in1)+Vt(in2))/2 ;
-    VT13=(Vt(in1)+Vt(in3))/2 ;
-    VT23=(Vt(in2)+Vt(in3))/2 ;
+    VT12=(Vt(in1)+Vt(in2))/2;
+    VT13=(Vt(in1)+Vt(in3))/2;
+    VT23=(Vt(in2)+Vt(in3))/2;
     
     offset_n=zeros(1,nn);
     offset_nn=zeros(1,nn);
@@ -1630,7 +1637,7 @@ if(mode.oflg)
         VI=Rrad2D;
         MM = qel.*[Lp1.*VI(iiQW1) Lp2.*VI(iiQW2)];
         IntRad=IntRad+sum(MM);
-        mode.IRsp(mode.indv,indQW) = sum (MM) ;  
+        mode.IRsp(mode.indv,indQW) = sum (MM);
 
         MM = [Lp1.*Rrad2D(iiQW1) Lp2.*Rrad2D(iiQW2)];
         frsp=mode.frsp;
@@ -1872,7 +1879,7 @@ if(mode.oflg)
             gE = g.*E2; % gain-field product
             MM = [Lp1.*gE(iiQW1) Lp2.*gE(iiQW2)];
            
-            mode.gE(mode.indv,indQW,indMode,:)= gE ; 
+            mode.gE(mode.indv,indQW,indMode,:)=gE; 
             
             gm = sum(diag(sparse(ijrQW,ijrQW,MM,nnQW,nnQW)));
             dgm_nE = dgE.*E2;
@@ -1977,7 +1984,8 @@ if(mode.oflg)
     % saving variables
     mode.Pst=Pst; mode.Scheck=Scheck;
     %mode.nQW{mode.ind_v0}=nQW; mode.pQW{mode.ind_v0}=pQW;
-    mode.matgain=mode.matgain/(NQW*nmodes); mode.Psp=Psp;
+    mode.matgain=mode.matgain/(NQW*nmodes); 
+    mode.Psp=Psp;
     
     % assembling additional equations for passivation
     if(mesh.nnx-nnQW>0)

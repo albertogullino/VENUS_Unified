@@ -4,13 +4,17 @@
 clc
 clear
 clear global
-%  close all
+% close all
+
+
+% try
+
 colordef white
 dbstop if error
 
 addpathVENUS    % add the folders needed for a VENUS simulation
 
-% Flag to avoid slow geom generation (load geom file)
+% Flag to avoid slow geom generation of lithographic structures (load geom file)
 flgGEOM=1;     % 1, carica vecchia geom
 flgGEOM=0;     % carica vecchia geom
 
@@ -21,7 +25,7 @@ fvet = logspace(7,11,121);   % frequencies for small-signal simulation, Hz
 % CurDynRef = [1:3:13];       %     values of current where small-signal analysis is performed
 CurDynRef = 1:0.5:7;       % values of current where small-signal analysis is performed
 
-minPerc = 5;
+minPerc=5;
 
 IOLDsw=0;
 
@@ -29,7 +33,7 @@ iSavNome=1;
 
 IPLOT=1;  % Structure details + live plots of simulation results
 % IPLOT=-2;   % Structure details plot
-% IPLOT=0;    % Not intermediate plots
+IPLOT=0;    % Not intermediate plots
 
 % Imassimo=1;  % massima corrente analizzata
 PotMin=.1;        % potenza finale
@@ -40,9 +44,9 @@ nomeSav = input(prompt,'s'); % Suffix appended at the end of the save file, to d
 %
 nomeSave=[nomeSW,nomeSav];
 %eval(['save ',nomeSave,' h'])
-
-% iStruttura=27;      % (20,25,27) radially infinite TJ, ABOVE long-rad. graded OX (Lg graded)
-iStruttura=28; % (21, 26) radially infinite TJ, BELOW long-rad. graded OX (Lg graded)
+% 
+iStruttura=25;      % (20,25,27) radially infinite TJ, ABOVE long-rad. graded OX (Lg graded)
+% iStruttura=26; % (21, 26, 28) radially infinite TJ, BELOW long-rad. graded OX (Lg graded)
 % iStruttura=22; % (22, 27) radially infinite TJ, DOUBLE-side long-rad. graded OX (Lg graded)
 
 
@@ -56,7 +60,8 @@ Last_Workspac='LW';
 
 Last_Workspace=[nomeSW,Last_Workspac];
 
-radi='_1TJ'; % 1 TJ structure (several structures are accessible with "iStruttura")
+% radi='_1TJ'; % 1 TJ structure (several structures are accessible with "iStruttura")
+radi='_1TJ_elementi'; % 1 TJ structure (several structures are accessible with "iStruttura")
 % radi='_1TJ_1D'; % 1D simulation of 1 TJ structure
 
 
@@ -129,32 +134,30 @@ if iloop==0 && iSavNome==1
 end
 
 %% Definition of the bias condition (cell of tension: DDstr{itemp})
-% DD0=[0:0.4:1.2 1.3 1.4 1.5]; % col bulk, per res
 clear DDstr
 
 % Bias values BELOW threshold condition
-DDin=[0:0.4:1.2 1.3:0.1:1.5];
+% DD0=[0:0.4:1.2 1.3:0.1:1.5]; % col bulk, per res
+DDin=[0:0.4:1.2 1.3:0.1:1.7];
 
 % Different bias conditions ABOVE threshold are investigated for different temperatures
-% TTve=[80:-30:20];
-TTve=20;
+TTve=[110:-30:20];
+% TTve=20
 Tpelt=TTve;
 for itemp=1:length(TTve)
     Temperaturei=TTve(itemp);
     if Temperaturei == 110
-        Vadd=[1.55:0.02:2.2];
-        Imassimo=7;  % massima corrente analizzata
+        Vadd=[1.80:0.02:2.50];
+        Imassimo=12;  % massima corrente analizzata
     elseif Temperaturei == 80
-%         Vadd=[1.55:0.03:2.4];
-        Vadd=[1.55:0.05:2.9];
-        Imassimo=11;  % massima corrente analizzata
+		Vadd=[1.80:0.03:2.90];
+        Imassimo=14;  % massima corrente analizzata
     elseif Temperaturei == 50
-        Vadd=[1.55:0.04:2.7];
-        Imassimo=13;  % massima corrente analizzata
+        Vadd=[1.80:0.04:3.10];
+        Imassimo=16;  % massima corrente analizzata
     elseif Temperaturei == 20
-        Vadd=[1.55:0.05:3.20];
-%         Vadd=[];
-        Imassimo=14;
+        Vadd=[1.80:0.05:3.20];
+        Imassimo=18;
     end
     DD0=[DDin Vadd];
 %     DDstr{itemp}=DD0;
@@ -359,3 +362,4 @@ for IPAR=IPvet
     end
     
 end
+%  catch

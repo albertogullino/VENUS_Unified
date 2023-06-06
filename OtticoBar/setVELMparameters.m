@@ -79,7 +79,7 @@ calop.iplan=iplan;
 pin=[];
 REM=cPAR;
 PARV=par_in;
-if Npara~=length(ParVet)
+if Npara~=length(find(ParVet>0))
  ' parametri non corretti !   ',
  ' far coincidere PARV (in parv.m) coi parametri @ in ordine   ', keyboard
  return

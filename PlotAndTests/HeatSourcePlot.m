@@ -1,3 +1,5 @@
+function []=HeatSourcePlot(mesh,mode,MODEplot)
+
 pointHeat=2:mesh.nny-1;
 
 % Heat sources
@@ -26,20 +28,38 @@ plot(mode.ii_dd*1e3,mode.DeltaTmax_RAD,'.-')
 plot(mode.ii_dd*1e3,mode.DeltaTmax_Ccap,'.-')
 plot(mode.ii_dd*1e3,mode.DeltaTmax_OptAbs,'.-')
 plot(mode.ii_dd*1e3,mode.DeltaTmax_srhAu,'.-')
+plot(mode.ii_dd*1e3,mode.DeltaTmax,'k.-')
 ylabel('\DeltaT, K'),xlabel('Current, mA')
 xlim([0 max(mode.ii_dd)*1e3])
 legend('Joule','Rad','Ccap','FCA','NR','location','best')
 
 
-% figure,plot(sum(mode.Pst_dd,1),'o-'),ylabel('Optical power, mW')
-% figure,plot(mode.ii_dd*1e3,'o-'),ylabel('Current, mA')
-% % keyboard
+figure,subplot(121),plot(sum(mode.Pst_dd,1),'o-'),ylabel('Optical power, mW')
+subplot(122),plot(mode.ii_dd*1e3,'o-'),ylabel('Current, mA')
+% keyboard
 % % iV=25;
-% iV=input('iV?\n');
+iV=input('iV?\n');
 %
-modep=MODEplot{1};
+if length(MODEplot)>1
+    iT=input('iT?\n');
+    modep=MODEplot{iT};
+else
+    modep=MODEplot;
+end
+
+Joulep=(squeeze(modep.HeatJoule(iV,:,:)));
+Rec_RADp=(squeeze(modep.HeatRec_RAD(iV,:,:)));
+Rec_Capp=(squeeze(modep.HeatRec_Cap(iV,:,:)));
+OptAbsp=(squeeze(modep.HeatOptAbs(iV,:,:)));
+Rec_nrp=(squeeze(modep.HeatRec_13(iV,:,:)));
+
+HeatSource=(squeeze(modep.HeatRec_RAD(iV,:,:)));
+HeatSource=Joulep+Rec_RADp+Rec_Capp+OptAbsp+Rec_nrp;
+
+PTherm=HeatIntegral(mesh,HeatSource)  % Extract Ptherm for a given thermal source
 
 DensityCurrentPlot
+
 
 HeatJoulep=(squeeze(modep.HeatJoule(iV-1,pointHeat,2)));
 HeatRec_RADp=(squeeze(modep.HeatRec_RAD(iV-1,pointHeat,2)));
@@ -76,13 +96,32 @@ if mode.quasi1D==1
     xlim([0.1 mode.ii_dd(end)*1e3])
     xlabel('Current, mA'),ylabel('fattore\_correttivo')
 else
-%     fattore_correttivo=mode.PDissPred(2:end)./mode.PTherm;
-% 
-%     figure
-%     hold on,box on,grid on
-%     plot(mode.ii_dd*1e3,fattore_correttivo,'.-')
-%     xlim([0.1 mode.ii_dd(end)*1e3])
-%     xlabel('Current, mA'),ylabel('fattore\_correttivo')
+    fattore_correttivo=mode.PDissPred(1:end-1)./mode.PTherm;
+
+    
+    figure
+    set(gcf,'position',[680 398 1046 580])
+    subplot(131)
+    hold on,box on,grid on    
+    plot(mode.ii_dd*1e3,mode.PDissPred(1:end-1),'.-')
+    plot(mode.ii_dd(iV)*1e3,mode.PDissPred(iV),'kd')
+    xlim([0.1 mode.ii_dd(end)*1e3])
+    xlabel('Current, mA'),ylabel('PDissPred')
+    
+    subplot(132)
+    hold on,box on,grid on    
+    plot(mode.ii_dd*1e3,mode.PTherm,'.-')
+    plot(mode.ii_dd(iV)*1e3,mode.PTherm(iV),'kd')
+    xlim([0.1 mode.ii_dd(end)*1e3])
+    xlabel('Current, mA'),ylabel('PTherm')
+    
+    subplot(133)
+    hold on,box on,grid on    
+    plot(mode.ii_dd*1e3,fattore_correttivo,'.-')
+    plot(mode.ii_dd(iV)*1e3,fattore_correttivo(iV),'kd')
+    xlim([0.1 mode.ii_dd(end)*1e3])
+    xlabel('Current, mA'),ylabel('fattore\_correttivo')
 
 end
+
 

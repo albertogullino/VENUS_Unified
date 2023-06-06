@@ -206,7 +206,7 @@ subplot(122)
   if isfield(mesh,'yBTJ')
 	  ITJ_finder
 	  
-      yBTJ=ze-mesh.ygrid(ITJ(1))*1e4;
+      yBTJ=ze-mesh.ygrid(iTJ(1))*1e4;
       yo=ze-yBTJ;
       
       thTJ=.03;

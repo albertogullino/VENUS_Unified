@@ -43,6 +43,7 @@ if(mode.oflg)
     
     modePlot.Pst_dd=mode.Pst_dd;
     modePlot.Psp_dd=mode.Psp_dd;
+    modePlot.PspBulk_dd=mode.PspBulk_dd;
     
     modePlot.vind=vind;
     
@@ -76,7 +77,7 @@ modePlot.NVbias=NVbias;
 if mode.oflg==0
     fprintf(['\nCurrent: ',num2str(abs(mode.ii_dd(end))*1e3),' mA | Voltage: ',num2str(abs(mode.vv_dd(end))), ' V\n\n'])
 else
-    fprintf(['\nCurrent: ',num2str(abs(mode.ii_dd(end))*1e3),' mA | Voltage: ',num2str(abs(mode.vv_dd(end))), ' V | Opt. power: ',num2str(abs(mode.Pst_dd(end))), ' mW | T variation (max): ',num2str(abs(mode.DeltaTmax(end))), ' K\n\n'])
+    fprintf(['\nCurrent: ',num2str(abs(mode.ii_dd(end))*1e3),' mA | Voltage: ',num2str(abs(mode.vv_dd(end))), ' V | Opt. power: ',num2str(sum(mode.Pst_dd(:,end),1),'%.2f'), ' mW | dT(max): ',num2str(abs(mode.DeltaTmax(end)),'%.1f'), ' K\n\n'])
 end
 
 if mode.oflg==1
@@ -88,6 +89,9 @@ if mode.oflg==1
     modePlot.lambda=mode.lambda;
     
     modePlot.PTherm=mode.PTherm;
+    if mode.v0_dd==0
+        modePlot.PDiss=mode.PDissPred;
+    end
     modePlot.matgain(indv,:)=mode.matgain;
     modePlot.fPdif(indv,:)=mode.fPdif;
     modePlot.E2(indv,:,:)=mode.E2;

@@ -1,5 +1,5 @@
 mode.flgBTJ=0;  % flag to TJ presence
-mode.flgBTJ_lithographic=0;     % infinite TJ+oxide, or TJ with oxide around
+mode.flgBTJ_lithographic=0; % 0: no etching; 1: etching in VELM only; 2: etching in VELM and in DD
 
 irel=0; % if 1, relief; if 0, standard VCSEL
 
@@ -17,7 +17,7 @@ mode.MAXiterMoveOn=8; % max iteration when mode.MoveON is enabled
 mode.TQWFake=0; 
 mode.Elementi=0; 
 mode.ThermalDB=0; 
-mode.ThermalFake=0 ;  %interpolated Temperature
+mode.ThermalFake=0;  %interpolated Temperature
 
 Effetti=0;
 STIMA_Temp=1;
@@ -27,6 +27,23 @@ irest=IREST; % restart flag; 0 restarts from 0, 2 restarts from last point
 if IPAR~=11
     T0=273+Temperature;         % environment temperature, K
 end
+
+% Needed for parametric loops
+T0a=T0-273;
+if T0a==110
+    Vadd=[1.55:0.02:2.2];
+    Imassimo=8;  % massima corrente analizzata
+elseif T0a==80
+    Vadd=[1.55:0.03:2.4];
+    Imassimo=12;  % massima corrente analizzata
+elseif T0a==50
+    Vadd=[1.55:0.04:2.7];
+    Imassimo=14;  % massima corrente analizzata
+elseif  T0a==20
+    Imassimo=16;  % massima corrente analizzata
+    Vadd=[1.55:0.05:2.8] ;
+end
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % VCSEL, and environmental parameters
@@ -58,15 +75,17 @@ if mode.quasi1D==0
     
     % DelOx=2
     DelOx=1.5;
-    %OX1=OX+0;
-    %OX2=OX1+0;
-    %OX3=OX2+0;
-    %OX4=OX3+0;
+%     DelOx=1 % smaller value --> earlier threshold of superior modes
     
     % Radial grading of the oxide
     OX1=OX+0.4;
+%     OX1=OX+0.2
     OX2=OX1+DelOx;
     OX3=OX2+DelOx;
+    
+%     OX1=OX;
+%     OX2=OX1;
+%     OX3=OX2;
     
     OxTot=[OX; OX1; OX2; OX3;];
     OxT=OxTot(:,Isize)/2;
@@ -371,7 +390,7 @@ end
 KMax=[.25 .20 .16 .12 .11 .10];
 VelmOptions.krel_max=KMax(Isize);               %kmax; 0.1 va bene per aperture normali (3-4 um)
 mode.mintempVELM=200; % degrees, minimum temperature such that VELM is called
-mode.mintempVELM=1; % degrees, minimum temperature such that VELM is called
+mode.mintempVELM=.5; % degrees, minimum temperature such that VELM is called
 mode.IsoThermal=0;
 mode.DT0=100; % degrees, minimum temperature for estimating Dlam_mod
 mode.frsp=1/90; %.5 x sopra e sotto,  .3 per cono ricezione, 100 fattore tras specchio
@@ -446,6 +465,8 @@ if Temperaturei==20
     mode.Imin=1.5e-3/mode.CarrierNorm;  % 1.5 in case of "etched" TJ
 elseif Temperaturei==80
     mode.Imin=3e-3/mode.CarrierNorm;  % 1.5 in case of "etched" TJ
+elseif Temperaturei==110
+    mode.Imin=2.5e-3/mode.CarrierNorm;  % 1.5 in case of "etched" TJ
 end
 mode.Istep=0.2e-3/mode.CarrierNorm; % A, current step for current driving below Imin
 mode.IstepLarge=0.5e-3/mode.CarrierNorm; % A, current step for current driving above Imin

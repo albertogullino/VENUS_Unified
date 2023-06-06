@@ -67,6 +67,9 @@ Svar{59}='epsNLg';
 Svar{60}='ifFC';
 Svar{61}='PerCoefExT';
 Svar{62}='STIMA_Temp';
+
+% Gullino
+Svar{63}='Fat_VTJ';
 % Svar{100} = 'Non_loop';
 
 
@@ -470,10 +473,10 @@ NP(IPAR)=length(PMAT{IPAR});
 
 FattoreExpE=1; % l'esponenziale degli elettroni = quello delle lacune per FattoreExpE
 
-
-
-
-%mode.ABS_Texp=2;
+% 63 Fat_VTJ
+IPAR=63;
+PMAT{IPAR}=linspace(0,1,9);
+NP(IPAR)=length(PMAT{IPAR});
 
 
 

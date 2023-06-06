@@ -48,7 +48,12 @@ iV=25;
 iV=input('iV?\n');
 % iV=36;
 
-modep=MODEplot{1};
+if length(MODEplot)>1
+    iT=input('iT?\n');
+    modep=MODEplot{iT};
+else
+    modep=MODEplot{1};
+end
 
 JN_X=squeeze(modep.JXn(iV,:,:));
 JN_Y=squeeze(modep.JYn(iV,:,:));

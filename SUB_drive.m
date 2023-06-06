@@ -87,10 +87,13 @@ if irest==0
     mode.p3Di=mode.hole;
     mode.phi_0=mode.phi;
     mesh.nint_equil=mesh.nint;
-    % Carriers for VELM (for the losses)
+    % Carriers for FCA heating source (for the losses)
     mode.elecABS=mode.elec*1e-18*mode.CarrierNorm;
     mode.holeABS=mode.hole*1e-18*mode.CarrierNorm;
     
+    mode.elecABSvelm=mode.elecABS;   % used in VELM
+    mode.holeABSvelm=mode.holeABS;
+
     
     % nmodes=length(mode.Lm); % number of optical modes (VELM)
     mode.nmodes=NUMERO_MODI;
@@ -268,6 +271,10 @@ else
     mesh.fCondTerZ=fCondTerZ;
 end
 
+if mode.flgBTJ==1
+    mode.nBTJ=StrDD.nBTJ;
+end
+
 mesh.dndT=fatt_dndT*dndT;
 mesh.dndT1D=dndT1D;
 
@@ -337,7 +344,7 @@ while(indv<=NVbias && DeltaTmax<DTM0 && I_mA<abs(Imassimo) && CondPotBreak==0) %
 % 			save TERM Tprec mesh mode StrTT IPLOT % save intermediate input of thermal solver for debugging
 %                 [DeltaTold,Tprec,PTherm,T_Contributi]=f_ThermicFun(Tprec,mesh,mode,StrTT,IPLOT);
                 if mode.ThermalFake==0
-                   [DeltaTold,Tprec,PTherm,T_Contributi]=f_ThermicFunMOD(Tprec,mesh,mode,StrTT,IPLOT);
+                   [DeltaTold,Tprec,PTherm,T_Contributi,fattore_correttivo]=f_ThermicFunMOD(Tprec,mesh,mode,StrTT,IPLOT);
                 else
                    disp('Call the fake thermal solver')
                    [DeltaTold,Tprec,PTherm,T_Contributi,fattore_correttivo]=FakeThermalSolver(Tprec,mesh,mode,StrTT,IPLOT) ; 
@@ -347,7 +354,7 @@ while(indv<=NVbias && DeltaTmax<DTM0 && I_mA<abs(Imassimo) && CondPotBreak==0) %
                 
                 StimaTempWU
                 DeltaT=DeltaTold*Fat_STIMA_Temp;
-%                 mode.fattore_correttivo(indv)=fattore_correttivo; 
+                mode.fattore_correttivo(indv)=fattore_correttivo; 
             end
         else
             if mode.quasi1D==1
@@ -577,12 +584,11 @@ while(indv<=NVbias && DeltaTmax<DTM0 && I_mA<abs(Imassimo) && CondPotBreak==0) %
             
             % Torrelli Valerio: modification 12/12/2022
             % Saving the far field results
-            
-            VELMInfo(indVELM).FF_Intensity = velm.If(:,1); % far field intensity (normalized to 1), this should change in current!
-            VELMInfo(indVELM).FF_ApertureAngle = velm.theta; % semi-aperture angle
-            VELMInfo(indVELM).FF_angle_at_e2 = velm.ffL; % semi-aperture angle corresponding to 1/e^2 of the peak intensity
-            
-            
+            if mode.quasi1D==0
+                VELMInfo(indVELM).FF_Intensity = velm.If(:,1); % far field intensity (normalized to 1), this should change in current!
+                VELMInfo(indVELM).FF_ApertureAngle = velm.theta; % semi-aperture angle
+                VELMInfo(indVELM).FF_angle_at_e2 = velm.ffL; % semi-aperture angle corresponding to 1/e^2 of the peak intensity
+            end           
             
             %            VELMInfo(indVELM).Lm=velm.Lm(1:mode.nmodes); % prendo solo il primo modo (per ora)
             VELMInfo(indVELM).Lm=velm.Lm; % prendo solo il primo modo (per ora)
@@ -764,22 +770,11 @@ clear Res
             end
             mode.indv=indv;
             if mode.mp==0
-                if mode.Elementi==1
-                    if mode.IdriveON==0
-                        [Kmat0,Jmat0,Jmat2,uvet,rvet,mode,tvet]=assem_GBT_Elementi(geom,mesh,mode,uvet,v0_dd);
-                    else
-                        mode.Zmat=mode.Ymat ;
-                        [Kmat0,Jmat0,Jmat2,uvet,rvet,mode,tvet]=assem_GBT_Elementi(geom,mesh,mode,uvet,i0_dd);
-                    end
+                if mode.IdriveON==0
+                    [Kmat0,Jmat0,Jmat2,uvet,rvet,mode,tvet]=assem_GBT(geom,mesh,mode,uvet,v0_dd);
                 else
-                    
-                    if mode.IdriveON==0
-                        [Kmat0,Jmat0,Jmat2,uvet,rvet,mode,tvet]=assem_GBT(geom,mesh,mode,uvet,v0_dd);
-                    else
-                        mode.Zmat=mode.Ymat ;
-                        [Kmat0,Jmat0,Jmat2,uvet,rvet,mode,tvet]=assem_GBT(geom,mesh,mode,uvet,i0_dd);
-                    end
-                    
+                    mode.Zmat=mode.Ymat ;
+                    [Kmat0,Jmat0,Jmat2,uvet,rvet,mode,tvet]=assem_GBT(geom,mesh,mode,uvet,i0_dd);
                 end
             else
                 if mode.IdriveON==0
@@ -862,19 +857,21 @@ clear Res
         mode.res(indv)=res; % save residual
 
         Res(iter+1)=res;
-        if max(mode.Scheck)>.2 & iprimoRunna==1	
-         RunnaVELM=1;		
-		 iprimoRunna=0;
-   		
-		end
-		if length(Res)>3 & max(mode.Scheck)>1
-		 PrecTol=abs(1-Res(end-1)/Res(end))*100
-%		 pausak
-		 if PrecTol<PrecTol0
-%		'RES', keyboard
-            break
-		 end	
-		end
+        if mode.oflg==1
+            if max(mode.Scheck)>.2 & iprimoRunna==1
+                RunnaVELM=1;
+                iprimoRunna=0;
+            end
+            if length(Res)>3 & max(mode.Scheck)>1
+                PrecTol=abs(1-Res(end-1)/Res(end))*100
+                %		 pausak
+                if PrecTol<PrecTol0
+                    %		'RES', keyboard
+                    break
+                end
+            end
+        end
+
 
         
         if(res<mode.tolconv)
@@ -1144,17 +1141,19 @@ clear Res
                     if diPot(end)<0
                         if Ptotal<PotMin & max(PtotV)>PotMin
                             CondPotBreak=1;
-                            keyboard
+%                             keyboard
                         end
                     end
                 end
                 if mode.oflg==1
                     mode.Pst_dd(:,indv)=Pst(:)/mode.Cpot*1e3;
                     mode.Psp_dd(:,indv)=mode.Psp(end)/mode.Cpot*1e3;
+                    mode.PspBulk_dd(:,indv)=mode.PspBulk(end);
                     mode.lambda(:,indv)=mode.vlambda;
                 else
-                    mode.Pst_dd(:,indv)=0 ;
+                    mode.Pst_dd(:,indv)=0;
                     mode.Psp_dd(:,indv)=0;
+                    mode.PspBulk_dd(:,indv)=0;
                     mode.lambda(:,indv)=0;
                 end
                 
@@ -1251,6 +1250,9 @@ clear Res
 				% Markus data, for example!
 				load(['MarkusN_',num2str(Isize),'_T',num2str(double(T0)),'.mat'])
                 pa=1:10:length(Imeas);
+                
+                Rmeas=diff(Vmeas)./diff(Imeas)*1e3;
+                Rmeas=[NaN; Rmeas];
 
             end
             plot(Vmeas,Imeas,'-or','LineWidth',1.5,'MarkerSize',2)
@@ -1265,7 +1267,7 @@ clear Res
             legend('Measurements','Simulation','Location','Best')
             
             
-            subplot(2,2,2)
+            subplot(222)
             hold on
             grid on
             box on
@@ -1279,15 +1281,13 @@ clear Res
             
             % Torrelli: modification 16/11/2022
             % Adding the experimental data
-			if strfind(mode.strName,'Stephan')
-                plot(data.LIV.V{IndexT},data.LIV.Rdiff{IndexT},'-or','LineWidth',1.5,'MarkerSize',2)
-            end
+            plot(Vmeas,Rmeas,'-or','LineWidth',1.5,'MarkerSize',2)
             plot(mode.vv_dd,Rdiff,'b.','LineWidth',2)
             plot(mode.vv_dd(vind),Rdiff(vind),'bo','LineWidth',2)
             % axis([0 mode.vv_dd(end)+.2 0 mode.ii_dd(end)*1e3+1])
             if mode.vv_dd(end)+.2>1.5
                 xlim([1.5, mode.vv_dd(end)+.2])
-                ylim([0 500])
+                ylim([20 350])
             else
                 xlim([0, mode.vv_dd(end)+.2])
             end
@@ -1298,7 +1298,7 @@ clear Res
             drawnow
             
             
-            subplot(2,2,3)
+            subplot(223)
             hold on
             grid on
             box on
@@ -1319,15 +1319,12 @@ clear Res
             title(['Heat sink temperature: T=',num2str(T0),'°C'])
             drawnow
             
-            subplot(2,2,4)
+            subplot(224)
             grid on
             hold on
             box on
 %                 figure(555),clf
 %                 set(gcf,'position',[667 64 554 392])
-            grid on
-            hold on
-            box on
             plot(mode.ii_dd*1e3,mode.lambda,'b.-','linewidth',1.5)
             plot(Cur,LAM,'ro','linewidth',1,'markersize',4)
             xlabel('Current, mA')
@@ -1356,33 +1353,34 @@ clear Res
             % Adding FF results
             
             % Saving the aperture in mode as well
-            
-            mode.FF_angle_at_e2(indv) = velm.ffL;
-            
-            FFIntensity = velm.If(:,1);     
-%             FFIntensity = VELMInfo(indVELM).FF_Intensity;      
-            % FFIndex = find(FFIntensity>=exp(-2)*max(FFIntensity));
-            FFIndex = find(FFIntensity>=0.25*max(FFIntensity));
-            FFIndex = max(FFIndex);
-            mode.FF_angle_manual(indv) = velm.theta(FFIndex);
-%             mode.FF_angle_manual(indv) = VELMInfo(indVELM).FF_ApertureAngle(FFIndex);
-            
-            figure(6000),clf
-            set(gcf,'position',[667 64 554 392])    
-            hold on
-            % plot(mode.ii_dd*1e3,mode.FF_angle_at_e2,'-ob','linewidth',1.5,'MarkerSize',2)
-            % plot(mode.ii_dd(vind)*1e3,mode.FF_angle_at_e2(vind),'ob','linewidth',1.5)
-            plot(mode.ii_dd*1e3,mode.FF_angle_manual,'-ob','linewidth',1.5,'MarkerSize',2)
-            plot(mode.ii_dd(vind)*1e3,mode.FF_angle_manual(vind),'ob','linewidth',1.5)
-            hold off
-            grid on
-            box on
-            xlabel('Current, mA')
-            ylabel('\theta/2, °')
-            set(gca,'FontSize',12)
-            title('FF width @ 25%')
-            xlim([0 mode.ii_dd(end)*1e3+0.01])
-            drawnow
+            if mode.quasi1D==0
+                mode.FF_angle_at_e2(indv) = velm.ffL;
+                
+                FFIntensity = velm.If(:,1);
+                %             FFIntensity = VELMInfo(indVELM).FF_Intensity;
+                % FFIndex = find(FFIntensity>=exp(-2)*max(FFIntensity));
+                FFIndex = find(FFIntensity>=0.25*max(FFIntensity));
+                FFIndex = max(FFIndex);
+                mode.FF_angle_manual(indv) = velm.theta(FFIndex);
+                %             mode.FF_angle_manual(indv) = VELMInfo(indVELM).FF_ApertureAngle(FFIndex);
+                
+                figure(6000),clf
+                set(gcf,'position',[667 64 554 392])
+                hold on
+                % plot(mode.ii_dd*1e3,mode.FF_angle_at_e2,'-ob','linewidth',1.5,'MarkerSize',2)
+                % plot(mode.ii_dd(vind)*1e3,mode.FF_angle_at_e2(vind),'ob','linewidth',1.5)
+                plot(mode.ii_dd*1e3,mode.FF_angle_manual,'-ob','linewidth',1.5,'MarkerSize',2)
+                plot(mode.ii_dd(vind)*1e3,mode.FF_angle_manual(vind),'ob','linewidth',1.5)
+                hold off
+                grid on
+                box on
+                xlabel('Current, mA')
+                ylabel('\theta/2, °')
+                set(gca,'FontSize',12)
+                title('FF width @ 25%')
+                xlim([0 mode.ii_dd(end)*1e3+0.01])
+                drawnow
+            end
             
 
             figure(440),clf
@@ -1506,7 +1504,7 @@ clear Res
             %                 hold on
             %                 grid on
             %                 box on
-            %                 Resistence=diff(mode.vv0_dd)./diff(mode.ii_dd);
+            %                 Resistence=diff(mode.vv_dd)./diff(mode.ii_dd);
             %                 Resistence=[Resistence(1),Resistence];
             %                 plot(Imeasinterp,Resmeasinterp,'r-','LineWidth',2)
             %                 plot(mode.ii_dd*1000,Resistence,'b.','LineWidth',2)
@@ -1516,6 +1514,43 @@ clear Res
             %                 %            legend('Measurements','Simulation','Location','Best')
             %                 drawnow
             %             end
+            
+                        % Carrier density and energy band diagram (central column)
+            figure(439),clf
+            set(gcf,'position',[667 64 554 392])
+            grid on
+            hold on
+            box on
+            plot(mesh.node(2,1:mesh.nny)*1e4,mode.elec(1:mesh.nny),'b','linewidth',1.5)
+            plot(mesh.node(2,1:mesh.nny)*1e4,mode.hole(1:mesh.nny),'r','LineWidth',1.5)
+            xlabel('z, \mum')
+            ylabel('Elec. and holes, cm^{-3}')
+            set(gca,'yscale','log')
+            set(gca,'FontSize',14)
+            xlim([StrTT.Tbuf+StrTT.Tdbr_inf-1 StrTT.Tbuf+StrTT.Tdbr_inf+StrTT.Tcav+1]),hold off
+            drawnow
+            title(['Red/blue: holes/electrons'])
+            
+
+            figure(440),clf
+            set(gcf,'position',[1249  572  604  407])
+            grid on
+            hold on
+            box on
+            plot(mesh.node(2,1:mesh.nny)*1e4,mode.ecb(1:mesh.nny),'b.-','linewidth',2)
+            plot(mesh.node(2,1:mesh.nny)*1e4,mode.evb(1:mesh.nny),'r.-','linewidth',2)
+            plot(mesh.node(2,1:mesh.nny)*1e4,mode.EFn(1:mesh.nny),'k-.','linewidth',1)
+            plot(mesh.node(2,1:mesh.nny)*1e4,mode.EFp(1:mesh.nny),'k--','linewidth',1)
+            xlim([StrTT.Tbuf+StrTT.Tdbr_inf-1 StrTT.Tbuf+StrTT.Tdbr_inf+StrTT.Tcav+1]),hold off
+            title(['I = ',num2str(mode.ii_dd(end)*1e3),' mA'])
+            xlabel('z, \mum')
+            ylabel('Band diagram, eV')
+            set(gca,'FontSize',14)
+            drawnow
+            
+            if mode.v0_dd>0
+                DensityCurrentPlot
+            end
         end
     end
     
@@ -1527,15 +1562,30 @@ clear Res
         end
         %
         if mode.oflg==1 %&& mode.quasi1D==1
-            PPst=sum(modePlot.Pst_dd,1)+modePlot.Psp_dd;
+            PPst=sum(modePlot.Pst_dd,1)+(modePlot.Psp_dd/mode.frsp + modePlot.PspBulk_dd)*(1-mode.fat_RAD);
             PElec=modePlot.ii_dd*1e3.*modePlot.vv_dd;
-            PDiss=PElec(end)-PPst(end);
-            if mode.quasi1D==1
-                PDiss=PElec(end)/mode.AreaOx-PPst(end)/mode.AreaOpt;
-                PDiss=PElec(end)-PPst(end);
+            if mode.flgBTJ==1 && mode.flgHeatTJ==3
+                % mode.VTJ(indexBTJ,mode.ind_v0,:)=Vint;
+                if mode.quasi1D==0
+                    iRagHeatTJ=18;
+                    
+                    rho=mesh.xgrid;
+                    drho=diff([0 rho]);
+                    xdxN=rho.*drho;
+                    
+                    Area=pi*rho(iRagHeatTJ)^2;
+                    
+                    VTJ=squeeze(mode.VTJ(1,end,1:iRagHeatTJ))';
+                    Vrho=VTJ*xdxN(1:iRagHeatTJ)'*2*pi/Area;
+                else
+                    % 1D case
+                    VTJ=squeeze(mode.VTJ(1,end,1:2))';
+                    Vrho=mean(VTJ);
+                end
+                PElec=modePlot.ii_dd*1e3.*(modePlot.vv_dd-Vrho);
             end
+            PDiss=PElec(end)-PPst(end);
             mode.PDiss(indv)=PDiss;
-            mode.PDissPred(indv)=PDiss;
             
             if (PPst(end)>mode.Pmin_Pfit)
                 polGrad=2;
@@ -1576,6 +1626,8 @@ clear Res
                     
                     mode.PDissPred(indv+1)=Pdissfit;
                 end
+            else
+                mode.PDissPred(indv+1)=PDiss;
             end
             
             Tsoglia=1e3;
@@ -1638,7 +1690,9 @@ clear Res
             if mode.Ilog==1
                 Iadd=[(abs(i_dd)+logspace(floor(log10(abs(i_dd))),-4,15))/mode.CarrierNorm mode.Istep:mode.Istep:mode.Imin-mode.Istep mode.Imin:mode.IstepLarge:Imassimo*1e-3/mode.CarrierNorm];
             else
-                Iadd=[(i_dd/mode.CarrierNorm+mode.Istep):mode.Istep:(mode.Imin-mode.Istep) mode.Imin:mode.IstepLarge:Imassimo*1e-3/mode.CarrierNorm];
+                i_dd=i_dd/mode.CarrierNorm;
+                Imax=Imassimo*1e-3/mode.CarrierNorm;
+                Iadd=[(i_dd+mode.Istep):mode.Istep:(mode.Imin-mode.Istep) mode.Imin:mode.IstepLarge:Imax];
                % Iadd=[(mode.ii_dd(end)/mode.CarrierNorm+mode.Istep): mode.Istep : mode.Imax/mode.CarrierNorm/1e3] ; 
             end
             mode.VIdrive=mode.vv_dd(end);   % last bias step at which Vdrive is used
@@ -1656,7 +1710,10 @@ clear Res
             mode.VIdrive=mode.vv_dd(end);   % last bias step at which Vdrive is used
             disp('Idrive ON'),keyboard
             
-            Iadd=[(i_dd/mode.CarrierNorm+mode.Istep):mode.Istep:(mode.Imin-mode.Istep) mode.Imin:mode.IstepLarge:Imassimo*1e-3/mode.CarrierNorm];
+            i_dd=i_dd/mode.CarrierNorm;
+            Imax=Imassimo*1e-3/mode.CarrierNorm;
+            
+            Iadd=[(i_dd+mode.Istep):mode.Istep:(mode.Imin-mode.Istep) mode.Imin:mode.IstepLarge:Imax];
     
             mode.i0_dd=[mode.ii_dd/mode.CarrierNorm Iadd];
             NVbias=length(mode.i0_dd);
@@ -1681,7 +1738,7 @@ end
 
 indv=indv-1;
 
-fprintf('Press "Continue" to save the simulation output\n'),keyboard
+fprintf('Press "Continue" to save the simulation output\n')%,keyboard
 
 if irest==0
 %         save sadu MODEplot kpvet kpar IPvet PMAT NP rad_setting  rad_settingV

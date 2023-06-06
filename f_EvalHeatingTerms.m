@@ -19,10 +19,19 @@ mobn_n=mesh.mobn0_n;
 mobp_n=mesh.mobp0_n;
 sigma=qel.*(mode.elec.*mobn_n+mode.hole.*mobp_n);
 if isfield(mesh,'IBTJ')==1 % expand for MTJ! (each one has a different sigma)
-    [~,iRagTJ]=min(abs(mesh.xgrid*1e4-mode.rAperture));
-    for iTJ=1:iRagTJ
-        % sigmaTJ has been computed 
-        sigma(mesh.LBTJ(iTJ):mesh.RBTJ(iTJ))=mode.sigmaTJ(1)/mode.CarrierNorm;
+    if mode.flgBTJ_lithographic>0
+        [~,iRagTJ]=min(abs(mesh.xgrid*1e4-mode.rAperture));
+    else
+        iRagTJ=mesh.nnxQW{1};
+    end
+    if mode.flgHeatTJ==1
+        % Equivalent sigma for the TJ nodes is introduced in place of the
+        % DD one!
+        for iTJ=1:iRagTJ
+            % sigmaTJ has been computed
+            sigma(mesh.LBTJ(iTJ):mesh.RBTJ(iTJ))=mode.sigmaTJ(iTJ,1)/mode.CarrierNorm;
+            %        sigma(mesh.LBTJ(iTJ):mesh.RBTJ(iTJ))=mode.sigmaTJ(iTJ)/mode.CarrierNorm;
+        end
     end
 end
 
@@ -34,6 +43,15 @@ if mode.quasi1D==1
     HeatJoule([mesh.nny-2 2*mesh.nny-2])=0;
 else
     HeatJoule=HeatJoule_x+HeatJoule_y;
+end
+
+% Computes an equivalent HeatTJ with VTJ and ITJ (not used)
+if isfield(mesh,'IBTJ')==1 && mode.flgHeatTJ==2
+    % Equivalent HeatTJ=VTJ*Itot for the TJ nodes is introduced in place of
+    % the DD one!
+    for iTJ=1:iRagTJ
+        HeatJoule(mesh.LBTJ(iTJ):mesh.RBTJ(iTJ))=squeeze(mode.HeatTJ(1,end,iTJ))/mode.CarrierNorm;
+    end
 end
 
 % Per mia comodità, riporto sui nodi
@@ -71,6 +89,7 @@ HeatThomson_y=-Jn_y.*mesh.T.*dPn_y-Jp_y.*mesh.T.*dPp_y; % W/(cm^3)
 mode.HeatJoule_x=HeatJoule_x*1e-12*mode.CarrierNorm;
 mode.HeatJoule_y=HeatJoule_y*1e-12*mode.CarrierNorm;
 mode.HeatJoule=HeatJoule*1e-12*mode.CarrierNorm;
+
 mode.HeatRec_nr_bulk=qel.*mesh.Eg.*(mode.RSRH+mode.RAuger)*1e-12*mode.CarrierNorm;
 mode.HeatRec_rad_bulk=qel.*mesh.Eg.*(mode.Rrad)*1e-12*mode.CarrierNorm;
 mode.HeatThomson=(HeatThomson_x+HeatThomson_y)*1e-12*mode.CarrierNorm;
@@ -94,7 +113,7 @@ fat_RAD=mode.fat_RAD;
 mode.HeatRec_nr=mode.HeatRec_nrParziale+mode.HeatCap+mode.HeatRec_rad*fat_RAD;
 mode.HeatRec_Cap=mode.HeatCap;
 mode.HeatRec_RAD=mode.HeatRec_rad*fat_RAD;
-mode.HeatRec_13=mode.HeatRec_nrParziale;
+mode.HeatRec_13=mode.HeatRec_nrParziale;%*0;
 %mode.HeatTh=mode.HeatThomson;
 %'thom',keyboard
 
@@ -198,23 +217,38 @@ if mode.ABSh+mode.ABSe==0
 else
     ifFC=mode.ifFC;
     if ifFC==1
-        mode.elecABS=mode.elec;
-        mode.holeABS=mode.hole;
+        elecABS=mode.elec;
+        holeABS=mode.hole;
+        
+        if mode.flgBTJ==1
+            for iTJ=1:iRagTJ
+                elecABS(mesh.LBTJ(iTJ):mesh.RBTJ(iTJ))=elecABS(mesh.LBTJ(iTJ):mesh.RBTJ(iTJ))+mode.dop_dp(mesh.LBTJ(iTJ):mesh.RBTJ(iTJ));
+                holeABS(mesh.LBTJ(iTJ):mesh.RBTJ(iTJ))=holeABS(mesh.LBTJ(iTJ):mesh.RBTJ(iTJ))+mode.dop_am(mesh.LBTJ(iTJ):mesh.RBTJ(iTJ));
+            end
+        end
     elseif ifFC==0
-        mode.elecABS=mode.dop_dp;
-        mode.holeABS=mode.dop_am;
+        elecABS=mode.dop_dp;
+        holeABS=mode.dop_am;
     elseif ifFC==2
-        mode.elecABS=(mode.dop_dp+mode.elec)/2;
-        mode.holeABS=(mode.dop_am+mode.hole)/2;
+        elecABS=(mode.dop_dp+mode.elec)/2;
+        holeABS=(mode.dop_am+mode.hole)/2;
     end
-    mode.elecABS=mode.elecABS*1e-18*mode.CarrierNorm;
-    mode.holeABS=mode.holeABS*1e-18*mode.CarrierNorm;
+    elecABS=elecABS*1e-18*mode.CarrierNorm;
+    holeABS=holeABS*1e-18*mode.CarrierNorm;
+    
+    mode.elecABSvelm=elecABS;   % used in VELM, T dependence still NOT included!
+    mode.holeABSvelm=holeABS;
     
     T300=mode.T300;
     Temp=mesh.T-T300;
     
     Al=mode.ABS_Apor;
     
+    % This is done TWICE: here and in f_CallVELM, with the same parameters
+    % (there was a bug, such that (1+Temp/T300).^ABS_Texp was accounted
+    % twice in VELM. This bug is now corrected, and ABS_Texp=0;
+    % In summary: if you want to correct/change this formulas, do the same
+    % in VELM!!!
     ABS_Texp=mode.ABS_Texp+mode.PerCoefExT*Temp;
     
     if Al>0
@@ -227,11 +261,11 @@ else
             InDe=(Al*N0+1)/Al;
         end
 %         InDe=1/log(Al+1);
-        mode.elecABS=InDe*log(Al*mode.elecABS+1).*(1+Temp/T300).^ABS_Texp;
-        mode.holeABS=InDe*log(Al*mode.holeABS+1).*(1+Temp/T300).^ABS_Texp;
+        mode.elecABS=InDe*log(Al*elecABS+1).*(1+Temp/T300).^ABS_Texp;
+        mode.holeABS=InDe*log(Al*holeABS+1).*(1+Temp/T300).^ABS_Texp;
     else
-        mode.elecABS=mode.elecABS.*(1+Temp/T300).^ABS_Texp;
-        mode.holeABS=mode.holeABS.*(1+Temp/T300).^ABS_Texp;
+        mode.elecABS=elecABS.*(1+Temp/T300).^ABS_Texp;
+        mode.holeABS=holeABS.*(1+Temp/T300).^ABS_Texp;
     end
     
     if isfield(mode,'Fat_PerCoefTemp')
@@ -268,17 +302,6 @@ if(mode.oflg)
     mode.HeatOptAbs=mode.OptPowerDensity.*(mode.alpha*1e-6);    
 end
 
-% % Computes an equivalent HeatTJ with VTJ and ITJ (not used)
-% if isfield(mesh,'IBTJ')==1
-%     for iTJ=1:length(mesh.LBTJ)
-%         HeatJoule(mesh.LBTJ(iTJ):mesh.RBTJ(iTJ))=mode.HeatTJ(iTJ)/mode.CarrierNorm;
-%         mode.HeatJoule=HeatJoule*1e-12*mode.CarrierNorm;
-%         mode.HeatOptAbs(mesh.LBTJ(iTJ):mesh.RBTJ(iTJ))=0;
-%         mode.HeatRec_Cap(mesh.LBTJ(iTJ):mesh.RBTJ(iTJ))=0;
-%         mode.HeatRec_RAD(mesh.LBTJ(iTJ):mesh.RBTJ(iTJ))=0;
-%         mode.HeatRec_13(mesh.LBTJ(iTJ):mesh.RBTJ(iTJ))=0;
-%     end
-% end
 
 return
 

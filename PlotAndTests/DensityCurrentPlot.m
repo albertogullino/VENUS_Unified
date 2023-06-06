@@ -7,7 +7,13 @@ JYp=reshape(mode.Jp_y,mesh.nny,mesh.nnx);
 JXn=reshape(mode.Jn_x,mesh.nny,mesh.nnx);
 JXp=reshape(mode.Jp_x,mesh.nny,mesh.nnx);
 
-% modep=MODEplot{1};
+% if length(MODEplot)>1
+%     iT=input('iT?\n');
+%     modep=MODEplot{iT};
+% else
+%     modep=MODEplot;
+% end
+% 
 % JYn=squeeze(modep.JYn(iV,:,:));
 % JYp=squeeze(modep.JYp(iV,:,:));
 % JXn=squeeze(modep.JXn(iV,:,:));
@@ -37,7 +43,11 @@ end
 
 fP=abs((cury_n*mode.CarrierNorm)+(cury_p*mode.CarrierNorm));
 
-figure(321),clf
+if exist('StrTT')==0
+    StrTT=modep.StrTT;
+end
+
+figure(322),clf
 % 	subplot(211)
 
 set(gcf,'Position',[1.3146e+03   6.6600e+01   5.6000e+02   4.2000e+02])
@@ -46,6 +56,7 @@ plot(y*1e4,abs(cury_n)*mode.CarrierNorm,'b','linewidth',2)
 plot(y*1e4,abs(cury_p)*mode.CarrierNorm,'r','linewidth',2)
 plot(y*1e4,fP,'g--','linewidth',2)
 %     axis([114.5 115.5 max(abs(cury_n*mode.CarrierNorm),[],'omitnan')/10 max(abs(cury_n*mode.CarrierNorm),[],'omitnan')])
+xlim([StrTT.Tbuf+StrTT.Tdbr_inf-1 StrTT.Tbuf+StrTT.Tdbr_inf+StrTT.Tcav+1]),hold off
 xlim([StrTT.Tbuf+StrTT.Tdbr_inf-1 StrTT.Tbuf+StrTT.Tdbr_inf+StrTT.Tcav+1]),hold off
 % xlim([MODEplot{1}.StrTT.Tbuf+4.5 MODEplot{1}.StrTT.Tbuf+5.5])
 

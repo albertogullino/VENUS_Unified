@@ -82,7 +82,8 @@ for IPAR=IPvet
         modePlot=MODEplot{kpar};
         if isfield(modePlot,'Isize')
             Isize=modePlot.Isize;
-            T0=modePlot.T0;%-TTT000;
+%             T0=modePlot.T0-TTT000;
+            T0=modePlot.Temp(1,1,1)-TTT000;
             %    'prima di load', keyboard
             %fibar=strfind(nomeSR,'\');
             %nomeSR=nomeSR(fibar(end)+1:end);
@@ -112,7 +113,7 @@ for IPAR=IPvet
         set(gcf,'position',[263          89        1517         891])
         
         kcol=input('Color index?  \n');
-        if ~exist('kcol')
+        if isempty(kcol)
             kcol=kpar
         end            
         
@@ -364,11 +365,13 @@ for IPAR=IPvet
         pausak
         
 %         PlotDyn
-        Dyn_Comparison
+        
         
         iDDPlot=input(' Vuoi DD_PLOT? [Any key, NO; Enter, Si] ');
         
         if isempty(iDDPlot)
+            Dyn_Comparison
+            
             DD_PLOT_pris
 %             DD_PLOT_Gullino
             pausak

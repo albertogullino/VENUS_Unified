@@ -36,7 +36,7 @@ subplot(122)
 Etai=Rnor(:,4)./sum(Rnor,2);
 Pott=sum(mode.Pst_dd,1);
 corr=mode.ii_dd;
-volt=mode.vv0_dd;
+volt=mode.vv_dd;
 Watt=corr.*volt*1000;
 Etawp=Pott./Watt;
 Eta=[Etai Etawp'];
@@ -54,15 +54,15 @@ Eta=[Etai Etawp'];
                   hold on, plot(Watt(ipm)*ones(1,2),Eta(ipm,:),'ko','LineWidth',2)
                   hold on, plot(Watt(ipw)*ones(1,2),Eta(ipw,:),'go','LineWidth',2)
 	          legend('Internal','Wallplug','location','best')
-	          ylabel('Efficiency (%)')
+	          ylabel('Efficiency, %')
 	          grid
 	          xlim([0 40])
-         xlabel('Electrical Power (mW)')
+         xlabel('Electrical Power, mW')
                   subplot(122)
 	          plot(Watt,Pott,'LineWidth',1.5)
 	                   hold on, plot(Watt(ipm),Pott(ipm),'ko','LineWidth',2)
 	                   hold on, plot(Watt(ipw),Pott(ipw),'go','LineWidth',2)
-	 	          ylabel('Light (mW)')
-         xlabel('Electrical Power (mW)')
+	 	          ylabel('Light, mW')
+         xlabel('Electrical Power, mW')
          	          xlim([0 40])
          grid

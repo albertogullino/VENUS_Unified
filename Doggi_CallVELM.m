@@ -5,30 +5,38 @@ colordef black
 
 addpathVENUS
 
-% rmpath('OtticoBar\new22Optica')
 
-% load('out\LW_MarkusN_FINALE_LgDBR_Thesis.mat')
-% load('out\LW_MarkusN_TJ_oxAbove_LgDBR_Thesis.mat')
-load('out\LW_MarkusN_TJ_oxBelow_LgDBR_fixed_new.mat')
-% load('out\LW_MarkusN_BTJetch_DD_ROSSO_LgDBR_singleMode_Isize=2_nmodes=2.mat')
 
 % load LW_Stephan_GRok_.mat
-% load LW_MarkusN_FINALE_LgDBR_saveVELM_newVELM.mat
-% iold=input('  old VELM? [ENTER]: Yes; [Any key]: No  ');
-iold=[];
-if isempty(iold)
-    rmpath('OtticoBar\new23OpticaGR')
-    rmpath('OtticoBar\new22Optica')
-%     load LW_MarkusN_FINALEdisFitto_testOLDvelm_abs.mat
-%     load LW_MarkusN_FINALE_LgDBR_oldVELM.mat
-    %     load LW_MarkusN_FINALEdisFitto_oldVELM.mat
-else
-    rmpath('OtticoBar\new22Optica')
-%     load LW_MarkusN_FINALE_LgDBR_testNEWvelm.mat
-    %     load LW_MarkusN_FINALEdisFitto_newVELM.mat
-end
-% load LW_Julian_TJ_2AR_pDBR_fake_.mat
+% % load LW_Julian_TJ_2AR_pDBR_fake_.mat
 % load LW_Julian_TJ_2AR_pDBR_fake_new.mat
+
+% load LW_MarkusN_BTJetch_DD_ROSSO_LgDBR_.mat
+
+% load('out\LW_MarkusN_FINALE_LgDBR_oldFit_FCAindox_FatPerd=2.4_Tindox_Texp=1.2_noDoubleTFCA_eMobQW=0.2_NX=2.5.mat');
+
+% load('out\LW_MarkusN_TJ_oxAbove_LgDBR_fixed_oldFit_FCAindox_FatPerd=2.4_Tindox_Texp=1.2_noDoubleTFCA_eMobQW=0.2_NX=2.5.mat');
+% 
+% load('out\LW_MarkusN_TJ_oxBelow_LgDBR_fixed_oldFit_FCAindox_FatPerd=2.4_Tindox_Texp=1.2_noDoubleTFCA_eMobQW=0.2_NX=2.5.mat');
+
+% load LW_MarkusN_FINALE_LgDBR_FatPerd0=2.8_Texp=0_eQWmob=.4_dndT=2.3_betaT=1.mat
+
+% load LW_MarkusN_FINALE_LgDBR_110_FatPerd0=2.9_Texp=0_eQWmob=.4_dndT=2.37_betaT=1.1_tauSRH=10ns_fatRad=0.05_Pmin=0.1_fCondTer=0.9_FatPerCoefTemp=0.002_FattoreZ=1.0015.mat
+
+load('C:\Users\albig\Politecnico\Dottorato\3b_VENUS\VENUS_Unified\out\LW_MarkusN_TJ_oxBelow_LgDBR_20C_Pelec-PTJ_noHeatTJ.mat')
+% iold=input('  old VELM? [ENTER]: Yes; [Any key]: No  ');
+% iold=[];
+% if isempty(iold)
+%     rmpath('OtticoBar\new23OpticaGR')
+%     rmpath('OtticoBar\new22Optica')
+% %     load LW_MarkusN_FINALEdisFitto_testOLDvelm_abs.mat
+% %     load LW_MarkusN_FINALE_LgDBR_oldVELM.mat
+%     %     load LW_MarkusN_FINALEdisFitto_oldVELM.mat
+% else
+%     rmpath('OtticoBar\new22Optica')
+% %     load LW_MarkusN_FINALE_LgDBR_testNEWvelm.mat
+%     %     load LW_MarkusN_FINALEdisFitto_newVELM.mat
+% end
 
 ParVet=MODEplot{1}.ParVet;
 VelmOptions=MODEplot{1}.VelmOptions;
@@ -36,10 +44,10 @@ VelmOptions=MODEplot{1}.VelmOptions;
 structureName=[nomeSR,mode.strName];
 fis= strfind(structureName,'\');
 strName=structureName(fis(end)+1:end);
-DirName=structureName(1:fis(end));
 
-fil_str=[structureName,'.str'];
-
+% fil_str=[structureName,'.str'];
+fil_str=['dati\',strName,'.str'];
+    
 verVE=0;    % verbVELM
 ian=1;      % guiding
 MulT=1;     % Temperature pre-factor
@@ -171,8 +179,8 @@ for indVELM=veind
     %VelmOptions.Dlam=DL;  % 0 per LP
     %     VelmOptions.gain_gui=ian;  % 0 per LP
     %     VelmOptions.NP_k=NP_k;  % 0 per LP
-    VelmOptions.itutmir=0; % 1: caso termico completo; 0: caso ridotto (+ veloce)
-%         VelmOptions.Pf.nmasce=-2;
+%     VelmOptions.itutmir=0; % 1: caso termico completo; 0: caso ridotto (+ veloce)
+%         VelmOptions.Pf.nmasce=-3;
     
     mode.matgain=VELMInput(indVELM).matgain;
     mode.DeltaN=VELMInput(indVELM).DeltaN;
@@ -182,8 +190,8 @@ for indVELM=veind
     mode.vlambda=VELMInput(indVELM).vlambda;
     mode.alpha=VELMInput(indVELM).alpha;
     
-    mode.elecABS=VELMInput(indVELM).elecABS;
-    mode.holeABS=VELMInput(indVELM).holeABS;
+    mode.elecABSvelm=VELMInput(indVELM).elecABS;
+    mode.holeABSvelm=VELMInput(indVELM).holeABS;
     if indVELM>1
         mode1.TmVelm=VELMInput(indVELM).TmVelm;
         mode1.LamVelm=VELMInput(indVELM).LamVelm;
@@ -199,17 +207,18 @@ for indVELM=veind
 %     VelmOptions.Dlam=[-5 +5 10 0 .4]; % ORIGINAL, -10???? (30°C)
 %     VelmOptions.Dlam=[-.5 +7 10 0 .4]; % ORIGINAL, -10???? (30°C)
 % %     VelmOptions.Dlam=[-6 -2 10 0 .4]; % ORIGINAL, -10???? (room T)
+%     VelmOptions.Dlam=[-.5 4.5 10 0 .4];
 %     VelmOptions.NP_k=30;
 %     VelmOptions.krel_max=.12;
 %     VelmOptions.ianti_gui=0;
 %     
 %     ParVet(3)=8;
-%     mode.verbVELM=1;
+%     mode.verbVELM=2;
     
     'ver prima di call', keyboard
     
-%     [velm] = f_CallVELM(mesh,mode,mode1,ParVet,VelmOptions,fil_str);
-    [velm] = f_CallVELM_old(mesh,mode,mode1,ParVet,VelmOptions,fil_str);
+    [velm] = f_CallVELM(mesh,mode,mode1,ParVet,VelmOptions,fil_str);
+%     [velm] = f_CallVELM_old(mesh,mode,mode1,ParVet,VelmOptions,fil_str);
     indv=vind(ves);
     
     Lmod=velm.Lm/vph;

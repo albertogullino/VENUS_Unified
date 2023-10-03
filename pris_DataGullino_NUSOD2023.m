@@ -92,13 +92,13 @@ for IPAR=IPvet
             kcol=kpar
         end
         
-        subplot(231)
+        subplot(221)
         pa=1:5:length(Imeas);
         plot(Vmeas(pa),Imeas(pa),[colo(kpar),'.'],'markersize',10)
         hold on
         
         
-        subplot(233)
+        subplot(222)
         plot(Imeas(pa),Lmeas(pa),[colo(kpar),'.'],'markersize',10)
         hold on
         xlim([0 IMAX])
@@ -140,7 +140,7 @@ for IPAR=IPvet
         Pmod_B{kpar}=10*log10(B.modePlot.Pst_dd);
         %         figure(hh)
         
-        subplot(231)
+        subplot(221)
         hold on
         grid on
         box on
@@ -152,7 +152,7 @@ for IPAR=IPvet
         xlabel('Voltage (V)')
         title(tita)
         % figure(11)
-        subplot(233)
+        subplot(222)
         hold on
         grid on
         box on
@@ -174,38 +174,39 @@ for IPAR=IPvet
         %legend(num2str([1:kpar]'),'location','best')
         %  legend([titeff0, TITE{PMAT{IPAR}(1:kpar)+1}],'location','best')
         
-        subplot(232)
-        hold on
-        grid on
-        box on
-        %            xlim([0 20])
-        plot(A.mode.ii_dd*1000,A.mode.DeltaTmax,[col{kcol}],'LineWidth',2)
-        plot(B.mode.ii_dd*1000,B.mode.DeltaTmax,[col{kcol},'--'],'LineWidth',2)
-        axis([0 Imax 0 max(B.mode.DeltaTmax)])
-        %         plot(A.mode.ii_dd*1000,A.mode.DeltaTmax,'k--','LineWidth',2)
-        xlabel('Current, mA')
-        ylabel('Temperature rise, K')
-        
-        if IPAR==30
-            if kpar<=ppar(end)
-                legend(TITE{[1 ppar(1:kpar)+2]},'location','best')
-            else
-                legend(TITE{[1 ppar(1):ppar(end)+2]},'location','best')
-            end
-        else
-            fis= strfind(A.modePlot.structureName,'\');
-            %             fis= strfind(A.modePlot.structureName,'/');
-            strName=A.modePlot.structureName(fis(end)+1:end);
-            titeff=strName;
-        end
-        if length(titeff)>20
-            title(titeff(15:end))
-        else
-            title(titeff)
-        end
+%         subplot(232)
+%         hold on
+%         grid on
+%         box on
+%         %            xlim([0 20])
+%         plot(A.mode.ii_dd*1000,A.mode.DeltaTmax,[col{kcol}],'LineWidth',2)
+%         plot(B.mode.ii_dd*1000,B.mode.DeltaTmax,[col{kcol},'--'],'LineWidth',2)
+%         axis([0 Imax 0 max(B.mode.DeltaTmax)])
+%         %         plot(A.mode.ii_dd*1000,A.mode.DeltaTmax,'k--','LineWidth',2)
+%         xlabel('Current, mA')
+%         ylabel('Temperature rise, K')
+%         
+%         if IPAR==30
+%             if kpar<=ppar(end)
+%                 legend(TITE{[1 ppar(1:kpar)+2]},'location','best')
+%             else
+%                 legend(TITE{[1 ppar(1):ppar(end)+2]},'location','best')
+%             end
+%         else
+%             fis= strfind(A.modePlot.structureName,'\');
+%             %             fis= strfind(A.modePlot.structureName,'/');
+%             strName=A.modePlot.structureName(fis(end)+1:end);
+%             titeff=strName;
+%         end
+%         if length(titeff)>20
+%             title(titeff(15:end))
+%         else
+%             title(titeff)
+%         end
         % title(tit{IPAR})
         %figure(hh1)
-        subplot(236)
+        
+        subplot(224)
         hold on
         grid on
         box on
@@ -220,10 +221,11 @@ for IPAR=IPvet
         plot(1000*B.mode.ii_dd(fib),B.mode.lambda(1,fib)+DeLam+.4,[col{kcol},'--'],'linewidth',2)
 %         title(['DeLam=',num2str(DeLam),' TMa ',num2str(TMa,'%0.f- '),' TMb ',num2str(TMb,'%0.f- ')])
         plot(CUR,LAM(:,1),[colo(kpar),'o'],'Markersize',5)
-        axis([1 Imax-2 847 855])
+        axis([1 Imax-4 847 855])
         xlabel('Current, mA')
         ylabel('Wavelength, nm')
-        subplot(234)
+        
+        subplot(223)
         %         hold on
         %          grid on
         %          box on
@@ -249,75 +251,79 @@ for IPAR=IPvet
         xlabel('Current, mA')
         ylabel('Differential resistance, \Omega')
         %            keyboard
-        subplot(235)
-        hold on
-        grid on
-        box on
-        if kpar==1
-            CurSav=Cur;
-        end
-        if FLos==1
-            %figure(111)
-            
-            Cur=CurSav;
-            
-            [~,icu]=min(abs(Imeas-Cur(fix(end/2))));
-            Smis='o+s';
-            k=kpar;
-            if IPAR==11 || IPAR==41
-                
-                P_dB=PDB{k};
-                Cur=CU{k};
-                P_lin=10.^(P_dB/10);
-                Pls=P_lin(:,1);
-                for kp=2:size(P_dB,2)
-                    fi=isnan(P_lin(:,kp))==0;
-                    if length(fi)>0
-                        Pls(fi)=Pls(fi)+P_lin(fi,kp);
-                    end
-                end
-                FatPow=Lmeas(icu)/Pls(fix(end/2));
-                scLo=10*log10(FatPow);
-                plot(Cur,P_dB+scLo,[Smis(3),'--'])
-                %                 plot(Cur,P_dB(:,1)+scLo,[Smis(k),'--'])
-                hold on
-                ax = gca;
-                ax.ColorOrderIndex = 1;
-            else
-                P_lin=10.^(P_dB/10);
-                Pls=P_lin(:,1);
-                for kp=2:size(P_dB,2)
-                    fi=isnan(P_lin(:,kp))==0;
-                    if length(fi)>0
-                        Pls(fi)=Pls(fi)+P_lin(fi,kp);
-                    end
-                end
-                FatPow=Lmeas(icu)/Pls(fix(end/2));
-                scLo=10*log10(FatPow);
-                
-                %                 plot(Cur,P_dB+scLo,'o','LineWidth',2)
-                plot(Cur,P_dB(:,1)+scLo,'o','LineWidth',2)
-                hold on
-            end
-            
-            
-            ax = gca;
-            ax.ColorOrderIndex = 1;
-            lines{1}='-'; lines{2}='--'; lines{3}='-.';  lines{4}='.';  lines{5}='+';  lines{6}='o';
-            lines{7}='p'; lines{8}='s';
-            plot(Imod_A{k},Pmod_A{k},lines{mod(k,length(lines))},'linewidth',2)
-            chold
-            plot(Imod_B{k},Pmod_B{k},lines{mod(k,length(lines))},'linewidth',2)
-            ax = gca;
-            ax.ColorOrderIndex = 1;
-            %axis([0 Imod{end}(end)+1 -40 5])
-            axis([0 Imax -7 5])
-            xlabel('Current, mA')
-            ylabel('Optical power, mW')
-            
-        end
+%         subplot(235)
+%         hold on
+%         grid on
+%         box on
+%         if kpar==1
+%             CurSav=Cur;
+%         end
+%         if FLos==1
+%             %figure(111)
+%             
+%             Cur=CurSav;
+%             
+%             [~,icu]=min(abs(Imeas-Cur(fix(end/2))));
+%             Smis='o+s';
+%             k=kpar;
+%             if IPAR==11 || IPAR==41
+%                 
+%                 P_dB=PDB{k};
+%                 Cur=CU{k};
+%                 P_lin=10.^(P_dB/10);
+%                 Pls=P_lin(:,1);
+%                 for kp=2:size(P_dB,2)
+%                     fi=isnan(P_lin(:,kp))==0;
+%                     if length(fi)>0
+%                         Pls(fi)=Pls(fi)+P_lin(fi,kp);
+%                     end
+%                 end
+%                 FatPow=Lmeas(icu)/Pls(fix(end/2));
+%                 scLo=10*log10(FatPow);
+%                 plot(Cur,P_dB+scLo,[Smis(3),'--'])
+%                 %                 plot(Cur,P_dB(:,1)+scLo,[Smis(k),'--'])
+%                 hold on
+%                 ax = gca;
+%                 ax.ColorOrderIndex = 1;
+%             else
+%                 P_lin=10.^(P_dB/10);
+%                 Pls=P_lin(:,1);
+%                 for kp=2:size(P_dB,2)
+%                     fi=isnan(P_lin(:,kp))==0;
+%                     if length(fi)>0
+%                         Pls(fi)=Pls(fi)+P_lin(fi,kp);
+%                     end
+%                 end
+%                 FatPow=Lmeas(icu)/Pls(fix(end/2));
+%                 scLo=10*log10(FatPow);
+%                 
+%                 %                 plot(Cur,P_dB+scLo,'o','LineWidth',2)
+%                 plot(Cur,P_dB(:,1)+scLo,'o','LineWidth',2)
+%                 hold on
+%             end
+%             
+%             
+%             ax = gca;
+%             ax.ColorOrderIndex = 1;
+%             lines{1}='-'; lines{2}='--'; lines{3}='-.';  lines{4}='.';  lines{5}='+';  lines{6}='o';
+%             lines{7}='p'; lines{8}='s';
+%             plot(Imod_A{k},Pmod_A{k},lines{mod(k,length(lines))},'linewidth',2)
+%             chold
+%             plot(Imod_B{k},Pmod_B{k},lines{mod(k,length(lines))},'linewidth',2)
+%             ax = gca;
+%             ax.ColorOrderIndex = 1;
+%             %axis([0 Imod{end}(end)+1 -40 5])
+%             axis([0 Imax -7 5])
+%             xlabel('Current, mA')
+%             ylabel('Optical power, mW')
+%             
+%         end
         
 %         figure(2)
+%         subplot(235)
+%         hold on
+%         grid on
+%         box on
 %         
 %         lenA=1:length(A.mode.ii_dd);
 %         
@@ -327,11 +333,19 @@ for IPAR=IPvet
 %         plot(1000*A.mode.ii_dd,1e-18*A.mode.n3MaxVet(lenA),[colo(kcol),'-'],...
 %             1000*A.mode.ii_dd,1e-18*A.mode.p3MaxVet(lenA),[colo(kcol),'--'],'linewidth',2)
 %         
-%         %         plot(1000*A.mode.ii_dd,1e-12*A.mode.nMaxVet(len)/A.mode.NMQW,'ko-',...
-%         %             1000*A.mode.ii_dd,1e-12*A.mode.pMaxVet(len)/A.mode.NMQW,'k+--')
-%         %         hold on
-%         %         plot(1000*A.mode.ii_dd,1e-18*A.mode.n3MaxVet(len),'k-',...
-%         %             1000*A.mode.ii_dd,1e-18*A.mode.p3MaxVet(len),'k--','linewidth',2)
+%         lenB=1:length(B.mode.ii_dd);
+%         
+%         plot(1000*B.mode.ii_dd,1e-12*B.mode.nMaxVet(lenB)/B.mode.NMQW,[colo(kcol),'o-'],...
+%             1000*B.mode.ii_dd,1e-12*B.mode.pMaxVet(lenB)/B.mode.NMQW,[colo(kcol),'+--'])
+%         hold on
+%         plot(1000*B.mode.ii_dd,1e-18*B.mode.n3MaxVet(lenB),[colo(kcol),'-'],...
+%             1000*B.mode.ii_dd,1e-18*B.mode.p3MaxVet(lenB),[colo(kcol),'--'],'linewidth',2)
+%         
+% %                 plot(1000*A.mode.ii_dd,1e-12*A.mode.nMaxVet(len)/A.mode.NMQW,'ko-',...
+% %                     1000*A.mode.ii_dd,1e-12*A.mode.pMaxVet(len)/A.mode.NMQW,'k+--')
+% %                 hold on
+% %                 plot(1000*A.mode.ii_dd,1e-18*A.mode.n3MaxVet(len),'k-',...
+% %                     1000*A.mode.ii_dd,1e-18*A.mode.p3MaxVet(len),'k--','linewidth',2)
 %         
 %         xlabel('Current (mA)')
 %         ylabel('N-P density (PER well) 1e12/cm^2)')
@@ -342,6 +356,7 @@ for IPAR=IPvet
     end
 end
 
+return
 HeatSourcePlot(A.mesh,A.modeold,A.MODEplot{4})
 
 HeatSourcePlot(B.mesh,B.modeold,B.MODEplot{4})

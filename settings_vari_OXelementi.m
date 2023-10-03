@@ -41,7 +41,7 @@ elseif T0a==50
     Imassimo=14;  % massima corrente analizzata
 elseif  T0a==20
     Imassimo=16;  % massima corrente analizzata
-    Vadd=[1.55:0.05:2.8] ;
+    Vadd=[1.55:0.05:2.8];
 end
 
 
@@ -109,11 +109,11 @@ end
 
 
 mode.OptScaling=0;    % area reduction w.r.t. to the eletrical area
-if mode.quasi1D==1 && mode.flgBTJ==1
-    mode.fPdifScaling=1.15; % 1 for Oxide or 3D simulations; 1.2 for TJ (1D)
-else
-    mode.fPdifScaling=1; % 1 for Oxide or 3D simulations; 1.2 for TJ (1D)
-end
+% if mode.quasi1D==1 && mode.flgBTJ==1
+%     mode.fPdifScaling=1.15; % 1 for Oxide or 3D simulations; 1.2 for TJ (1D)
+% else
+%     mode.fPdifScaling=1; % 1 for Oxide or 3D simulations; 1.2 for TJ (1D)
+% end
 
 mode.fPdifScaling=1; % 1 for Oxide or 3D simulations; 1.2 for TJ (1D)
 
@@ -129,9 +129,9 @@ end
 % Gain and quantum models
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% epsNLg=4e-17;
+epsNLg=4e-17;
 % epsNLg=3e-17;
-epsNLg=1.5e-17;
+% epsNLg=1.5e-17;
 
 Qc=0.6;
 FLos=1;
@@ -208,12 +208,15 @@ Deltalam=3;
 C_Temp=1;  % Coeff. Temperatura totale
 C_TempGain=1;  % Coeff. Temperatura Gain
 dndT=2.3e-4;  % dn/dT  2.3e-4 da dati sperimentali
-dndT1D=4e-4;  % for 1D fitting
+dndT1D=2.3e-4;  % for 1D fitting
 fat_RAD=0.50;   % self-absorption heating from spont. recombination
 fat_RAD=5e-2   % self-absorption heating from spont. recombination
 
 mode.FatQtot=115;    % scaling factor for Q to fit 3D and 1D deltaT
-mode.FatV=46;   % kT scaling between substrate and VCSEL regions
+% mode.FatV=46;   % kT scaling between substrate and VCSEL regions
+mode.FatV=80;   % kT scaling between substrate and VCSEL regions
+% mode.FatQtot=1;    % scaling factor for Q to fit 3D and 1D deltaT
+% mode.FatV=1;   % kT scaling between substrate and VCSEL regions
 mode.FatQcontact=1.00; % 1D simulation: scaling at the contact (0.65 for Oxide; 1.00 for TJ)
 
 % fCondTer=1;   % transverse thermal conducibility
@@ -240,26 +243,33 @@ mode.ABSh=11;
 mode.ABSe0=3;   % these are multiplied by Fat_Perd0 in ASSEGNO_mode: f_alpha in 2019Debernardi_JSTQE, (7)
 mode.ABSh0=7;
 
+% Different value w.r.t. original VENUS is related to where elecABS,
+% holeABS and Tvelm are taken in f_CallVELM:
+% - OLD: fianti=NPxQW (last radial node before mesa) 
+% - NEW: indox=2*rox/3
+
 % Fat_Perd0=2.6;  % con Log 1
 Fat_Perd0=2.9  % con Log 1
 
-% increase ABS_Texp with Tvelm=DeltaT+T0, in f_CallVELM:
+% Increase ABS_Texp with Tvelm=DeltaT+T0, in f_CallVELM:
 % ABS_Texp=mode.ABS_Texp+mode.PerCoefExT*Tvelm;
 PerCoefExT=0
-%PerCoefExT=2e-3 
+% PerCoefExT=2e-2
 
-% changes Fat_Perd0 in ASSEGNO_mode: Fat_Perd_mod=Fat_Perd0+Fat_PerCoefTemp*(mode.T0-T300);
+% Changes Fat_Perd0 in ASSEGNO_mode: Fat_Perd_mod=Fat_Perd0+Fat_PerCoefTemp*(mode.T0-T300);
 % Fat_PerCoefTemp=(.9-Fat_Perd0)/90;
 % Fat_PerCoefTemp=0   
-Fat_PerCoefTemp=0.002
+% Fat_PerCoefTemp=0.002
+Fat_PerCoefTemp=-0.00375
+
 if IPAR==42
     Fat_PerCoefTemp=0;
 end
 
 
 % ABS_Texp=2.4
-ABS_Texp=0      % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
-% ABS_Texp=1.2      % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
+% ABS_Texp=0      % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
+ABS_Texp=1.5      % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
 
 ABS_Apor=0;   %dipendenza lineare !!!!!!!
 ABS_Ader=0;
@@ -279,11 +289,12 @@ mode.xmolPiatto=0;   % =1 toglie tutta la variazione di x_mol
 ExpH=0.4;       % exponent for thermal dependence of hole mobility
 FattoreExpE=1;  % electron/hole ratio for thermal dependence of mobility
 
-if mode.quasi1D==0
-    IHILS=0;   % 0 fisso, 1 variabile, original VENUS
-else
-    IHILS=1;   % 0 fisso, 1 variabile
-end
+% if mode.quasi1D==0
+%     IHILS=0;   % 0 fisso, 1 variabile, original VENUS
+% else
+%     IHILS=1;   % 0 fisso, 1 variabile
+% end
+IHILS=0;   % 0 fisso, 1 variabile, original VENUS
 % N_X=1.5e17;      % Hilsum model parameter
 N_X=2.5e17      % Hilsum model parameter
 NxCoe=.011;
@@ -355,9 +366,9 @@ VelmOptions.gain_gui=1;
 
 mode.verbVELM=0;
 if mode.quasi1D==1
-    mode.verbVELM=-1;   % <0 to see VELM results only the first time; >0: always
+%     mode.verbVELM=-1;   % <0 to see VELM results only the first time; >0: always
 end
-mode.verbVELM=-2;   % <0 to see VELM results only the first time; >0: always
+% mode.verbVELM=-2;   % <0 to see VELM results only the first time; >0: always
 
 itutmir=0; % if 1, the "entire" optical structure is studied with thermal (strong discretization)
 

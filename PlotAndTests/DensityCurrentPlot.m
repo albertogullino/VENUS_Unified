@@ -11,7 +11,7 @@ JXp=reshape(mode.Jp_x,mesh.nny,mesh.nnx);
 %     iT=input('iT?\n');
 %     modep=MODEplot{iT};
 % else
-%     modep=MODEplot;
+%     modep=MODEplot{end};
 % end
 % 
 % JYn=squeeze(modep.JYn(iV,:,:));

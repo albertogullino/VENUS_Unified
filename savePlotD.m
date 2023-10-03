@@ -8,6 +8,11 @@ if exist('iDyn')
         
         [DifCur,fi]= min(abs(CfPerc));
         if DifCur < minPerc
+            fprintf('\n+++++++++++++++++++++++++++++++++++++++++++\n')
+            fprintf('+++  Small-signal Analysis at, %.2f mA  +++\n',Cf)
+            fprintf('+++++++++++++++++++++++++++++++++++++++++++\n')
+%             pausak
+            
             CurDynRef(fi)=1000;
             CurDyn=[CurDyn Cf];
             
@@ -18,10 +23,12 @@ if exist('iDyn')
             
             leCuD=length(CurDyn);
             modePlot.AM(leCuD,:)=AM;
-            modePlot.Pss(leCuD,:)=sum(Pst_ss);
+            modePlot.Pss(leCuD,:)=sum(Pst_ss,1);
             modePlot.Yss(leCuD,:)=Y_ss;
             modePlot.Css(leCuD,:)=C_ss;
             modePlot.Gss(leCuD,:)=G_ss;
+%             modePlot.Rss(leCuD,:)=Z_ss;
+%             modePlot.Zss(leCuD,:)=R_ss;
             modePlot.fvet=fvet;
             modePlot.CurDyn=CurDyn;
         end

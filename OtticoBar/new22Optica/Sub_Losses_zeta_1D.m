@@ -1,12 +1,22 @@
+Dov=dglo.Dop;
 
+anyfS=anyf;
 
-if ifp==-10
+anyf=ones(size(anyf));
+fi=find(imag(anyf)~=0 & Dov==0);
+
+anyf(fi)=0;
+fi=find(imag(anyf)~=0);
+anyf(fi)=1;
+
+if ifp==-11
 
  'qui Losses_zeta entro', keyboard
+ 'qui Losses_zeta entro', keyboard
+ 'qui Losses_zeta entro', keyboard
 end
-
 %fiQ=find(fst(:,2)==-1)-1;
-
+%ifp=-10
 %'fiQ ', keyboard
 
 
@@ -41,8 +51,14 @@ end
 
 xd=[zeros(size(dv)) dv];
 fl=abs(fst(:,2));
+
+iSem=find(Dov~=0);
+%iSem=iSem(1):length(Dov);
+
 fim=find(fl>1);
 %fim=find(fl>=1);
+%'qui', keyboard
+
 if length(fim)>0
  if length(find(diff(fim)>1))==0 & sum(diff(fim))>length(fim)-1
   fim=[fim; length(dv)-1];
@@ -164,8 +180,8 @@ end
 
 puac=puo;
 puae=find(ato>0);
-%puae=1:length(dmic);
-%' puae ', keyboard
+puae=find(ato>=0);
+% ' puae ', keyboard
 
 
 nd=[nto nto];
@@ -225,7 +241,7 @@ y(fipe)=-y(fipe);
 
  z=ABS.zAbs;
  %z=max(zv)-fliplr(zv);
- Dov=dglo.Dop;
+
  
  hz=x*1000;
  uFunc=hz*0;
@@ -263,29 +279,35 @@ relPerm=conj(perm.^2).';
  %fmu(:,1)=mean(EO.Es,2);
 
 
-% fista=find(abs(Dov)>0);
- fista=find(abs(n1)<=1.1);
-% finiz=1:fista(1)-1;
-finiz=fista;
+ fista=find(abs(Dov)>0);
+ finiz=1:fista(1)-1;
 
- dorigin=sum(dv(finiz));
- dorigin1=sum(dv(finiz(2:end)));
+
+ dorigin=sum(dv(finiz).*fst(finiz,2));
+
+ dorigin1=sum(dv(finiz(2:end)).*fst(finiz(2:end),2));
+ 
+ frest=finiz(end)+1:length(fst)-1;
+ drest=sum(dv(frest).*fst(frest,2))/1000;
+ 
  x=(hz'-dorigin)*1e-3;
  xv=x;
 
 % 'dorig', keyboard
-  zo=z;%-z(2);
-  fip=find(nz>1);
+  zo=z-z(2);
+  fip=find(nz>2.9);
+%  fip=find(nz>1);
   xp=x(fip);
   Fip=Fi(fip);
+  nzp=nz(fip);
  
-  fmu_0=flipud(ABS.eleccentro*ABS.e);
+  fmu_0=flipud(ABS.eleccentro.*ABS.e);
   fmu=interp1(zo,fmu_0,xp);
   fiN=find(isnan(fmu)==1);
   fmu(fiN)=0;
   fmuE=fmu;
   
-  fmu_0=flipud(ABS.holecentro*ABS.h);
+  fmu_0=flipud(ABS.holecentro.*ABS.h);
   fmu=interp1(zo,fmu_0,xp);
   fiN=find(isnan(fmu)==1);
   fmu(fiN)=0;
@@ -326,9 +348,9 @@ finiz=fista;
 % pewa=spline(x,imag(relPerm),z);
 %'qui', keyboard
 if ifp==-10
-%   figure, semilogy(xp,Los,'.',xp,Fip/max(Fip)*max(fmu),xp,real(nz(fip)/3.5),'g',xp,Do,'c',xp,xmol,'w.')
-  figure, semilogy(xp,Los,'.',xp,Fip/max(Fip)*max(fmu),xp,real(nz(fip)/3.5),'g',xp,xmol,'w.')
-  ylim([.001 50])
+%  figure, semilogy(xp,Los,'.',xp,Fip/max(Fip)*max(fmu),xp,real(nz(fip)/3.5),'g',xp,Do,'c',xp,xmol,'w.')
+  figure, semilogy(xp,Los*k0cm2,'r.',xp,Fip/max(Fip)*max(fmu),xp,real(nz(fip)/3.5),'g',xp,xmol,'w.')
+  ylim([.001 200])
   pausak
   figure, plot(xp,real(nz(fip)),'g',xp,nref_mol,'w.')
   pausak
@@ -340,6 +362,7 @@ end
  dz=[diff(xp); 0];
  smu=size(Los);
  F_dz=((Fip.*dz)*ones(1,smu(2)));
+ 
  FL_dz=((FPerd.*dz)*ones(1,smu(2)));
 % Fnorm=Fiw.*dz;
 % Fnorms=Fiw'*dz;
@@ -349,15 +372,14 @@ end
   dmic(fic)=1.2e-7;
  end
 
-% fista=find(abs(Dov)>0);
- fista=find(abs(n1)>1);
+ fista=find(abs(Dov)>0);
  kin=fista(1);
-clear amedis 
+ xpshift=xp+dorigin1/1000;
+amedis=0; 
  for k=1:length(puae)
-%  li=sum(dmic(1:puae(k)-1))-dmic(1);
-  li=sum(dmic(1:puae(k)-1))-sum(dmic(1:kin));
+  li=sum(dmic(1:puae(k)-1))-dmic(1);
   lu=li+dmic(puae(k));
-  fi=find(xp>=li & xp<lu);
+  fi=find(xpshift>=li & xpshift<lu);
   if length(fi)>0
    R=sum(FL_dz(fi))/sum(F_dz(fi));
   else
@@ -422,7 +444,13 @@ clear amedis
 % dlam=dlam/5; % No solution found for dlam/10
 % NPlam=10;
 global DeltaN0
+if isempty(DeltaN0)==0
 n_i(fiQWvet)=n_i(fiQWvet)+ianti_gui*DeltaN0(1,1:2:end)';
+end
+
+if ABS.Tlosses==0
+    fiQW=fiQWvet(2);
+end
 ifpsave=ifp;
 if Ps.ifpstop==1
     ifp=-10;

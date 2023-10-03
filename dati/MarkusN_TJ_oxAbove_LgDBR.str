@@ -13,8 +13,8 @@ $ PassivationSection passiv_size=15 passiv_mesh=9 passiv_depth=3.5
 % Devono essere uguali a quelli ottici
 % DD_radial_sections radii radie: significa che sono aggiunte due colonne, i cui limiti
 % sono oxide-radii oxide+radie
-$ DD_radial_sections radii=0.5 radie=0.5 Radial_mesh=.1+10j .01+5j .01+4j .01+10j  0.01+7j 
-% DD_radial_sections radii=0.5 radie=0.3 Radial_mesh=.1+10j .01+6j .01+3j .01+8j  0.01+6j 
+% DD_radial_sections radii=0.5 radie=0.5 Radial_mesh=.1+10j .01+5j .01+4j .01+10j  0.01+7j 
+$ DD_radial_sections radii=0.6 radie=0.5 Radial_mesh=.1+8j .01+7j .01+3j .01+11j  0.01+8j 
 %  Radial_mesh organizza la mesh radiale: per ogni colonna, si da il passo (parte reale)
 % e il n. max di punti (parte immaginaria)
 $ buffer thick=110 thick_dd=109990 size=50
@@ -75,7 +75,7 @@ Lca  Nd=3.57e18  1  6        AlGaAs 0.85  1 circle 2|P5 Ref 1.6 0  Nmesh=1
 Lca  Nd=2.62e18  1  3        AlGaAs 0.78  1 circle 2|P6 Ref 1.6 0  Nmesh=1
 
 Lga  Nd=3.10e18 Nd=9.00e18 1 31        AlGaAs 0.50 0.29 1 1 Ndis=3 Nmesh=3
-Lga  Nd=9.00e18 Nd=3.11e18 1 34.5      AlGaAs 0.29 0.23 1 1 Ndis=3 Nmesh=3 
+Lga  Nd=9.00e18 Nd=3.11e18 1 35        AlGaAs 0.29 0.23 1 1 Ndis=3 Nmesh=3 
 Lca  Nd=2.24e18            1 20.9      AlGaAs 0.17 1   Nmesh=2
 
 %%%%%%%%%%%%% BTJ %%%%%%%%%%%%%%%%

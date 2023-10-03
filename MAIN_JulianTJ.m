@@ -8,7 +8,7 @@ clear global
 colordef white
 dbstop if error
 
-addpathVENUS
+addpathVENUS    % add the folders needed for a VENUS simulation
 
 % Flag to avoid slow geom generation of lithographic structures (load geom file)
 flgGEOM=1;     % 1, carica vecchia geom
@@ -21,7 +21,7 @@ fvet = logspace(7,11,121);   % frequencies for small-signal simulation, Hz
 % CurDynRef = [1:3:13];       %     values of current where small-signal analysis is performed
 CurDynRef = 1:0.5:7;       % values of current where small-signal analysis is performed
 
-minPerc = 5;
+minPerc=5;
 
 IOLDsw=0;
 
@@ -126,7 +126,7 @@ DDin=[0:0.4:2.8]; % for 2 TJ
 
 % Different bias conditions ABOVE threshold are investigated for different temperatures
 % TTve=[80:-30:20];
-TTve=20;
+TTve=20
 Tpelt=TTve;
 for itemp=1:length(TTve)
     Temperaturei=TTve(itemp);
@@ -269,7 +269,7 @@ for IPAR=IPvet
 						%%%% save geom
 						load([DirName,'geom_' strName])
 						ParMore=StrDD.ParMore;
-						mode.nBTJ=StrDD.nBTJ;
+						mesh.nBTJ=StrDD.nBTJ;
 						fprintf('Structure loaded\n'),keyboard
                     end
 					

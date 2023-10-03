@@ -49,8 +49,9 @@ end
 if isfield(mesh,'IBTJ')==1 && mode.flgHeatTJ==2
     % Equivalent HeatTJ=VTJ*Itot for the TJ nodes is introduced in place of
     % the DD one!
+    % mode.HeatTJ(indexBTJ,mode.ind_v0,:)=abs(JTJ.*Vint'./LTJ);
     for iTJ=1:iRagTJ
-        HeatJoule(mesh.LBTJ(iTJ):mesh.RBTJ(iTJ))=squeeze(mode.HeatTJ(1,end,iTJ))/mode.CarrierNorm;
+        HeatJoule(mesh.LBTJ(iTJ):mesh.RBTJ(iTJ))=(1-mode.Fat_VTJ)*squeeze(mode.HeatTJ(1,end,iTJ))/mode.CarrierNorm;
     end
 end
 
@@ -293,7 +294,8 @@ if(mode.oflg)
     for indMode=1:mode.nmodes
         if mode.quasi1D==1
             % 1D version excludes the contact nodes (not playing any role)
-            OptPowerModes(indMode,:)=reshape([0 mode.Inviluppo_SW 0].'*E2(indMode,:),1,mesh.nn).';
+%             OptPowerModes(indMode,:)=reshape([0 mode.Inviluppo_SW 0].'*E2(indMode,:),1,mesh.nn).';
+            OptPowerModes(indMode,:)=reshape(mode.Inviluppo_SW.'*E2(indMode,:),1,mesh.nn).';
         else
             OptPowerModes(indMode,:)=reshape(mode.Inviluppo_SW.'*E2(indMode,:),1,mesh.nn).';
         end

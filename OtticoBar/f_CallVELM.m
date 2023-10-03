@@ -12,6 +12,7 @@ warning off
 %==========================================================================
 % VELM solver parameters
 %==========================================================================
+verbVELM=abs(mode.verbVELM);
 
 fclose('all') 
 num_azim=VelmOptions.num_azim;
@@ -284,11 +285,11 @@ if VelmOptions.ianti_gui==1
   
   del_n_agInf=Dn(end);
   del_n_ag0=Dn(1);
-  del_n_ag=del_n_ag0-Dn(end);
+  del_n_ag=del_n_ag0-del_n_agInf;
   if del_n_ag==0
    Nref=0;
   else 
-   Nref=(Dn-Dn(end))/del_n_ag;
+   Nref=(Dn-del_n_agInf)/del_n_ag;
    
    if fianti(end)>NPxQW
        'Nref=0'%,keyboard
@@ -389,7 +390,7 @@ calop.zeta=mesh.ygrid*1e4;
  nmed=3.248; %media di n con |E|^2
  %Ps.dndT0=dndT0*(mode.T0-300);   % valore 1D
 
- T_por=flipud(Deltan-1i.*ImagDeltan);
+ T_por=flipud(Deltan-1i.*ImagDeltan);%*0;
  T_ter=dndT0*Tdd;
  Tg=2*nmed*(T_ter+T_por);
  %Tg=2*nmed*(T_ter);
@@ -421,7 +422,7 @@ ABS.zAbs=zAbs;
 
 rFCA=dox*2/3;
 [~,indox]=min(abs(NPx-rFCA));
-% indox=NPxQW;
+indox=NPxQW;
 
 elec=reshape(mode.elecABSvelm,mesh.nny,mesh.nnx);
 eleccentro=elec(:,indox);
@@ -434,7 +435,7 @@ xmol=xmo(:,1);
 ABS.xmol=xmol;
 ABS.eleccentro=eleccentro;
 ABS.holecentro=holecentro;
-ABS.zT=zT;
+% ABS.zT=zT;
 
 
  % effetti termici
@@ -521,7 +522,7 @@ if(ifp_Opt==-10)
 
  figure, 
  subplot(121), plot(xT,Tdd)
- xlabel('ro')
+ xlabel('\rho')
  ylabel('Incremento Temperatura')
   %'qui Temp', keyboard
   subplot(122), plot(zT,Tdd)
@@ -530,7 +531,7 @@ if(ifp_Opt==-10)
    pausak
  figure, 
  subplot(121), plot(xT,imag(Tg)*(2*k0/100))
- xlabel('ro')
+ xlabel('\rho')
   ylabel('Delta Eps (Imag)')
   %'qui Temp', keyboard
   subplot(122), plot(zT,imag(Tg)*(2*k0/100))

@@ -1,0 +1,166 @@
+%icapol=input(' icapol (solo campo dominante = ');
+%disp(' camv_new')
+%keyboard
+
+icapol=1;
+if length(icapol)==0
+ icapol=0;
+end
+if idyn>=1
+ icampi=2;
+end
+if iLP==1
+ icapol=0;
+end
+
+
+%if ifps<=-2
+ if fix(nube/2)-nube/2==0
+  desi=0;
+ else
+  desi=1;
+ end
+%end
+
+if icampi>0
+  if  length(desi)==0
+   desi=input(' plot a sinistra [1] o destra [0] = ');
+   if length(desi)==0
+    desi=0;
+   end
+  end
+  enlar=0;
+  nsub2=1;
+  enlar=300;
+  nsub2=2;
+  if iLP==0
+   if desi==1
+    sinc=+1;
+    pograp=[ 40 70 450 600];
+    pogram=[ 40 30 450 600];
+    else
+    sinc=-1;
+    pograp=[ 550 70 450 600];
+    pogram=[ 550 30 450 600];
+   end
+  else
+   if desi==1
+    sinc=+1;
+    pograp=[0 150 450 500];
+    pogram=[0 50 450 500];
+    else
+    sinc=-1;
+    pograp=[550 150 450 500];
+    pogram=[550 50 450 500];
+   end
+  end
+
+ if istrumix==0
+  global fimaxi lfi fian0 Cug
+  forma
+  Cug.x=xcu;
+  Cug.y=ycu;
+  Cug.z=zcu;
+ end
+
+
+
+    a=a0ref*kcav0;
+    avero=a0ref;
+%    if length(xroJ)==0
+%     disp(' vecchio modo no'), keyboard
+%     Nx1=100;
+%     Nx2=25;
+%     if ifalso>=0
+%      xx1=linspace(0,1*a,Nx1);
+%      xx2=linspace(a+1e-2,amax,Nx2);
+%     else
+%      xx1=linspace(0,rax*a,Nx1);
+%      xx2=linspace(rax+1e-2,rax*amax,Nx2);
+%     end
+%     xv=[xx1 xx2];
+%     xvero=xv/a*avero;
+%     x=xvero;
+%
+%    else
+%     xvero=xroJ;
+%     x=xvero;
+%    end
+
+%' xvero  '
+%keyboard
+
+    if length(xroJ)==1
+     Nx=xroJ;
+     plomax=2.5*max(max(axtot));
+     plomay=2.5*max(max(aytot));
+     ploma=max([plomax plomay]);
+     xvero=linspace(0,ploma,Nx);
+     x=xvero;
+    else
+     xvero=xroJ;
+     x=xvero;
+    end
+
+
+%    disp(' camful'), keyboard
+
+    if length(lfi_inp)==0 | length(fimaxi)==0
+     lfi_inp=51;
+     fimaxi=2*pi;
+    end
+
+    Nx=length(x);
+    npk=length(KK);
+
+
+  lbv=length(mbv);
+  fian=linspace(0,fimaxi,lfi_inp(1)+1);
+%  fian=linspace(0,fimaxi,lfi_inp(1));
+  if fimaxi<2*pi
+   fian0=[fian(1:length(fian)-1) fian+pi];
+  else
+   fian0=fian;
+  end
+
+  fm0=cos(fian0);
+  gm0=sin(fian0);
+
+    xdx=[0 diff(xvero)].*xvero;
+    defid=diff(fian0);
+    defi=[defid defid(end)]';
+    XP=xvero'*fm0;
+    YP=xvero'*gm0;
+
+
+    if idyn>=1
+     if i2D==0
+      fiGa=find(xvero>aiat);
+      defi=2*pi;
+     else
+      borders
+      Sat=ones(size(xvero'))*robor;
+      XP1=xvero'*cos(fi);
+      YP1=xvero'*sin(fi);
+      Sbor=sqrt(XP1.^2+YP1.^2);
+      fiGa=find(Sbor>Sat);
+      ' fiGA ', keyboard
+     end
+    end
+
+
+    modangle
+
+    mod_ff
+
+end   %icampi
+
+ if length(if_only_out)==0
+%  diss_new
+  di_pro
+ else
+  diss_onl
+ end
+
+
+

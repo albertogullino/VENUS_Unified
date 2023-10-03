@@ -1,42 +1,22 @@
 close all
-clear
+% clear
+clear global
 colordef black
 % dbstop if error
 
 addpathVENUS
 
-
-
-% load LW_Stephan_GRok_.mat
-% % load LW_Julian_TJ_2AR_pDBR_fake_.mat
-% load LW_Julian_TJ_2AR_pDBR_fake_new.mat
-
 % load LW_MarkusN_BTJetch_DD_ROSSO_LgDBR_.mat
 
-% load('out\LW_MarkusN_FINALE_LgDBR_oldFit_FCAindox_FatPerd=2.4_Tindox_Texp=1.2_noDoubleTFCA_eMobQW=0.2_NX=2.5.mat');
+% load LW_MarkusN_TJ_oxAbove_LgDBR_FINAL.mat
+% load LW_MarkusN_TJ_oxBelow_LgDBR_NUSOD2023.mat
 
-% load('out\LW_MarkusN_TJ_oxAbove_LgDBR_fixed_oldFit_FCAindox_FatPerd=2.4_Tindox_Texp=1.2_noDoubleTFCA_eMobQW=0.2_NX=2.5.mat');
-% 
-% load('out\LW_MarkusN_TJ_oxBelow_LgDBR_fixed_oldFit_FCAindox_FatPerd=2.4_Tindox_Texp=1.2_noDoubleTFCA_eMobQW=0.2_NX=2.5.mat');
+% load out\LW_MarkusN_TJ_oxAbove_LgDBR_20C_lambda_radial.mat
+% load out\LW_MarkusN_TJ_oxBelow_LgDBR_20C_lambda_radial.mat
 
-% load LW_MarkusN_FINALE_LgDBR_FatPerd0=2.8_Texp=0_eQWmob=.4_dndT=2.3_betaT=1.mat
-
-% load LW_MarkusN_FINALE_LgDBR_110_FatPerd0=2.9_Texp=0_eQWmob=.4_dndT=2.37_betaT=1.1_tauSRH=10ns_fatRad=0.05_Pmin=0.1_fCondTer=0.9_FatPerCoefTemp=0.002_FattoreZ=1.0015.mat
-
-load('C:\Users\albig\Politecnico\Dottorato\3b_VENUS\VENUS_Unified\out\LW_MarkusN_TJ_oxBelow_LgDBR_20C_Pelec-PTJ_noHeatTJ.mat')
-% iold=input('  old VELM? [ENTER]: Yes; [Any key]: No  ');
-% iold=[];
-% if isempty(iold)
-%     rmpath('OtticoBar\new23OpticaGR')
-%     rmpath('OtticoBar\new22Optica')
-% %     load LW_MarkusN_FINALEdisFitto_testOLDvelm_abs.mat
-% %     load LW_MarkusN_FINALE_LgDBR_oldVELM.mat
-%     %     load LW_MarkusN_FINALEdisFitto_oldVELM.mat
-% else
-%     rmpath('OtticoBar\new22Optica')
-% %     load LW_MarkusN_FINALE_LgDBR_testNEWvelm.mat
-%     %     load LW_MarkusN_FINALEdisFitto_newVELM.mat
-% end
+% load out\LW_MarkusN_FINALE_LgDBR_new.mat % 1D
+% load out\LW_MarkusN_FINALE_LgDBR_1D_PerCoefExT=2e-2.mat % 1D
+load out\LW_MarkusN_FINALE_LgDBR_20C_radial.mat % 3D
 
 ParVet=MODEplot{1}.ParVet;
 VelmOptions=MODEplot{1}.VelmOptions;
@@ -48,8 +28,15 @@ strName=structureName(fis(end)+1:end);
 % fil_str=[structureName,'.str'];
 fil_str=['dati\',strName,'.str'];
     
-verVE=0;    % verbVELM
-ian=1;      % guiding
+verVE=2   % verbVELM
+
+IPLOT=1
+
+% if mode.quasi1D==1
+%     ian=0;      % NO anti-guiding
+% else
+%     ian=1;      % anti-guiding
+% end
 MulT=1;     % Temperature pre-factor
 
 nqw=3;      % Number of QW
@@ -88,7 +75,9 @@ modeold=mode;
 
 %'corrente', keyboard
 Pcor=input(' Corrente = ')
-% Pcor=.6
+if length(Pcor)==0
+ Pcor=8
+end 
 
 Cor=1000*modeold.ii_dd(vind);
 % Cor=1000*modeold.ii_dd;         % Computed current from DD
@@ -99,7 +88,6 @@ pu=fim;                         % for plot purposes
 ves=fim;           % index of VELM calling (1st, 2nd,...)
 vindm=vind(1:end-1);
 
-IPLOT=1
 
 if IPLOT==1
     figure(1), hold on, grid on
@@ -135,7 +123,7 @@ if IPLOT==1
     xlim([0 10])
     pausak
     
-    
+    if mode.quasi1D==0
     figure(4), hold on, grid on
     plot(I,squeeze(E2v(10,:,veind)),'LineWidth',2),
     if size(E2v,2)>1
@@ -144,6 +132,7 @@ if IPLOT==1
     xlabel('Corrente, mA')
     ylabel(['Fields intensity at x(10)=',num2str(mesh.xgrid(10)*1e4),' \mum'])
     pausak
+    end
     
     figure(5), hold on, grid on
     plot(I,fPold(veind,:),'LineWidth',2),
@@ -171,10 +160,10 @@ veind=fim;
 ico=0;
 for indVELM=veind
     ico=ico+1;
-    
-    mode.verbVELM=verVE;
-    %     VelmOptions.ianti_gui=ian;  % 0 per LP
-    DL=VelmOptions.Dlam;  % 0 per LP
+    if exist('ian')
+        VelmOptions.ianti_gui=ian;  % 0 per LP
+    end
+%     DL=VelmOptions.Dlam;  % 0 per LP
     %DL(5)=.8;
     %VelmOptions.Dlam=DL;  % 0 per LP
     %     VelmOptions.gain_gui=ian;  % 0 per LP
@@ -190,8 +179,12 @@ for indVELM=veind
     mode.vlambda=VELMInput(indVELM).vlambda;
     mode.alpha=VELMInput(indVELM).alpha;
     
+%     load fca
+%     mode.elecABSvelm=fca.eleccentro';
+%     mode.holeABSvelm=fca.holecentro';    
     mode.elecABSvelm=VELMInput(indVELM).elecABS;
     mode.holeABSvelm=VELMInput(indVELM).holeABS;
+
     if indVELM>1
         mode1.TmVelm=VELMInput(indVELM).TmVelm;
         mode1.LamVelm=VELMInput(indVELM).LamVelm;
@@ -199,7 +192,17 @@ for indVELM=veind
         mode1.a=0;
     end
     mesh.DeltaTvelm=MulT*VELMInput(indVELM).DeltaTvelm;
-    mesh.ygrid=VELMInput(indVELM).ygrid;
+	iTaroccoT=0
+    if iTaroccoT==1
+        IPLOT=1;
+        StrTT=MODEplot{1}.StrTT;
+        'TERMICO TAROCCO', keyboard
+        [deltaT,PTherm,T_Contributi,fattore_correttivo,condzTe] = f_ThermD1ANA(mesh,mode,StrTT,IPLOT);
+        R= reshape(deltaT,1,prod(size(mesh.DeltaTvelm)));
+        'Fine TERMICO TAROCCO', keyboard
+        mesh.DeltaTvelm=R*1.4;
+    end
+	mesh.ygrid=VELMInput(indVELM).ygrid;
     mesh.xgrid=VELMInput(indVELM).xgrid;
     mesh.nnx=VELMInput(indVELM).nnx;
     mesh.nny=VELMInput(indVELM).nny;
@@ -212,18 +215,30 @@ for indVELM=veind
 %     VelmOptions.krel_max=.12;
 %     VelmOptions.ianti_gui=0;
 %     
-%     ParVet(3)=8;
-%     mode.verbVELM=2;
+% %     ParVet(3)=8;
+
+%     mode.verbVELM=0;
+    mode.verbVELM=verVE;
     
     'ver prima di call', keyboard
     
-    [velm] = f_CallVELM(mesh,mode,mode1,ParVet,VelmOptions,fil_str);
-%     [velm] = f_CallVELM_old(mesh,mode,mode1,ParVet,VelmOptions,fil_str);
+    if mode.quasi1D==0
+        [velm] = f_CallVELM(mesh,mode,mode1,ParVet,VelmOptions,fil_str);
+%         [velm] = f_CallVELM_old(mesh,mode,mode1,ParVet,VelmOptions,fil_str);
+    else
+        [velm] = f_CallVELM_1D(mesh,mode,mode1,ParVet,VelmOptions,fil_str,mode.quasi1D);
+    end
+
     indv=vind(ves);
     
     Lmod=velm.Lm/vph;
     lambda=velm.vlambda;
     fP=velm.fPdif;
+    if isfield(mode,'quasi1D') && mode.quasi1D==1
+        velm.E2=ones(mode.nmodes,mesh.nnx)/(mode.AreaOx);
+        velm.E2=ones(mode.nmodes,mesh.nnx)/(mode.AreaOpt);
+        velm.SW=0;
+    end
     E2=velm.E2'; %dà errore qui (multimodo)
 end
 
@@ -250,10 +265,12 @@ if IPLOT==1
     xlim([0 5])
     pausak
         
-    figure(4)
-    plot(I(ves),squeeze(E2(10,:)),'g*')
-    ylabel(['Fields intensity at x(10)=',num2str(mesh.xgrid(10)*1e4),' \mum'])
-    pausak
+    if mode.quasi1D==0
+        figure(4)
+        plot(I(ves),squeeze(E2(10,:)),'g*')
+        ylabel(['Fields intensity at x(10)=',num2str(mesh.xgrid(10)*1e4),' \mum'])
+        pausak
+    end
     
     figure(5)
     plot(I(ves),fP,'g*')

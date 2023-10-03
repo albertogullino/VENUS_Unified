@@ -9,6 +9,12 @@ HeatRec_Cap=reshape(mode.HeatRec_Cap,mesh.nny,mesh.nnx);
 HeatOptAbs=reshape(mode.HeatOptAbs,mesh.nny,mesh.nnx);
 HeatRec_nr=reshape(mode.HeatRec_13,mesh.nny,mesh.nnx);
 
+% HeatJoule=mode.HeatJoule;
+% HeatRec_RAD=mode.HeatRec_RAD;
+% HeatRec_Cap=mode.HeatRec_Cap;
+% HeatOptAbs=mode.HeatOptAbs;
+% HeatRec_nr=mode.HeatRec_13;
+
 figure
 hold on,box on,grid on
 plot(mesh.ygrid(pointHeat)*1e4,HeatJoule(pointHeat,2),'.-')

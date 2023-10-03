@@ -397,7 +397,7 @@ icpa=0;
          for kassegna=1:length(purv)
           purloc=purv(kassegna);
           shpu=shapuv(kassegna);
-%           shpu, pausak
+%          shpu, pausak
            if shpu<6
             ik=0;
             for kpu=purloc'
@@ -1148,7 +1148,8 @@ global la1Dr ga1Dr
 
 if Ps.ifpstop==1
  'campi 1D'%, keyboard
- ipcam=input(' vuoi plot campi? ')
+% ipcam=input(' vuoi plot campi? ')
+ ipcam=1;
 
  if length(ipcam)==0
   ifp=-4;

@@ -1,6 +1,14 @@
 mode.flgBTJ=1;  % flag to TJ presence
-mode.flgHeatTJ=2;   % HeatTJ flag: 0 for the DD sigma; 1 for TJ equivalent sigma; 2 for HeatJoule=HeatTJ in TJ nodes
 mode.flgBTJ_lithographic=0; % 0: no etching; 1: etching in VELM only; 2: etching in VELM and in DD
+
+% HeatTJ flag: 
+% - 0 for the DD sigma; 
+% - 1 for TJ equivalent sigma; 
+% - 2 for HeatJoule=HeatTJ and Pelec-PTJ balancing: use Fat_VTJ!
+%       - HeatTJ=(1-Fat_TJ)*(Vint*JTJ/LTJ) -> computed in assem_GBT.m
+%       - Pelec=I*(V-VTJ*Fat_VTJ) -> computed in f_EvalHeatingTerms.m
+mode.flgHeatTJ=2;   
+mode.Fat_VTJ=1;   % Scales VTJ as a source of heating 
 
 irel=0; % if 1, relief; if 0, standard VCSEL
 
@@ -70,9 +78,9 @@ if mode.quasi1D==0
     %OX4=OX3+0;
     
     % Radial grading of the oxide
-%     OX1=OX+0.4;
-%     OX2=OX1+DelOx;
-%     OX3=OX2+DelOx;
+    OX1=OX+0.4;
+    OX2=OX1+DelOx;
+    OX3=OX2+DelOx;
     
     Oxide=OX(Isize)/2;      % oxide radius, um
     
@@ -182,7 +190,7 @@ for ks=1:length(LUT)
 end
 
 Deltalam=3;
-
+% Deltalam=-70
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Thermal and optical coefficients
@@ -423,7 +431,7 @@ mode.report=1; % verbose mode
 mode.nflg=1; % include electron continuity equation
 mode.pflg=1; % include hole continuity equation
 mode.tflg=0; % include trap equations
-mode.Tflg=0; % include thermal effects
+mode.Tflg=1; % include thermal effects
 mode.oflg=1; % include quantum effects and stimulated recombination
 mode.RAD_spalmato=1;
 if mode.oflg==0

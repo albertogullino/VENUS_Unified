@@ -133,7 +133,7 @@ Ps.iord_long=1;
 iBEL=100 ;   % reticoli
 %'qui velma', keyboard
 iexis=isfield(mode1,'TmVelm');
-if (isfield(mesh,'DeltaTvelm') & iexis==1 )
+if (isfield(mesh,'DeltaTvelm') & iexis==1 & isfield(mode,'Gmod'))
  dT_nuovo=max(max(mesh.DeltaTvelm));
  Tv=mode1.TmVelm;
  Lv=mode1.LamVelm;

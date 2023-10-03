@@ -35,29 +35,29 @@ Rec_srhAu = mode.HeatRec_13(puntatore)*1e+12;
 OptAbs = mode.HeatOptAbs(puntatore)*1e+12;
 Rec_Cap = mode.HeatCap(puntatore)*1e+12;
 
-TotalHeat = ones(1,nn);
+TotalHeat = zeros(1,nn);
 TotalHeat(1:nn) = (Joule + Thomson + Rec_Cap + Rec_srhAu + OptAbs + Rec_RAD); % 
 
-if isfield(mesh,'IBTJ')==1
-%     for iTJ=1:length(mesh.LBTJ)  
-        iTJ=1;
-        TotalHeat(mesh.LBTJ(iTJ):mesh.RBTJ(iTJ))=mode.HeatTJ(iTJ+1)/mode.CarrierNorm;
-%     end
-end
+% if isfield(mesh,'IBTJ')==1
+% %     for iTJ=1:length(mesh.LBTJ)  
+%         iTJ=1;
+%         TotalHeat(mesh.LBTJ(iTJ):mesh.RBTJ(iTJ))=mode.HeatTJ(iTJ+1)/mode.CarrierNorm;
+% %     end
+% end
 
 %
 if mode.oflg==1
     PTherm=TotalHeat(2:end)*diff(node')*1e3; % mW/cm2 VENUS
-    fattore_correttivo=(mode.PDissPred(end))/PTherm; % divided by area to convert PDiss in mW/cm^2
+    fattore_correttivo=(mode.PDissPred(end))/PTherm/mode.AreaOx; % divided by area to convert PDiss in mW/cm^2
 else
     fattore_correttivo=1;
 end
-% fattore_correttivo=1;
+fattore_correttivo
 %
 % Thermal conductivity
 Bcondz = zeros(1,nn);
 if abs(StrTT.Tbuf_dd-StrTT.Tbuf)<0.2
-    Bcondz(mesh.ygrid(2:mesh.nny-1)*1e4<StrTT.Tbuf_dd)=StrTT.Bcond.CondZb*1e4*mode.FatQtot;
+    Bcondz(mesh.ygrid(2:mesh.nny-1)*1e4<StrTT.Tbuf_dd)=StrTT.Bcond.CondZb*mesh.fCondTerZ*1e4*mode.FatQtot;
     Bcondz(mesh.ygrid(2:mesh.nny-1)*1e4>=StrTT.Tbuf_dd)=StrTT.Bcond.CondZm*1e4*mesh.fCondTerZ*mode.FatQtot/mode.FatV;
 else
     Bcondz(mesh.ygrid(2:mesh.nny-1)*1e4<StrTT.Tbuf)=StrTT.Bcond.CondZb*1e4*mode.FatQtot;
@@ -108,10 +108,13 @@ while (iterCount<itermaxTherm && er>TolTherm)
     %
     % Enforce the boundary condition
     qvet(1)= 0;
+%     qvet(end)=100;
     %
     % Boundary conditions: Heat sink temperature (w.r.t. device)
     Amat(1,:) = 0;
     Amat(1,1) = 1; % line contact on the left
+%     Amat(end,:) = 0;
+%     Amat(end,end) = 1; % line contact on the right
     %
     % Solve the system
     deltaT = Amat\(fattore_correttivo*qvet);

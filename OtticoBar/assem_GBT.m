@@ -1,4 +1,4 @@
-function [Kmat0,Jmat0,Jmat2,uvet,rvet,mode,tvet,tvet3]=assem_GBT(geom,mesh,mode,uvet,v0_dd)
+function [Kmat0,Jmat0,Jmat1,Jmat2,uvet,rvet,mode,tvet,tvet3]=assem_GBT(geom,mesh,mode,uvet,v0_dd)
 %
 % define constants
 %
@@ -626,6 +626,17 @@ M33 = ( s1./l1.*G1 + s2./l2.*G2).*epsxx; M33(it)=0;
 MM=[M11 M12 M13 M12 M22 M23 M13 M23 M33];
 %
 Kmat0=sparse(iir,jjr,MM(mask_iir),neq,neq);
+% add dynamic part for small-signal analysis
+Jmat1=sparse(neq,neq);
+Jmat1=Jmat1+sparse(iit,jjt,qel*MM(mask_iit),neq,neq); % displacement current
+% =============================================================================================100
+% % doping dynamics in current continuity eqs. (not correct, small impact)
+% MM=-qel.*[Se1.*ddop_dp(in1) Se2.*ddop_dp(in2) Se3.*ddop_dp(in3)];
+% Jmat1=Jmat1+sparse(nn+ijs,nn+ijs,MM(mask_ijs),neq,neq); % j*w*dop_dp
+% %
+% MM=-qel.*[Se1.*ddop_am(in1) Se2.*ddop_am(in2) Se3.*ddop_am(in3)];
+% Jmat1=Jmat1+sparse(pp+ijs,pp+ijs,MM(mask_ijs),neq,neq); % j*w*dop_am
+%
 % =============================================================================================100
 qelNorm=mode.qelNorm;
 qelNorm2D=mode.qelNorm2D;
@@ -780,6 +791,9 @@ if(mode.nflg) % ################################################################
     Jmat0=Jmat0+sparse(iis+nn,jjs,MM(mask_iis),neq,neq); % Assembly electron eqs.
     Jmat0=Jmat0+sparse(iit   ,jjt,-MM(mask_iit),neq,neq); % Assembly current eq.
     % =============================================================================================100
+    MM=qel.*[Se1 Se2 Se3];
+    Jmat1=Jmat1+sparse(nn+ijs,nn+ijs,MM(mask_ijs),neq,neq); % j*w*elec
+    % =============================================================================================
     % direct recombination
     MM=qel.*[Se1.*R(in1) Se2.*R(in2) Se3.*R(in3)];
     tvet=tvet+sparse(ijs+nn,1,MM(mask_ijs),neq,1);
@@ -941,6 +955,9 @@ if(mode.pflg) % ################################################################
     %
     Jmat0=Jmat0+sparse(iis+pp,jjs,MM(mask_iis),neq,neq); % Assembly hole eqs.
     Jmat0=Jmat0+sparse(iit   ,jjt,MM(mask_iit),neq,neq); % Assembly current eq.
+    % =============================================================================================100
+    MM=qel*[Se1 Se2 Se3];
+    Jmat1=Jmat1+sparse(pp+ijs,pp+ijs,MM(mask_ijs),neq,neq); % j*w*hole
     % =============================================================================================100
     % direct recombination, derivatives
     MM=qel.*[Se1.*R(in1) Se2.*R(in2) Se3.*R(in3)];
@@ -1891,6 +1908,13 @@ if(mode.oflg)
         mode.RAugerQW(IQW)=mode.RAugerQW(IQW)+RAuger2D(IIQWP(IQW))./WQW;
         mode.RLeakageQW(IQW)=mode.RLeakageQW(IQW)+RLeakage2D(IIQWP(IQW))./WQW;
         %
+        % =========================================================================
+        % quantum dynamics
+        % =========================================================================
+        MM = - qel.*[Lp1 Lp2];
+        Jmat1 = Jmat1 + sparse(VV+ijrQW,VV+ijrQW,MM,neq,neq);
+        Jmat1 = Jmat1 + sparse(WW+ijrQW,WW+ijrQW,MM,neq,neq);
+        %
         %x=mesh.xgrid;
         %		Cn=sum(reshape(mode.Ccapn3D,mesh.nny,mesh.nnx));
         %		Cp=sum(reshape(mode.Ccapp3D,mesh.nny,mesh.nnx));
@@ -1924,25 +1948,33 @@ if(mode.oflg)
             
             [g,dgE,dgH,rsp,drspE,drspH] = f_InterpGain_lin(n2D,p2D,indQW,indMode);
             
-            %
-            if isfield(mode,'fat_gainG')
-                Fat_soloGain=mode.fat_gainG;
-            else
-                Fat_soloGain=1;
-            end
-            
+            %            
+            % Non-linear gain
             if isfield(mode,'nlG')
-                nlG=mode.nlG;
+                % Gain compression factor: g=g/(1+epsNL*S); [epsNL]=cm^3
+                % S --> Photon density ([S]=1/cm^3)
+                % Notice that in VENUS g(s^-1)=vph*g(cm^-1) is used 
+                % --> S = fPdif*Pst , with [Pst]=W
+                % Rst: Stimulated emission recombination term (see below)
+                % Rst=g*fPdif*Pst*WQW; [Rst]=1/(cm^2*s)
+                % fPdif=Rst/(g*Pst*WQW);
+                % [fPdif]=1/(cm^2*s)/(1/s*W*cm)=1/(cm^3*W) 
+                nlG=1./(1+(mode.epsNLg.*Pst.*mode.fPdif)*mode.E2);
+%                 dnlGdP=-(mode.epsNLg.*mode.fPdif*mode.E2)./(1+mode.epsNLg.*Pst.*mode.fPdif*mode.E2).^2;
+                dnlGdP=1;
+                
+                mode.nlG=nlG(1:nnQW);
             else
                 nlG=1;
+                dnlGdP=1;
             end
             
-            g=vph*mode.fat_gain*Fat_soloGain*g.*nlG;
+            g=vph*g.*nlG*mode.fat_gain;
             
             mode.g{indQW,indMode}=g; % saving just for the last mode..
             
-            dgE=vph*mode.fat_gain*Fat_soloGain*dgE.*nlG;
-            dgH=vph*mode.fat_gain*Fat_soloGain*dgH.*nlG;
+            dgE=vph*dgE.*nlG*mode.fat_gain;
+            dgH=vph*dgH.*nlG*mode.fat_gain;
             
             rsp=rsp*mode.fat_gain;
             drspE=drspE*mode.fat_gain;
@@ -1990,6 +2022,9 @@ if(mode.oflg)
             MMgain=MM+MMgain;
             Kmat0=Kmat0+sparse(ss+indMode,ss+indMode,MM,neq,neq);
             %
+%             MM=(Gamma_z*dnlGdP*gm*Pst);
+%             Jmat0=Jmat0+sparse(ss+1,ss+1,MM,neq,neq);
+            %
             % for display only
             mode.gmod(indMode)=mode.gmod(indMode)+Gamma_z.*gm./vph;
             mode.lmod(indMode)=Lm./vph;
@@ -2029,7 +2064,15 @@ if(mode.oflg)
             MM = qel.*[Lp1.*dRst_Pi(iiQW1) Lp2.*dRst_Pi(iiQW2)];
             Jmat0 = Jmat0 + sparse(VV+ijrQW,ss+indMode,MM,neq,neq);
             Jmat0 = Jmat0 + sparse(WW+ijrQW,ss+indMode,MM,neq,neq);
-            
+            %
+            % Non linear gain
+%             MM=qel.*Fattore_attivo.*(dnlGdP.*mode.fPdif(indMode)*WQW*Pst)/mode.CarrierNorm2D;
+%             Jmat0=Jmat0+sparse(vv+indQW,ss+indMode,MM,neq,neq);
+%             Jmat0=Jmat0+sparse(ww+indQW,ss+indMode,MM,neq,neq);
+            %
+            % Optical power dynamics
+            Jmat1 = Jmat1+sparse(ss+indMode,ss+indMode,1,neq,neq);
+            %
         end   %modes
         
         tvetQW(VV+[1:mesh.nnxQW{indQW}]) = tvet(VV+[1:mesh.nnxQW{indQW}]);
@@ -2144,17 +2187,20 @@ end
 % Apply boundary conditions, continuity equations
 % =============================================================================================100
 ii=find(not(masks));
-if(mode.nflg), Jmat0=Jmat0+sparse(ii+nn,ii+nn,1,neq,neq); end
-if(mode.pflg), Jmat0=Jmat0+sparse(ii+pp,ii+pp,1,neq,neq); end
+if(mode.nflg)
+    Jmat0=Jmat0+sparse(ii+nn,ii+nn,1,neq,neq);
+end
+if(mode.pflg)
+    Jmat0=Jmat0+sparse(ii+pp,ii+pp,1,neq,neq);
+end
 %
 % =============================================================================================100
 % Compute residual
 % =============================================================================================100
 
-rvet = (Kmat0 + Jmat2) * uvet.' + tvet + tvet3;
-Jmat0 = Kmat0 + Jmat0 + Jmat2 + Jmat3;
-
-
+rvet = (Kmat0 + Jmat2) * uvet.' + tvet;
+Jmat0 = Kmat0 + Jmat0 + Jmat2;
+% 
 rvetTot=rvet+tvet3;
 JmatTot=Jmat0+Jmat3;
 

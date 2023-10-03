@@ -276,10 +276,10 @@ end
  [zpu,iso]=sort(zp);
  tpu=tp(iso);
  if ifp==-10
- figure, plot(zdis(1:end-1),Tdis), pausak
+ figure, plot(zdis(1:end-1),Tdis)
  title('Profilo Deltan a ro_{max}'), pausak 
  figure, plot(zpu,tpu,zeta,T0),
- title('Profilo Deltan a ro_{max}'), pausak
+ title('Profilo Deltan a ro_{max}')
  figure, plot(rdis,Tdis,'.-'), pausak
  %zdisP=zdis(1:end-1);
  figure, subplot(121)

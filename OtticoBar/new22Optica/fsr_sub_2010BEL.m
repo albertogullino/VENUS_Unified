@@ -6,7 +6,8 @@ else
 
 ipolar1=ipolar;
 global fiload Ppol uL
-eval([' save ',fiload])
+fprintf('OLD "Saving to..."!\n')
+% eval([' save ',fiload])
 % fiload='sol0';
  fisha=find(shavet(:,1)==4);
  if length(fisha)==0

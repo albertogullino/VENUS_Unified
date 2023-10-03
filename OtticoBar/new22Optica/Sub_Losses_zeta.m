@@ -314,7 +314,7 @@ relPerm=conj(perm.^2).';
   fmuH=fmu;
   
 
-  Los=fmuE+fmuH;
+    Los=fmuE+fmuH;
   
   %Dsu=flipud(ABS.Dope+ABS.Doph);
   %Do=interp1(zo,Dsu,xp);

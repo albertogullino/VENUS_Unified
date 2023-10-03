@@ -14,7 +14,8 @@ $ PassivationSection passiv_size=15 passiv_mesh=9 passiv_depth=3.5
 % DD_radial_sections radii radie: significa che sono aggiunte due colonne, i cui limiti
 % sono oxide-radii oxide+radie
 % DD_radial_sections radii=0.5 radie=0.4 Radial_mesh=.1+11j .01+6j .01+2j .01+11j  0.01+8j 
-$ DD_radial_sections radii=0.5 radie=0.5 Radial_mesh=.1+10j .01+5j .01+4j .01+10j  0.01+7j 
+% DD_radial_sections radii=0.5 radie=0.5 Radial_mesh=.1+10j .01+5j .01+4j .01+10j  0.01+7j 
+$ DD_radial_sections radii=0.6 radie=0.5 Radial_mesh=.1+8j .01+7j .01+3j .01+11j  0.01+8j 
 %  Radial_mesh organizza la mesh radiale: per ogni colonna, si da il passo (parte reale)
 % e il n. max di punti (parte immaginaria)
 $ buffer thick=110 thick_dd=109990 size=50
@@ -53,7 +54,7 @@ Lga  Na=1.33e19 Na=1.08e19 16 14.9      AlGaAs 0.57 0.23 1 1 Ndis=2 Nmesh=3
 Lga  Na=8.62e18 Na=1.14e19 16 31.9      AlGaAs 0.17 0.17 1 1 Ndis=2 Nmesh=3
 Lga  Na=1.14e19 Na=1.68e19 16 33.5      AlGaAs 0.17 0.86 1 1 Ndis=4 Nmesh=6
 Lca  Na=1.73e19 		   16 32        AlGaAs 0.90      1 			Nmesh=2
-
+							
 Lga  Na=1.73e19 Na=1.04e19 1   0.1        AlGaAs 0.90 0.90 1 1 Ndis=1 Nmesh=1
 
 Lga  Na=1.20e19 Na=7.60e18 4  33.5      AlGaAs 0.90 0.23 1 1 Ndis=3 Nmesh=5

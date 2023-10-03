@@ -648,8 +648,8 @@ if idyn==1
         if i2D==3
             
             for k=modc
-                F=abs(reshape(Eqw(ifidif,ifisho,k),length(ifidif),lfs)).^2;;
-                F1=abs(reshape(Eqw(:,ifisho,k),length(xro),lfs)).^2;;
+                F=abs(reshape(Eqw(ifidif,ifisho,k),length(ifidif),lfs)).^2;
+                F1=abs(reshape(Eqw(:,ifisho,k),length(xro),lfs)).^2;
                 Sint1=spacintv(F1,xdx',lfp,pesf,Nsett);
                 Sint=spacintv(F,xdx1',lfp,pesf,Nsett);
                 cdp=pesf*F';

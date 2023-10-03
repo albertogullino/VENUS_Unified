@@ -1,4 +1,4 @@
-    %========================================================================76
+%========================================================================76
 % 2TJ-VCSEL (infinite + oxide)
 %========================================================================76
 clc
@@ -42,8 +42,8 @@ nomeSave=[nomeSW,nomeSav];
 %eval(['save ',nomeSave,' h'])
 % 
 % iStruttura=30   % 1TJ for recycling for a 2nd AR; TOP p-DBR!
-% iStruttura=31   % 1TJ for recycling for a 2nd AR; TOP p-DBR! (alternative)
-iStruttura=60    
+iStruttura=31   % 1TJ for recycling for a 2nd AR; TOP p-DBR! (alternative)
+% iStruttura=60    
 % 
 
 if ~exist('iStruttura')
@@ -56,8 +56,8 @@ Last_Workspac='LW';
 
 Last_Workspace=[nomeSW,Last_Workspac];
 
-radi='_2TJ'; %OK
-% radi='_JSTQE_dotLU3_onlyEl'; %OK
+radi='_2TJ'; % 2 TJ, 2 AR
+% radi='_JulianTJ';   % 1 TJ, 2 AR (similar bias vector to 2TJ case)
 
 rad_settingV{100}=radi;    %vale anche per IPAR = 0
 for k=1:70

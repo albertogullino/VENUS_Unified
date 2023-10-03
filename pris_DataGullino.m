@@ -1,6 +1,6 @@
 % clear
 clear global
-close all
+% close all
 colordef white
 dbstop if error
 

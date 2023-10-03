@@ -1,3 +1,13 @@
+if exist('mode')==0
+    mode=MODEplot{1};
+    pu=CurrIndex(CORRENTI,mode.ii_dd*1e3);
+    Fcur=pu;
+    
+    x=mode.x;
+    y=mode.y;
+end
+
+
 SEGNO_elettroni=1;  % -1 particelle
 Cur_2D=1;  % 0 se non la devo plottare
  Cn=mode.Cn;
@@ -224,21 +234,25 @@ subplot(122)
   wc=mode.Contact_e-xc;
   wo=mode.Contact_e-xo;
   RecCont=[xc yc wc thvis];
-  Xc=[xc xc+wc xc+wc xc];
+  if isfield(mesh,'yBTJ')
+    Xc=[0 xc+wc xc+wc 0];
+  else
+    Xc=[xc xc+wc xc+wc xc];
+  end
   RecOx=[xo yo wo thvis];
   Xo=[xo xo+wo xo+wo xo]; 
   Yo=[yo yo  yo+thvis yo+thvis];
   hhco=patch(Xc,Yc,'y'); set(hhco,'EdgeColor','none');
   hhco=patch(Xqw,Yqw,'c'); set(hhco,'EdgeColor','none'); 
   ylim(yo+[-.8 1]), xlim(xo+[-2 2])
-  quiver(SX1,SY1,squeeze(J_XN(pcor,sY1,sX1)),squeeze(J_YN(pcor,sY1,sX1)),.15),
-  quiver(SX1,SY1,squeeze(J_XP(pcor,sY1,sX1)),squeeze(J_YP(pcor,sY1,sX1)),.15),
+  quiver(SX1,SY1,squeeze(J_XN(pcor,sY1,sX1)),squeeze(J_YN(pcor,sY1,sX1)),.3,'linewidth',1),
+  quiver(SX1,SY1,squeeze(J_XP(pcor,sY1,sX1)),squeeze(J_YP(pcor,sY1,sX1)),.3,'linewidth',1),
   axis normal
    if Cur_2D==1
     yQWmedioE=mode.yMQW{3}*ones(size(sX1))*1e4;
     yQWmedioH=mode.yMQW{1}*ones(size(sX1))*1e4;
-    quiver(x(sX1),yQWmedioE,jQn(sX1)*WQW,zeros(size(sX1)),.3,'g')
-    quiver(x(sX1),yQWmedioH,jQp(sX1)*WQW,zeros(size(sX1)),.3,'m')
+    quiver(x(sX1),yQWmedioE,jQn(sX1)*WQW,zeros(size(sX1)),.05,'b','linewidth',1)
+    quiver(x(sX1),yQWmedioH,jQp(sX1)*WQW,zeros(size(sX1)),.05,'m','linewidth',1)
    end 
     hold off, pausak
   pausak

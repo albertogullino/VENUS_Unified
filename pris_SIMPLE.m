@@ -56,3 +56,37 @@ xlabel('Current, mA')
 ylabel('Emission wavelength, nm')
 xlim([0 mode.ii_dd(end)*1e3+0.01])
 title('VCSEL thermometer')
+
+figure
+                set(gcf,'Position',[  634    73   579   365])
+                hold on
+                grid on
+                box on
+                plot(mode.ii_dd*1e3,mode.DeltaTmax,'k','LineWidth',2)
+                plot(mode.ii_dd*1e3,mode.DeltaTmax_Joule,'c--','LineWidth',2)
+                plot(mode.ii_dd*1e3,mode.DeltaTmax_OptAbs,'g--','LineWidth',2)
+                plot(mode.ii_dd*1e3,mode.DeltaTmax_Ccap,'r--','LineWidth',2)
+                plot(mode.ii_dd*1e3,mode.DeltaTmax_RAD,'b--','LineWidth',2)
+                plot(mode.ii_dd*1e3,mode.DeltaTmax_srhAu,'y--','LineWidth',2)
+
+                legend('\DeltaT','Joule','Opt. abs.','Ccap','Rad','SRH/Aug','location','best')
+                xlabel('Current, mA')
+                ylabel('Temperature rise, K')
+				
+				
+            figure(120)
+            hold on
+            grid on
+            box on
+            plot(mode.ii_dd*1e3,mode.Gmod,'k','LineWidth',2)
+            plot(mode.ii_dd*1e3,mode.Lmod,'r--','LineWidth',2)
+            if(mode.nmodes>1)
+                plot(mode.ii_dd(vind)*1e3,mode.Gmod(:,vind)','ko','LineWidth',2)
+                plot(mode.ii_dd(vind)*1e3,mode.Lmod(:,vind)','ro','LineWidth',2)
+            else
+                plot(mode.ii_dd(vind)*1e3,mode.Gmod(vind),'ko','LineWidth',2)
+                plot(mode.ii_dd(vind)*1e3,mode.Lmod(vind),'ro','LineWidth',2)
+            end
+            xlabel('Current, mA')
+            ylabel('Modal gain vs losses, cm^{-1}')		
+ylim([min(mode.Lmod(1,:)) max(mode.Lmod(1,:)) ])			

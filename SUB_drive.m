@@ -67,7 +67,7 @@ if irest==0
     
     mesh.Tgain=mesh.T;
     
-    if abs(IPLOT)>=1
+    if IPLOT<=-1
         fprintf('Call "plotStructure_PLOT.m" to visualize mesh structure\n')
         
         plotStructure_IPLOT
@@ -339,7 +339,7 @@ while(indv<=NVbias && DeltaTmax<DTM0 && I_mA<abs(Imassimo) && CondPotBreak==0) %
                 
                 mode.FatMob=polyval(cot,max(max(DeltaT)));
                 mode.cot=cot; % coefficients used in 1D simulations to fit the mob change with T, see fitmob.m
-%                 mode.FatMob=1;
+                mode.FatMob=1;
             else
 % 			save TERM Tprec mesh mode StrTT IPLOT % save intermediate input of thermal solver for debugging
 %                 [DeltaTold,Tprec,PTherm,T_Contributi]=f_ThermicFun(Tprec,mesh,mode,StrTT,IPLOT);
@@ -384,18 +384,18 @@ while(indv<=NVbias && DeltaTmax<DTM0 && I_mA<abs(Imassimo) && CondPotBreak==0) %
         
     end
     
-    if isfield(mode,'epsNLg')
-        nlG=mode.epsNLg;
-        mode.nlG=1;
-        if isfield(mode,'E2')
-            %       'qui per nlG', keyboard
-            UU = (mode.Pst.*mode.fPdif)*mode.E2;
-            uudu=1./(1+mode.epsNLg*UU);
-            mode.nlG=uudu(1:nnQW);
-        end
-    else
-        mode.nlG=1;
-    end
+%     if isfield(mode,'epsNLg')
+%         nlG=mode.epsNLg;
+%         mode.nlG=1;
+%         if isfield(mode,'E2')
+%             %       'qui per nlG', keyboard
+%             UU = (mode.Pst.*mode.fPdif)*mode.E2;
+%             uudu=1./(1+mode.epsNLg*UU);
+%             mode.nlG=uudu(1:nnQW);
+%         end
+%     else
+%         mode.nlG=1;
+%     end
     
     
     mesh.DeltaT=DeltaT;
@@ -559,7 +559,7 @@ while(indv<=NVbias && DeltaTmax<DTM0 && I_mA<abs(Imassimo) && CondPotBreak==0) %
                 velm.SW=0;
             end
             %            mode.Lm=velm.Lm(1:mode.nmodes); % prendo solo il primo modo (per ora)
-            mode.Lm=velm.Lm; % prendo solo il primo modo (per ora)
+            mode.Lm=velm.Lm;%*1.31; % prendo solo il primo modo (per ora)
             mode.vlambda=velm.vlambda;
             mode.NQW=velm.NQW; % prendo solo il primo modo (per ora)
             mode.Gamma_z=velm.Gamma_z;
@@ -624,7 +624,7 @@ while(indv<=NVbias && DeltaTmax<DTM0 && I_mA<abs(Imassimo) && CondPotBreak==0) %
             
             colordef white
             mode.indv=indv;
-        elseif indVELM>=3 && mode.quasi1D==1
+        elseif indVELM>=3 && mode.quasi1D==5
             if mode.IdriveON==0
                 [mode]=velmFitting(indVELM,fitStart,fitDegree,VELMInfo,mode,v0_dd);
             elseif indVELM>=4
@@ -692,9 +692,6 @@ while(indv<=NVbias && DeltaTmax<DTM0 && I_mA<abs(Imassimo) && CondPotBreak==0) %
     % t = 1; % damping parameter % QUAAAAAA
     %
     
-    %             'keyboard le_VEl', keyboard
-    
-    %    if(v0_dd>=2.05 & v0_dd<2.1)
     if effetti(1)==1
         mode.fPES=VELMInfo(le_VELMinfo).fPES*1e3;
     end
@@ -742,11 +739,11 @@ clear Res
     while(iter<mode.maxiter) % && iter_t<mode.maxiter_t) % inner while-loop
         
         uvet(pp+1:3*nn)=abs(uvet(pp+1:3*nn));
-        uvet(nn+1:pp)=abs(uvet(nn+1:pp)) ;
+        uvet(nn+1:pp)=abs(uvet(nn+1:pp));
 
         if mode.oflg==1
-            uvet(ss+1)=abs(uvet(ss+1)) ;
-            uvet(vv:ss)=abs(uvet(vv:ss)) ;
+            uvet(ss+1)=abs(uvet(ss+1));
+            uvet(vv:ss)=abs(uvet(vv:ss));
         end
         %
         indCountMultiplicationFactor=1; %%% temporaneo
@@ -756,36 +753,35 @@ clear Res
         mode.ind_v0=indv;
         
         if mode.vv_dd>mode.VmaxStable
-            mode.Shunt=0 ;
+            mode.Shunt=0;
         end
 
-        if iDyn==0
-            if (mode.NumJac==1 && round(v0_dd,3)==round(mode.Vnum,3))
-                mode_num=mode;
-                uvet_num=uvet;
-                
-                save(['WorkSpace_Jacobian_',strSave,'_',nomeSav,'.mat'])
-                disp('Numerical - run "Main_99_Jnum.m"!')
-                keyboard
-            end
-            mode.indv=indv;
-            if mode.mp==0
-                if mode.IdriveON==0
-                    [Kmat0,Jmat0,Jmat2,uvet,rvet,mode,tvet]=assem_GBT(geom,mesh,mode,uvet,v0_dd);
-                else
-                    mode.Zmat=mode.Ymat ;
-                    [Kmat0,Jmat0,Jmat2,uvet,rvet,mode,tvet]=assem_GBT(geom,mesh,mode,uvet,i0_dd);
-                end
-            else
-                if mode.IdriveON==0
-                    [Kmat0,Jmat0,Jmat2,uvet,rvet,mode,tvet]=assem_mp(geom,mesh,mode,uvet,v0_dd);
-                else
-                    [Kmat0,Jmat0,Jmat2,uvet,rvet,mode,tvet]=assem_mp(geom,mesh,mode,uvet,i0_dd);
-                end
-            end
+        % Numerical Jacobian 
+        if (mode.NumJac==1 && round(v0_dd,3)==round(mode.Vnum,3))
+            mode_num=mode;
+            uvet_num=uvet;
             
+            save(['WorkSpace_Jacobian_',strSave,'_',nomeSav,'.mat'])
+            disp('Numerical - run "Main_99_Jnum.m"!')
+            keyboard
+        end
+        
+        % Assem: the Newton scheme matrices are assembled - there is an OLD
+        % version "assem_mp" working with multiprecision toolbox 
+        mode.indv=indv;
+        if mode.mp==0
+            if mode.IdriveON==0
+                [Kmat0,Jmat0,Jmat1,Jmat2,uvet,rvet,mode,tvet]=assem_GBT(geom,mesh,mode,uvet,v0_dd);
+            else
+                mode.Zmat=mode.Ymat ;
+                [Kmat0,Jmat0,Jmat1,Jmat2,uvet,rvet,mode,tvet]=assem_GBT(geom,mesh,mode,uvet,i0_dd);
+            end
         else
-            [Kmat0,Jmat0,Jmat1,Jmat2,uvet,rvet,mode]=assem_FM(geom,mesh,mode,uvet,v0_dd);
+            if mode.IdriveON==0
+                [Kmat0,Jmat0,Jmat2,uvet,rvet,mode,tvet]=assem_mp(geom,mesh,mode,uvet,v0_dd);
+            else
+                [Kmat0,Jmat0,Jmat2,uvet,rvet,mode,tvet]=assem_mp(geom,mesh,mode,uvet,i0_dd);
+            end
         end
                          
         if(mode.oflg)
@@ -798,17 +794,17 @@ clear Res
                 end
             end
         end
+        %
         % Numerical Jacobian section
-%          if indv==10
-%             keyboard 
-%             [JmatNum]=NumericalJacobian(uvet,rvet,geom,mesh,v0_dd,mode,tvet3) ; 
-% 
-%          end
-%                  
+        if mode.NumJac==1 && indv==10
+            keyboard
+            [JmatNum]=NumericalJacobian(uvet,rvet,geom,mesh,v0_dd,mode,tvet3);
+        end
+        %
         Jmat=Jmat0;
         
         [R,C]=dgsequ(Jmat);
-        res = norm(R*rvet);        
+        res = norm(R*rvet);
         
         MAXiter=mode.MAXiterMoveOn;
         
@@ -830,15 +826,15 @@ clear Res
             disp('================================================')
             
             figure(112)
-            subplot(311)
+            subplot(3,1,1)
             grid on,box on
             plot(uvet,'o')
             ylabel('uvet')
-            subplot(312)
+            subplot(3,1,2)
             grid on,box on
             semilogy(abs(rvet),'o')
             ylabel('rvet')
-            subplot(313)
+            subplot(3,1,3)
             grid on,box on
             semilogy(abs(R*rvet),'o')
             ylabel('R\cdot rvet')
@@ -859,7 +855,8 @@ clear Res
         Res(iter+1)=res;
         if mode.oflg==1
             if max(mode.Scheck)>.2 & iprimoRunna==1
-                RunnaVELM=1;
+%                 RunnaVELM=1;
+                RunnaVELM=0
                 iprimoRunna=0;
             end
             if length(Res)>3 & max(mode.Scheck)>1
@@ -1217,7 +1214,7 @@ clear Res
         for indplot=1:length(VELMInfo)
             vind=[vind,VELMInfo(indplot).indVoltage];
         end
-        if IPLOT==1
+        if IPLOT==1 && strcmp(mode.ContactPosition,'right')
             T0=mode.T0-273;
                 
             figure(1234+kfig),clf
@@ -1267,7 +1264,7 @@ clear Res
             legend('Measurements','Simulation','Location','Best')
             
             
-            subplot(222)
+            subplot(2,2,2)
             hold on
             grid on
             box on
@@ -1298,7 +1295,7 @@ clear Res
             drawnow
             
             
-            subplot(223)
+            subplot(2,2,3)
             hold on
             grid on
             box on
@@ -1319,7 +1316,7 @@ clear Res
             title(['Heat sink temperature: T=',num2str(T0),'°C'])
             drawnow
             
-            subplot(224)
+            subplot(2,2,4)
             grid on
             hold on
             box on
@@ -1463,7 +1460,7 @@ clear Res
                 ylim([40,120])
                 %            xlim([0.5,1000*mode.ii_dd(end)+.1])
                 xlabel('Current, mA')
-                ylabel('Differential resistence, \Omega')
+                ylabel('Differential resistance, \Omega')
                 %            legend('Measurements','Simulation','Location','Best')
                 subplot(1,2,2)
                 hold on
@@ -1510,12 +1507,12 @@ clear Res
             %                 plot(mode.ii_dd*1000,Resistence,'b.','LineWidth',2)
             %                 ylim([75,120])
             %                 xlabel('Current, mA')
-            %                 ylabel('Differential resistence, \Omega')
+            %                 ylabel('Differential resistance, \Omega')
             %                 %            legend('Measurements','Simulation','Location','Best')
             %                 drawnow
             %             end
             
-                        % Carrier density and energy band diagram (central column)
+            % Carrier density and energy band diagram (central column)
             figure(439),clf
             set(gcf,'position',[667 64 554 392])
             grid on
@@ -1564,10 +1561,16 @@ clear Res
         if mode.oflg==1 %&& mode.quasi1D==1
             PPst=sum(modePlot.Pst_dd,1)+(modePlot.Psp_dd/mode.frsp + modePlot.PspBulk_dd)*(1-mode.fat_RAD);
             PElec=modePlot.ii_dd*1e3.*modePlot.vv_dd;
-            if mode.flgBTJ==1 && mode.flgHeatTJ==3
-                % mode.VTJ(indexBTJ,mode.ind_v0,:)=Vint;
+            if mode.flgBTJ==1 && mode.flgHeatTJ==2
+                % See further comments in the "settings_vari_"
+                % mode.VTJ(indexBTJ,mode.ind_v0,:)=Vint; -> in assem_GBT.m
                 if mode.quasi1D==0
-                    iRagHeatTJ=18;
+                    xPerc=40;
+                    % Here we want to compute the integral rho drho and divide it by the Area
+                    [maxHeat,imax]=max(squeeze(mode.HeatTJ(1,end,:)));
+                    avgHeat=maxHeat*xPerc/100;
+                    iRagHeatTJ=find(squeeze(mode.HeatTJ(1,end,imax:end))<avgHeat,1)+imax;
+%                     iRagHeatTJ=18;
                     
                     rho=mesh.xgrid;
                     drho=diff([0 rho]);
@@ -1582,7 +1585,7 @@ clear Res
                     VTJ=squeeze(mode.VTJ(1,end,1:2))';
                     Vrho=mean(VTJ);
                 end
-                PElec=modePlot.ii_dd*1e3.*(modePlot.vv_dd-Vrho);
+                PElec=modePlot.ii_dd*1e3.*(modePlot.vv_dd-mode.Fat_VTJ*Vrho);
             end
             PDiss=PElec(end)-PPst(end);
             mode.PDiss(indv)=PDiss;
@@ -1646,7 +1649,7 @@ clear Res
         end
         %
         if mode.oflg==1 && mode.Pst_dd(end)>0.90 && mode.quasi1D==1
-            if isfield(mode,'Pst_max')==0 && mode.Pst_dd(end)<mode.Pst_dd(end-1)
+            if isfield(mode,'Pst_max')==1 && mode.Pst_dd(end)<mode.Pst_dd(end-1)
                 mode.Pst_max=mode.Pst_dd(end-1);
             end
             if isfield(mode,'Pst_max')==1

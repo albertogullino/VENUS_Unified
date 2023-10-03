@@ -2,8 +2,8 @@ $ DATAFORDD_START
 % P_i e P_f sono il paio di inizio e fine dello strato equivalente, da sinistra verso destra
 % P_i = P_f per eliminare strato equivalente, oppure togliere o commentare con % il campo mirroreq
 % se scrivi con il simbolo di dollaro, la funzione riconosce il simbolo e agisce.
-$ mirroreq_n2 P_i=2 P_f=17 x_eq=0.44 Dop_eq=4.5e18 Mateq=AlGaAs  Nmesh=30 f_any=1
-$ mirroreq_n P_i=3 P_f=36 x_eq=0.44 Dop_eq=4.5e18 Mateq=AlGaAs Nmesh=21 f_any=1
+$ mirroreq_n2 P_i=2 P_f=15 x_eq=0.44 Dop_eq=4.5e18 Mateq=AlGaAs  Nmesh=30 f_any=1
+$ mirroreq_n P_i=3 P_f=31 x_eq=0.44 Dop_eq=4.5e18 Mateq=AlGaAs Nmesh=21 f_any=1
 $ mesa Dpass=1
 % PassivationSection passiv_size=6 passiv_mesh=12
 $ PassivationSection passiv_size=15 passiv_mesh=9 passiv_depth=3.5
@@ -13,7 +13,8 @@ $ PassivationSection passiv_size=15 passiv_mesh=9 passiv_depth=3.5
 % Devono essere uguali a quelli ottici
 % DD_radial_sections radii radie: significa che sono aggiunte due colonne, i cui limiti
 % sono oxide-radii oxide+radie
-$ DD_radial_sections radii=0.5 radie=0.5 Radial_mesh=.1+10j .01+5j .01+4j .01+10j  0.01+7j 
+% DD_radial_sections radii=0.5 radie=0.5 Radial_mesh=.1+10j .01+5j .01+4j .01+10j  0.01+7j 
+$ DD_radial_sections radii=0.6 radie=0.5 Radial_mesh=.1+8j .01+7j .01+3j .01+11j  0.01+8j 
 %  Radial_mesh organizza la mesh radiale: per ogni colonna, si da il passo (parte reale)
 % e il n. max di punti (parte immaginaria)
 $ buffer thick=110 thick_dd=109990 size=50
@@ -46,12 +47,12 @@ Lc  Nd=4e18     1  77      AlGaAs 0.09  1     Nmesh=3
 Lga  Nd=2.24e18 Nd=3.84e18 1  21.9      AlGaAs 0.09 0.57 1 1 Ndis=4 Nmesh=4
 
 %%%%%%%%%%%%% Top DBR %%%%%%%%%%%%
-Lga  Nd=3.08e18 Nd=3.57e18 17 18.6      AlGaAs 0.57 0.86 1 1 Ndis=3 Nmesh=3
-Lca  Nd=3.75e18 		   17 32        AlGaAs 0.90 1  Nmesh=2
-Lga  Nd=3.57e18 Nd=9.00e18 17 26.5      AlGaAs 0.90 0.29 1 1 Ndis=4 Nmesh=6
-Lga  Nd=9.00e18 Nd=3.11e18 17 7         AlGaAs 0.29 0.23 1 1 Ndis=2 Nmesh=2
-Lca  Nd=2.24e18 		   17 31.9      AlGaAs 0.17 1  Nmesh=2
-Lga  Nd=3.84e18 Nd=3.08e18 17 14.9      AlGaAs 0.17 0.57 1 1 Ndis=3 Nmesh=3
+Lga  Nd=3.08e18 Nd=3.57e18 15 18.6      AlGaAs 0.57 0.86 1 1 Ndis=3 Nmesh=3
+Lca  Nd=3.75e18 		   15 32        AlGaAs 0.90 1  Nmesh=2
+Lga  Nd=3.57e18 Nd=9.00e18 15 26.5      AlGaAs 0.90 0.29 1 1 Ndis=4 Nmesh=6
+Lga  Nd=9.00e18 Nd=3.11e18 15 7         AlGaAs 0.29 0.23 1 1 Ndis=2 Nmesh=2
+Lca  Nd=2.24e18 		   15 31.9      AlGaAs 0.17 1  Nmesh=2
+Lga  Nd=3.84e18 Nd=3.08e18 15 14.9      AlGaAs 0.17 0.57 1 1 Ndis=3 Nmesh=3
 % 
 % Slightly lower doping level
 Lga  Nd=2.62e18 Nd=3.57e18 1   18.6     AlGaAs 0.57 0.86 1 1 Ndis=3 Nmesh=3
@@ -67,8 +68,8 @@ Lca  Nd=3.75e18 		   1   32        AlGaAs 0.90 	  1   Nmesh=2
 
 % (Former) Oxide region 
 
-Lga  Nd=3.57e18 Nd=9.00e18 1 20.6      AlGaAs 0.90 0.57 1 1 Ndis=3 Nmesh=4
-Lga  Nd=9.00e18 Nd=2.24e18 1 42.5      AlGaAs 0.57 0.17 1 1 Ndis=3 Nmesh=5
+Lga  Nd=3.57e18 Nd=9.00e18 1 21      AlGaAs 0.90 0.57 1 1 Ndis=3 Nmesh=4
+Lga  Nd=9.00e18 Nd=2.24e18 1 42.7      AlGaAs 0.57 0.17 1 1 Ndis=3 Nmesh=5
 
 %%%%%%%%%%%%% BTJ %%%%%%%%%%%%%%%%
 LcNEGF     	Nd=3e18 1  5	AlGaAs 0.12  100   Nmesh=3
@@ -123,11 +124,11 @@ Lca  Nd=3.75e18 		   1  32        AlGaAs 0.90 1  Nmesh=2
 Lga  Nd=3.57e18 Nd=9.00e18 1  18.6      AlGaAs 0.90 0.57 1 1 Ndis=2 Nmesh=3
 
 % back mirror 36 pairs
-Lga  Nd=9.00e18 Nd=3.11e18 36 14.9      AlGaAs 0.57 0.23 1 1 Ndis=2 Nmesh=2
-Lca  Nd=2.24e18 		   36 31.9      AlGaAs 0.17 1  Nmesh=2
-Lga  Nd=3.11e18 Nd=3.57e18 36 33.5      AlGaAs 0.17 0.86 1 1 Ndis=3 Nmesh=4
-Lca  Nd=3.75e18 		   36 32        AlGaAs 0.90 1  Nmesh=2
-Lga  Nd=3.57e18 Nd=9.00e18 36 18.6      AlGaAs 0.90 0.57 1 1 Ndis=2 Nmesh=3
+Lga  Nd=9.00e18 Nd=3.11e18 31 14.9      AlGaAs 0.57 0.23 1 1 Ndis=2 Nmesh=2
+Lca  Nd=2.24e18 		   31 31.9      AlGaAs 0.17 1  Nmesh=2
+Lga  Nd=3.11e18 Nd=3.57e18 31 33.5      AlGaAs 0.17 0.86 1 1 Ndis=3 Nmesh=4
+Lca  Nd=3.75e18 		   31 32        AlGaAs 0.90 1  Nmesh=2
+Lga  Nd=3.57e18 Nd=9.00e18 31 18.6      AlGaAs 0.90 0.57 1 1 Ndis=2 Nmesh=3
 
 Lga  Nd=9.00e18 Nd=3.24e18 1  21.9      AlGaAs 0.57 0.17 1 1 Ndis=1 Nmesh=2
 

@@ -299,7 +299,9 @@ end
       subplot(122)
       plot(rdis,-imag(Tdis)), title('Losses'), pausak
   else
-       figure, plot(zdis,Tdis), pausak
+       figure, plot(zdis,Tdis), title('Profilo Delta Epsilon Termico')
+	   xlabel('Long. coord')
+       pausak
   end
  
 

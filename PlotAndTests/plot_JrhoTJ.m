@@ -1,4 +1,4 @@
-close all
+% close all
 
 if exist('JN_X')==0
     ITJ_finder
@@ -20,12 +20,13 @@ end
     x=mesh.xgrid*1e4;
     y=mesh.ygrid*1e4;
 
-CORRENTI=[1 2 4];
+CORRENTI=[1 4 8];
 pcor=CurrIndex(CORRENTI(1),mode.ii_dd*1e3);
 
 % v=180:10:240;
 v=198:2:210;    % inside the TJ
-v=ITJ-5:3:ITJ(end)+1;
+v=iTJ-5:3:iTJ(end)+1;
+% v=mesh.inMQW{1}(1):3:mesh.inMQW{1}(1)+35;
 clear lgd
 	
 ND=reshape(mesh.dop_d,mesh.nny,mesh.nnx);
@@ -73,9 +74,9 @@ for ilong=v
 %     hold off
     
     figure(iiii+500)
-	set(gcf,'position',[iiii*100    -14    560    1000])
-	
-	subplot(411)
+% 	set(gcf,'position',[iiii*100    -14    560    1000])
+	set(gcf,'position',[iiii*100   558   560   420])
+% 	subplot(411)
     plot(x,squeeze(JN_X(pcor,ilong,:)),'--','linewidth',1.5)
     %chold
 	hold on,grid on
@@ -89,41 +90,41 @@ for ilong=v
 
 %     hold off
 	
-	subplot(412)
-    plot(x,ND(ilong,:),'.-')
-    hold on
-    plot(x,NA(ilong,:),'.-')
-    set(gca,'yscale','log')
-    ylabel('Radial doping density, 1/cm^3'),legend('ND','NA','location','best')
-%     hold off
-    	
-    subplot(413)     
-    plot(x,abs(squeeze(JN_X(pcor,ilong,:))),'--','linewidth',1.5)
-    %chold
-	hold on
-    plot(x,abs(squeeze(JP_X(pcor,ilong,:))),'--','linewidth',1.5)
-	
-	chold
-	plot(x,abs(squeeze(JN_Y(pcor,ilong,:))),'linewidth',1.5)
-    plot(x,abs(squeeze(JP_Y(pcor,ilong,:))),'linewidth',1.5)
-	
+% 	subplot(412)
+%     plot(x,ND(ilong,:),'.-')
+%     hold on
+%     plot(x,NA(ilong,:),'.-')
+%     set(gca,'yscale','log')
+%     ylabel('Radial doping density, 1/cm^3'),legend('ND','NA','location','best')
+% %     hold off
+%     	
+%     subplot(413)     
+%     plot(x,abs(squeeze(JN_X(pcor,ilong,:))),'--','linewidth',1.5)
+%     %chold
+% 	hold on
+%     plot(x,abs(squeeze(JP_X(pcor,ilong,:))),'--','linewidth',1.5)
+% 	
 % 	chold
-% 	plot(x,ND(ilong,:)/max(ND(ilong,:))*max(abs(squeeze(JN_X(pcor,ilong,:)))),'--')
-% 	plot(x,NA(ilong,:)/max(NA(ilong,:))*max(abs(squeeze(JP_X(pcor,ilong,:)))),'--')
-	grid on%,legend('J_n(\rho)','J_p(\rho)','J_n(z)','J_p(z)','location','best')
-%     hold off
-    ylabel('Log. scale')
-    set(gca,'yscale','log')
-    
-	
-	subplot(414)
-	hold on
-	plot(x,sqrt(abs(squeeze(JN_X(pcor,ilong,:))).^2+abs(squeeze(JN_Y(pcor,ilong,:))).^2),'linewidth',1.5)
-	plot(x,sqrt(abs(squeeze(JP_X(pcor,ilong,:))).^2+abs(squeeze(JP_Y(pcor,ilong,:))).^2),'linewidth',1.5)	
-	grid on%,hold off
-	xlabel('\rho, \mum')
-	ylabel('SUM')
-    lgd{iiii}=num2str(ilong);
+% 	plot(x,abs(squeeze(JN_Y(pcor,ilong,:))),'linewidth',1.5)
+%     plot(x,abs(squeeze(JP_Y(pcor,ilong,:))),'linewidth',1.5)
+% 	
+% % 	chold
+% % 	plot(x,ND(ilong,:)/max(ND(ilong,:))*max(abs(squeeze(JN_X(pcor,ilong,:)))),'--')
+% % 	plot(x,NA(ilong,:)/max(NA(ilong,:))*max(abs(squeeze(JP_X(pcor,ilong,:)))),'--')
+% 	grid on%,legend('J_n(\rho)','J_p(\rho)','J_n(z)','J_p(z)','location','best')
+% %     hold off
+%     ylabel('Log. scale')
+%     set(gca,'yscale','log')
+%     
+% 	
+% 	subplot(414)
+% 	hold on
+% 	plot(x,sqrt(abs(squeeze(JN_X(pcor,ilong,:))).^2+abs(squeeze(JN_Y(pcor,ilong,:))).^2),'linewidth',1.5)
+% 	plot(x,sqrt(abs(squeeze(JP_X(pcor,ilong,:))).^2+abs(squeeze(JP_Y(pcor,ilong,:))).^2),'linewidth',1.5)	
+% 	grid on%,hold off
+% 	xlabel('\rho, \mum')
+% 	ylabel('SUM')
+%     lgd{iiii}=num2str(ilong);
 %     set(gca,'FontSize',12)
 	
     iiii=iiii+1;

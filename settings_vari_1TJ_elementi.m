@@ -4,10 +4,11 @@ mode.flgBTJ_lithographic=0; % 0: no etching; 1: etching in VELM only; 2: etching
 % HeatTJ flag: 
 % - 0 for the DD sigma; 
 % - 1 for TJ equivalent sigma; 
-% - 2 for HeatJoule=HeatTJ in TJ nodes;
-% - 3 for the DD sigma and PTJ is subtracted from Pelec; 
-mode.flgHeatTJ=3;   
-
+% - 2 for HeatJoule=HeatTJ and Pelec-PTJ balancing: use Fat_VTJ!
+%       - HeatTJ=(1-Fat_TJ)*(Vint*JTJ/LTJ) -> computed in assem_GBT.m
+%       - Pelec=I*(V-VTJ*Fat_VTJ) -> computed in f_EvalHeatingTerms.m
+mode.flgHeatTJ=2;   
+mode.Fat_VTJ=1;   % Scales VTJ as a source of heating 
 
 irel=0; % if 1, relief; if 0, standard VCSEL
 
@@ -117,11 +118,11 @@ end
 
 
 mode.OptScaling=0;    % area reduction w.r.t. to the eletrical area
-if mode.quasi1D==1 && mode.flgBTJ==1
-    mode.fPdifScaling=1.15; % 1 for Oxide or 3D simulations; 1.2 for TJ (1D)
-else
-    mode.fPdifScaling=1; % 1 for Oxide or 3D simulations; 1.2 for TJ (1D)
-end
+% if mode.quasi1D==1 && mode.flgBTJ==1
+%     mode.fPdifScaling=1.15; % 1 for Oxide or 3D simulations; 1.2 for TJ (1D)
+% else
+%     mode.fPdifScaling=1; % 1 for Oxide or 3D simulations; 1.2 for TJ (1D)
+% end
 
 mode.fPdifScaling=1; % 1 for Oxide or 3D simulations; 1.2 for TJ (1D)
 
@@ -137,9 +138,9 @@ end
 % Gain and quantum models
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% epsNLg=4e-17;
+epsNLg=4e-17;
 % epsNLg=3e-17;
-epsNLg=1.5e-17;
+% epsNLg=1.5e-17;
 
 Qc=0.6;
 FLos=1;
@@ -213,12 +214,15 @@ Deltalam=3;
 C_Temp=1;  % Coeff. Temperatura totale
 C_TempGain=1;  % Coeff. Temperatura Gain
 dndT=2.3e-4;  % dn/dT  2.3e-4 da dati sperimentali
-dndT1D=4e-4;  % for 1D fitting
+dndT1D=2.3e-4;  % for 1D fitting
 fat_RAD=0.50;   % self-absorption heating from spont. recombination
 fat_RAD=5e-2   % self-absorption heating from spont. recombination
 
 mode.FatQtot=115;    % scaling factor for Q to fit 3D and 1D deltaT
-mode.FatV=46;   % kT scaling between substrate and VCSEL regions
+% mode.FatV=46;   % kT scaling between substrate and VCSEL regions
+mode.FatV=80;   % kT scaling between substrate and VCSEL regions
+% mode.FatQtot=1;    % scaling factor for Q to fit 3D and 1D deltaT
+% mode.FatV=1;   % kT scaling between substrate and VCSEL regions
 mode.FatQcontact=1.00; % 1D simulation: scaling at the contact (0.65 for Oxide; 1.00 for TJ)
 
 % fCondTer=1;   % transverse thermal conducibility
@@ -248,23 +252,25 @@ mode.ABSh0=7;
 % Fat_Perd0=2.6;  % con Log 1
 Fat_Perd0=2.9  % con Log 1
 
-% increase ABS_Texp with Tvelm=DeltaT+T0, in f_CallVELM:
+% Increase ABS_Texp with Tvelm=DeltaT+T0, in f_CallVELM:
 % ABS_Texp=mode.ABS_Texp+mode.PerCoefExT*Tvelm;
 PerCoefExT=0
-%PerCoefExT=2e-3 
+% PerCoefExT=2e-2
 
-% changes Fat_Perd0 in ASSEGNO_mode: Fat_Perd_mod=Fat_Perd0+Fat_PerCoefTemp*(mode.T0-T300);
+% Changes Fat_Perd0 in ASSEGNO_mode: Fat_Perd_mod=Fat_Perd0+Fat_PerCoefTemp*(mode.T0-T300);
 % Fat_PerCoefTemp=(.9-Fat_Perd0)/90;
 % Fat_PerCoefTemp=0   
-Fat_PerCoefTemp=0.002
+% Fat_PerCoefTemp=0.002
+Fat_PerCoefTemp=-0.00375
+
 if IPAR==42
     Fat_PerCoefTemp=0;
 end
 
 
 % ABS_Texp=2.4
-ABS_Texp=0      % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
-% ABS_Texp=1.2      % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
+% ABS_Texp=0      % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
+ABS_Texp=1.5      % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
 
 ABS_Apor=0;   %dipendenza lineare !!!!!!!
 ABS_Ader=0;

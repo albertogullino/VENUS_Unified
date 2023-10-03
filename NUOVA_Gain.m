@@ -54,13 +54,16 @@ if length(find(isnan(G0)==1))>0
 end
 
 if v0_dd>1
-NQW=mesh.NMQW;
-sDe=size(DeltaN0);
-DeDe=mean(DeltaN0,1);
-Deld=reshape(DeDe,sDe(2)/NQW,NQW);
-mode.DeltaN=mean(Deld,2);
+    NQW=mesh.NMQW;
+    sDe=size(DeltaN0);
+    DeDe=mean(DeltaN0,1);   % no effect in 1D
+    Deld=reshape(DeDe,sDe(2)/NQW,NQW);
+    mode.DeltaN=mean(Deld,2);
+%     if mode.quasi1D==1
+%         mode.DeltaN=DeltaN0;
+%     end
 else
-mode.DeltaN=0;
+    mode.DeltaN=0;
 end
 
 % toc

@@ -38,8 +38,8 @@ STR{28}='MarkusN_TJ_oxBelow_LgDBR_fixed';
 STR{29}='MarkusN_TJ_oxAbove_LgDBR_oxAnti';
 
 % 1TJ (with p-DBR and OX aperture: only current recycling)
-STR{30}='MarkusN_TJ_pDBR_2AR';      % MUST BE CREATED (maybe from MarkusN_2TJ_inf_BELOW.str)
-STR{31}='MarkusN_TJ_pDBR_2AR_alternative';      % MUST BE CREATED (maybe from MarkusN_2TJ_inf_BELOW.str)
+STR{30}='MarkusN_TJ_pDBR_2AR';      % maybe from MarkusN_2TJ_inf_BELOW.str
+STR{31}='MarkusN_TJ_pDBR_2AR_alternative';      % maybe from MarkusN_2TJ_inf_BELOW.str
 
 % 1TJ (radially limited by OX, like MarkusN_BTJetch_opt (w/out central step in VELM) - SIMPLIFICATION!)
 STR{32}='MarkusN_TJ_radialOx';      % obtained FROM 'MarkusN_BTJetch_opt.str'

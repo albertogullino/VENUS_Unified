@@ -374,8 +374,8 @@ for ic=1:nc; ii=(contact==ic); % loop on contacts
                 IBTJ=unique(cell2mat(mesh.IBTJ));
                 iTJp=min(cell2mat(mesh.iLeftBTJ));
                 iTJn=max(cell2mat(mesh.iRightBTJ));
-%                 ITJp_vet=repmat(mesh.LBTJ,1,nn);
-%                 ITJn_vet=repmat(mesh.RBTJ,1,nn);
+                %                 ITJp_vet=repmat(mesh.LBTJ,1,nn);
+                %                 ITJn_vet=repmat(mesh.RBTJ,1,nn);
                 ITJp_vet=mesh.LBTJ;
                 ITJn_vet=mesh.RBTJ;
                 %
@@ -387,9 +387,9 @@ for ic=1:nc; ii=(contact==ic); % loop on contacts
                 % Initialization of Vinterp derivatives for Jacobian matrix
                 dVinterp_dn=zeros(1,mesh.nn); dVinterp_dp=dVinterp_dn;
                 dVinterp_dphin=dVinterp_dn; dVinterp_dphip=dVinterp_dn;
-                % dn -> right (end); dp -> left (1); 1 -> right; 2 -> left 
+                % dn -> right (end); dp -> left (1); 1 -> right; 2 -> left
                 % Vt,ecb, evb, EFn, EFp should ALL be taken from "real"
-                % nodes, and not only from the central section! 
+                % nodes, and not only from the central section!
                 % iTJend -> IBTJright; iTJ1 -> IBTJleft
                 dVinterp_dn(IBTJ) = - Vt(iTJn)./mesh.Nc(iTJn)./ferdr((mode.EFn(iTJn)-mode.ecb(iTJn))./Vt(iTJn),-1/2);
                 dVinterp_dp(IBTJ) = - Vt(iTJp)./mesh.Nv(iTJp)./ferdr(-(mode.EFp(iTJp)-mode.evb(iTJp))./Vt(iTJp),-1/2);
@@ -683,7 +683,7 @@ for ic=1:nc; ii=(contact==ic); % loop on contacts
         % direct recombination, derivatives
         MM=qel.*[Se1.*dRn(in1) Se2.*dRn(in2) Se3.*dRn(in3)];
         Jmat0=Jmat0+sparse(ijs+nn,ijs+nn,MM(mask_ijs),neq,neq);
-        if(mode.pflg),
+        if(mode.pflg)
             MM=qel.*[Se1.*dRp(in1) Se2.*dRp(in2) Se3.*dRp(in3)];
             Jmat0=Jmat0+sparse(ijs+nn,ijs+pp,MM(mask_ijs),neq,neq);
         end
@@ -975,13 +975,13 @@ for ic=1:nc; ii=(contact==ic); % loop on contacts
             %        'TAROCCO N2 @@@@@@@@'
             %        N2 =.85* 4*pi/h^2*m0*qel*(sum((meffn2D*ones(1,mesh.nnxQW)).*(Ec0-Em),1)/10000);
             if isfield(mode,'Fat_N2')
-             Fat_N2=mode.Fat_N2;            
-             Fat_P2=mode.Fat_P2;            
+                Fat_N2=mode.Fat_N2;
+                Fat_P2=mode.Fat_P2;
             else
-             Fat_N2=1;
-             Fat_P2=1;
+                Fat_N2=1;
+                Fat_P2=1;
             end
-%            'Cont Ne', keyboard
+            %            'Cont Ne', keyboard
             
             N2 = Fat_N2 * 4*pi/h^2*m0*qel*(sum((meffn2D*ones(1,mesh.nnxQW{indQW})).*(Ec0-Em),1)/10000);
             P2 = Fat_P2 * 4*pi/h^2*m0*qel*(sum((meffp2D*ones(1,mesh.nnxQW{indQW})).*(Ed-Ev0),1)/10000);
@@ -1021,7 +1021,7 @@ for ic=1:nc; ii=(contact==ic); % loop on contacts
             % checking if n2D>N2 or p2D>P2
             % indNaN=find(isnan(n2D));
             % if(not(isempty(indNaN))),n2D(indNaN)=mean(n2D); end
-%            'iTappo', keyboard
+            %            'iTappo', keyboard
             if(iTappo==1 | iTappo==3 | iTappo==6)
                 indN2=find(n2D>=N2);if(not(isempty(indN2))),n2D(indN2)=0.99*N2(indN2);end
                 % indNaN=find(isnan(p2D));
@@ -1223,20 +1223,20 @@ for ic=1:nc; ii=(contact==ic); % loop on contacts
                         %                    tauscatpT=tauscatp.*exp((TQW-mode.T0)/mode.T_tauscat);
                         %         'cont qui', keyboard
                         
-%                        if Tcap_EXP==Inf
-%                            
-%                            Fat_cap=exp((TQW-mode.T0)/mode.T_tauscat);
-%                        elseif Tcap_EXP==-Inf
-%                            
-%                            DeT=mode.T_tauscat;
-%                            tauRat=mode.tauRat;
-%                            
-%                            %                     'controllo', keyboard
-%                        else
-                            %                     Fat_cap=(1+(TQW-mode.T0)/mode.T_tauscat).^Tcap_EXP;
-                            Fat_cap=exp((TQW-mode.T300)/mode.T_tauscat).^Tcap_EXP;
-                            %                     'controllo', keyboard
-%                        end
+                        %                        if Tcap_EXP==Inf
+                        %
+                        %                            Fat_cap=exp((TQW-mode.T0)/mode.T_tauscat);
+                        %                        elseif Tcap_EXP==-Inf
+                        %
+                        %                            DeT=mode.T_tauscat;
+                        %                            tauRat=mode.tauRat;
+                        %
+                        %                            %                     'controllo', keyboard
+                        %                        else
+                        %                     Fat_cap=(1+(TQW-mode.T0)/mode.T_tauscat).^Tcap_EXP;
+                        Fat_cap=exp((TQW-mode.T300)/mode.T_tauscat).^Tcap_EXP;
+                        %                     'controllo', keyboard
+                        %                        end
                         
                         if mode.leakage>0
                             Tstart=mode.Tstart;
@@ -1356,11 +1356,11 @@ for ic=1:nc; ii=(contact==ic); % loop on contacts
             CcapnM1=Ccapn;
             CcapnM2=Ccapn;
             
-    %        'Assem', keyboard
+            %        'Assem', keyboard
             
-    %        Xlimi=mesh.xgrid2(3)*1.5;
-      %      fii=find(mesh.xgrid<=Xlimi);
-       %     fie=find(mesh.xgrid>Xlimi);
+            %        Xlimi=mesh.xgrid2(3)*1.5;
+            %      fii=find(mesh.xgrid<=Xlimi);
+            %     fie=find(mesh.xgrid>Xlimi);
             fii=1:length(mesh.xgrid);
             fie=1:length(mesh.xgrid);
             CcapnM1(fie)=0;
@@ -1494,7 +1494,7 @@ for ic=1:nc; ii=(contact==ic); % loop on contacts
                 dCcapp_P3D =  - (1-FCapp).*pD./tauscatpT + ...
                     + FCapp.*pD.*pF(inQW)./tauscatpT./dP3D_Efp3D./Vt2D; %th der. inversa
                 dCcapp_p2D =  - FCapp.*pD.*pF(inQW)./tauscatpT./dp2D_EFp2D./Vt2D + ...
-                    + (1-FCapp).*pD./P2./tauscatpT.*pF(inQW);                
+                    + (1-FCapp).*pD./P2./tauscatpT.*pF(inQW);
                 
             end
             
@@ -1836,20 +1836,20 @@ for ic=1:nc; ii=(contact==ic); % loop on contacts
                 
                 %
                 if isfield(mode,'fat_gainG')
-                 Fat_soloGain=mode.fat_gainG;
+                    Fat_soloGain=mode.fat_gainG;
                 else
-                 Fat_soloGain=1;
+                    Fat_soloGain=1;
                 end
                 if isfield(mode,'nlG')
-                 nlG=mode.nlG;
+                    nlG=mode.nlG;
                 else
-                 nlG=1;
+                    nlG=1;
                 end
                 
                 g=vph*mode.fat_gain*Fat_soloGain*g.*nlG;
-
+                
                 mode.g{indQW,indMode}=g; % saving just for the last mode..
-%      'controllo Fa', keyboard
+                %      'controllo Fa', keyboard
                 
                 dgE=vph*mode.fat_gain*Fat_soloGain*dgE.*nlG;
                 dgH=vph*mode.fat_gain*Fat_soloGain*dgH.*nlG;
@@ -1866,7 +1866,7 @@ for ic=1:nc; ii=(contact==ic); % loop on contacts
                 E2 = mode.E2(indMode,1:nnQW); % electric field intensity (normalized)
                 %
                 FLos=mode.FLos;
-                Lm = FLos*mode.Lm(indMode); % losses, 1/s                
+                Lm = FLos*mode.Lm(indMode); % losses, 1/s
                 %
                 gE = g.*E2; % gain-field product
                 MM = [Lp1.*gE(iiQW1) Lp2.*gE(iiQW2)];
@@ -1962,8 +1962,8 @@ for ic=1:nc; ii=(contact==ic); % loop on contacts
             mode.JpQW{indQW} = curQW(WW+iiQW)/WQW;
             
         end
-%         figure,plot(mesh.xgrid,mode.JnQW{1},mesh.xgrid,mode.Jn_x(mesh.inMQW{indQW}),'--'),title('Electron currents'),legend('2D','3D')
-%         figure,plot(mesh.xgrid,mode.JpQW{1},mesh.xgrid,mode.Jp_x(mesh.inMQW{indQW}),'--'),title('Hole currents'),legend('2D','3D')
+        %         figure,plot(mesh.xgrid,mode.JnQW{1},mesh.xgrid,mode.Jn_x(mesh.inMQW{indQW}),'--'),title('Electron currents'),legend('2D','3D')
+        %         figure,plot(mesh.xgrid,mode.JpQW{1},mesh.xgrid,mode.Jp_x(mesh.inMQW{indQW}),'--'),title('Hole currents'),legend('2D','3D')
         %        ' fine ricomb', keyboard
         %'szke', keyboard
         Scheck=mode.gmod'./mode.lmod; % stimulated emission check
@@ -1984,7 +1984,7 @@ for ic=1:nc; ii=(contact==ic); % loop on contacts
         mode.Pst=Pst; mode.Scheck=Scheck;
         %mode.nQW{mode.ind_v0}=nQW; mode.pQW{mode.ind_v0}=pQW;
         mode.matgain=mode.matgain/(NQW*nmodes); mode.Psp=Psp;
-    
+        
         % assembling additional equations for passivation
         if(mesh.nnx-mesh.nnxQW{1}>0)
             iiP = mesh.nnxQW{1}+1:mesh.nnx;

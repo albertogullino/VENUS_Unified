@@ -5,9 +5,10 @@ addpath(genpath('out'))
 addpath(genpath('generageomBar'))
 
 addpath(genpath('OtticoBar'))
-rmpath('OtticoBar/new23OpticaGR')
+% rmpath('OtticoBar/new23OpticaGR')
 rmpath('OtticoBar/old22Optica')
 % rmpath('OtticoBar/new22Optica')
+rmpath('OtticoBar/new17Optica')
 
 addpath(genpath('ExperimentalData'))
 addpath(genpath('PlotAndTests'))

@@ -1,6 +1,15 @@
 mode.flgBTJ=1;  % flag to TJ presence
 mode.flgBTJ_lithographic=0; % 0: no etching; 1: etching in VELM only; 2: etching in VELM and in DD
 
+% HeatTJ flag: 
+% - 0 for the DD sigma; 
+% - 1 for TJ equivalent sigma; 
+% - 2 for HeatJoule=HeatTJ and Pelec-PTJ balancing: use Fat_VTJ!
+%       - HeatTJ=(1-Fat_TJ)*(Vint*JTJ/LTJ) -> computed in assem_GBT.m
+%       - Pelec=I*(V-VTJ*Fat_VTJ) -> computed in f_EvalHeatingTerms.m
+mode.flgHeatTJ=2;   
+mode.Fat_VTJ=1;   % Scales VTJ as a source of heating 
+
 irel=0; % if 1, relief; if 0, standard VCSEL
 
 mode.NumJac=0;  % flag for numerical jacobian computation
@@ -252,10 +261,11 @@ if mode.quasi1D==0
 else
     IHILS=1;   % 0 fisso, 1 variabile
 end
-N_X=2.5e17;      % Hilsum model parameter
+% N_X=1.5e17;      % Hilsum model parameter
+N_X=2.5e17      % Hilsum model parameter
 NxCoe=.011;
 if IPAR==4
-    NxCoe=0
+    NxCoe=0;
 end
 
 Fat_Dop=1.;
@@ -274,8 +284,8 @@ mode.FatMob=1;
 % cot=[3.5e-2 1.2];   % factor for mobility dependence on T: f(T)=cot(1)*T+cot(2)
 load COT
 
-% FAT_Diff_E=0.4;   % factor to be multiplied times QW electron mobility
-FAT_Diff_E=0.2;   % factor to be multiplied times QW electron mobility
+ FAT_Diff_E=0.4;   % factor to be multiplied times QW electron mobility
+% FAT_Diff_E=0.5   % factor to be multiplied times QW electron mobility
 FAT_Diff_H=1;   % factor to be multiplied times QW hole mobility
 mode.idiffusioneQW=3;   % 0: no QW diffusion; 1: QW diffusion; 2: NO; 3: drift-diffusion in QW
 % mode.idiffusioneQW=2;   % 0: no QW diffusion; 1: QW diffusion; 2: NO; 3: drift-diffusion in QW
@@ -323,7 +333,8 @@ mode.verbVELM=0;
 if mode.quasi1D==1
     mode.verbVELM=-1;   % <0 to see VELM results only the first time; >0: always
 end
-% mode.verbVELM=-2;   % <0 to see VELM results only the first time; >0: always
+mode.verbVELM=-2;   % <0 to see VELM results only the first time; >0: always
+
 
 itutmir=0; % if 1, the "entire" optical structure is studied with thermal (strong discretization)
 
@@ -335,8 +346,8 @@ else
 end
 NUM_Azim_v=[1 1 1 2 3 3 3]; % modi azimutali
 
-% NUMERO_MODI_v=[1 1 1 1 1 1 1];
-% NUM_Azim_v=[1 1 1 1 1 1 1];
+NUMERO_MODI_v=[1 1 1 1 1 1 1];
+NUM_Azim_v=[1 1 1 1 1 1 1];
 
 if isfield(mode,'quasi1D') & mode.quasi1D==1
     NUMERO_MODI_v=ones(size(NUMERO_MODI_v));

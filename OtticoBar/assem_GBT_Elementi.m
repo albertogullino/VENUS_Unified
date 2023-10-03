@@ -230,11 +230,11 @@ else
 end
 if(mode.nflg)
     elec=abs(uvet(nn+(1:nn)));
-   
-end % electron concentration 
+    
+end % electron concentration
 if(mode.pflg)
     hole=abs(uvet(pp+(1:nn)));
-   
+    
 end % hole concentration
 
 if(mode.oflg)
@@ -550,7 +550,7 @@ if(not(mode.firstrun)) % At equilibrium, R=0
         end
     end
     
-%     MM = [Lp1.*Rrad2D(iiQW1) Lp2.*Rrad2D(iiQW2)];
+    %     MM = [Lp1.*Rrad2D(iiQW1) Lp2.*Rrad2D(iiQW2)];
     MM=[Se1.*Rrad(in1) Se2.*Rrad(in2) Se3.*Rrad(in3)];
     PspBulk=1000*sum(sparse(MM))*h*(Clight*1e-2/mean(1e-9*mode.vlambda)); % milliwatt
     
@@ -647,11 +647,11 @@ if(mode.nflg) % ################################################################
     
     % Bernoulli functions
     offset_n(iq)=affinity(iq);  % Vt(iq).*log(Nc(iq))
-    offset_nn(iq)=log(Nc(iq)) ;  
+    offset_nn(iq)=log(Nc(iq)) ;
     offset_n1=offset_n(in1); offset_n2=offset_n(in2); offset_n3=offset_n(in3);
     offset_nn1=offset_nn(in1) ;offset_nn2=offset_nn(in2) ;offset_nn3=offset_nn(in3) ;
     
- 
+    
     
     delta12 = (phi1 + offset_n1 )./VT12+log(gamman(in1))+offset_nn1 - (phi2 + offset_n2 )./VT12-log(gamman(in2))-offset_nn2;
     delta23 = (phi2 + offset_n2 )./VT23+log(gamman(in2))+offset_nn2 - (phi3 + offset_n3 )./VT23-log(gamman(in3))-offset_nn3;
@@ -695,7 +695,7 @@ if(mode.nflg) % ################################################################
     Jmat0=Jmat0+sparse(iit   ,jjt,-MM(mask_iit),neq,neq); % Assembly current eq.
     % Fermi statistics ============================================================================100
     if((isfield(mode,'stats'))&&(strcmp(mode.stats,'Fermi')))
-       
+        
         M11=Dn.*((s3./l3.*VT12.*dB12+s2./l2.*VT13.*dB13).*elec1+s3./l3.*VT12.*dB21.*elec2+s2./l2.*VT13.*dB31.*elec3);
         M12=Dn.*(-s3./l3.*VT12.*dB12.*elec1-s3./l3.*VT12.*dB21.*elec2);
         M13=Dn.*(-s2./l2.*VT13.*dB13.*elec1-s2./l2.*VT13.*dB31.*elec3);
@@ -786,7 +786,7 @@ if(mode.pflg) % ################################################################
     offset_pp(iq)=-log(Nv(iq));
     offset_p1=offset_p(in1); offset_p2=offset_p(in2); offset_p3=offset_p(in3);
     offset_pp1=offset_pp(in1); offset_pp2=offset_pp(in2); offset_pp3=offset_pp(in3);
-
+    
     % Bernoulli functions
     delta12 = (phi1 + offset_p1)./VT12-log(gammap(in1))+offset_pp1 - (phi2 + offset_p2)./VT12+log(gammap(in2))-offset_pp2;
     delta23 = (phi2 + offset_p2 )./VT23-log(gammap(in2))+offset_pp2 - (phi3 + offset_p3 )./VT23+log(gammap(in3))-offset_pp3;
@@ -1027,14 +1027,14 @@ if(mode.oflg)
         s_LoadConstants
         Vt2D = Vt(inQW);
         
-        if mode.TQWFake==1 && mode.indv> 2 
-           load('DTfit') ; 
-           Iq=mode.ii_dd(end)*1e3 ; 
-           TQWfit=interp1(Ifit,DTfit,Iq)+293 ;
-           Vt2D = ones(1,length(inQW))*TQWfit*kB/qel ; 
+        if mode.TQWFake==1 && mode.indv> 2
+            load('DTfit') ;
+            Iq=mode.ii_dd(end)*1e3 ;
+            TQWfit=interp1(Ifit,DTfit,Iq)+293 ;
+            Vt2D = ones(1,length(inQW))*TQWfit*kB/qel ;
             disp('Warning! Tqw fake!')
         end
-      
+        
         %
         tauscatn = mesh.tauscatnMQW{indQW}/mode.FatAdiab; % capture time, s
         tauscatp = mesh.tauscatpMQW{indQW}/mode.FatAdiab; % capture time, s
@@ -1537,7 +1537,7 @@ if(mode.oflg)
         CcappQW=Ccapp*mode.CarrierNorm/mode.CarrierNorm2D;
         dCcapp_P3DQW=dCcapp_P3D*mode.CarrierNorm/mode.CarrierNorm2D;
         dCcapp_p2DQW=dCcapp_p2D*mode.CarrierNorm/mode.CarrierNorm2D;
-                
+        
         CcappM1=CcappQW;
         CcappM2=CcappQW;
         CcappM1(fie)=0;
@@ -1622,42 +1622,42 @@ if(mode.oflg)
         Rsp=Rsp*mode.fat_gain;
         dRspE=dRspE*mode.fat_gain;
         dRspH=dRspH*mode.fat_gain;
-%             if mode.CarrierNorm>1
-%                 Rrad2D_SBE = Rsp; % from 1/(s*cm^3) to 1/(s*cm^2)
-%                 Rrad2D = Rsp; % from 1/(s*cm^3) to 1/(s*cm^2)
-%                 dRrad2D_n2D = dRspE; % 1/cm and cm simplify
-%                 dRrad2D_p2D = dRspH; % 1/cm and cm simplify
-%             else
+        %             if mode.CarrierNorm>1
+        %                 Rrad2D_SBE = Rsp; % from 1/(s*cm^3) to 1/(s*cm^2)
+        %                 Rrad2D = Rsp; % from 1/(s*cm^3) to 1/(s*cm^2)
+        %                 dRrad2D_n2D = dRspE; % 1/cm and cm simplify
+        %                 dRrad2D_p2D = dRspH; % 1/cm and cm simplify
+        %             else
         Rrad2D_SBE = Rsp*WQW; % from 1/(s*cm^3) to 1/(s*cm^2)
         Rrad2D = Rsp*WQW; % from 1/(s*cm^3) to 1/(s*cm^2)
         dRrad2D_n2D = dRspE*WQW; % 1/cm and cm simplify
         dRrad2D_p2D = dRspH*WQW; % 1/cm and cm simplify
-%             end
+        %             end
         
         VI=Rrad2D;
         MM = qel.*[Lp1.*VI(iiQW1) Lp2.*VI(iiQW2)];
         IntRad=IntRad+sum(MM);
         mode.IRsp(mode.indv,indQW) = sum (MM);
-
+        
         MM = [Lp1.*Rrad2D(iiQW1) Lp2.*Rrad2D(iiQW2)];
         frsp=mode.frsp;
         Psp=Psp+frsp*1000*sum(sparse(MM))*h*(Clight*1e-2/mean(1e-9*mode.vlambda)); % milliwatt
         
         % "Brad" model
-%         Brad2D = mesh.brad(inQW)./WQW; % Brad in cm^2/s (/WQW!)
-%         Rrad2D = Brad2D.*np2D; % cm^(-2)/s
-%         dRrad2D_n2D = Brad2D.*p2D;
-%         dRrad2D_p2D = Brad2D.*n2D;
+        %         Brad2D = mesh.brad(inQW)./WQW; % Brad in cm^2/s (/WQW!)
+        %         Rrad2D = Brad2D.*np2D; % cm^(-2)/s
+        %         dRrad2D_n2D = Brad2D.*p2D;
+        %         dRrad2D_p2D = Brad2D.*n2D;
         %
         R2D = R2D + Rrad2D;
         dR2D_n2D = dR2D_n2D + dRrad2D_n2D;
         dR2D_p2D = dR2D_p2D + dRrad2D_p2D;
         %
         % Auger recombination model
-%             if mode.CarrierNorm>1
-%                 Cnnp2D=mode.FatAuger23D*mesh.Cnnp(inQW);
-%                 Cppn2D=mode.FatAuger23D*mesh.Cppn(inQW);
-%             else
+        %             if mode.CarrierNorm>1
+        %                 Cnnp2D=mode.FatAuger23D*mesh.Cnnp(inQW);
+        %                 Cppn2D=mode.FatAuger23D*mesh.Cppn(inQW);
+        %             else
         Cnnp2D=mode.FatAuger23D*mesh.Cnnp(inQW)./(WQW.^2);
         Cppn2D=mode.FatAuger23D*mesh.Cppn(inQW)./(WQW.^2);
         %             end
@@ -1790,7 +1790,7 @@ if(mode.oflg)
         % 2D electron equation recombination term ---------------------------------
         MM = qel.*[Lp1.*R2D(iiQW1) Lp2.*R2D(iiQW2)];
         tvet = tvet + sparse(VV+ijrQW,1,MM,neq,1);
-        mode.IR2D(mode.indv,indQW)=sum(MM) ; 
+        mode.IR2D(mode.indv,indQW)=sum(MM) ;
         MM = qel.*[Lp1.*dR2D_p2D(iiQW1) Lp2.*dR2D_p2D(iiQW2)];
         Jmat0 = Jmat0 + sparse(VV+ijrQW,WW+ijrQW,MM,neq,neq);
         MM = qel.*[Lp1.*dR2D_n2D(iiQW1) Lp2.*dR2D_n2D(iiQW2)];
@@ -1878,8 +1878,8 @@ if(mode.oflg)
             %
             gE = g.*E2; % gain-field product
             MM = [Lp1.*gE(iiQW1) Lp2.*gE(iiQW2)];
-           
-            mode.gE(mode.indv,indQW,indMode,:)=gE; 
+            
+            mode.gE(mode.indv,indQW,indMode,:)=gE;
             
             gm = sum(diag(sparse(ijrQW,ijrQW,MM,nnQW,nnQW)));
             dgm_nE = dgE.*E2;
@@ -1918,7 +1918,7 @@ if(mode.oflg)
             Rst = gE.*Pst(indMode).*Fattore_attivo*mode.fPdif(indMode)/mode.CarrierNorm2D*WQW;
             % 2D electron equation recombination term ---------------------------------
             MM = qel.*[Lp1.*Rst(iiQW1) Lp2.*Rst(iiQW2)];
-            mode.Irst(mode.indv,indQW)=sum(MM) ; 
+            mode.Irst(mode.indv,indQW)=sum(MM) ;
             IntStim=IntStim+sum(MM);
             
             tvet = tvet + sparse(VV+ijrQW,1,MM,neq,1);
@@ -1984,7 +1984,7 @@ if(mode.oflg)
     % saving variables
     mode.Pst=Pst; mode.Scheck=Scheck;
     %mode.nQW{mode.ind_v0}=nQW; mode.pQW{mode.ind_v0}=pQW;
-    mode.matgain=mode.matgain/(NQW*nmodes); 
+    mode.matgain=mode.matgain/(NQW*nmodes);
     mode.Psp=Psp;
     
     % assembling additional equations for passivation

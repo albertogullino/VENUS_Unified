@@ -20,20 +20,21 @@ flgGEOM=0;     % carica vecchia geom
 
 % Dynamic Analysis
 iDyn = 0;                   % flag, 1 to turn on the dynamic analysis
-% fvet = logspace(8,11,36);   % frequencies for small-signal simulation, Hz
-fvet = logspace(7,11,121);   % frequencies for small-signal simulation, Hz
+fvet = 5*logspace(8,10,81);   % frequencies for small-signal simulation, Hz
+% fvet = logspace(7,11,121);   % frequencies for small-signal simulation, Hz
 % CurDynRef = [1:3:13];       %     values of current where small-signal analysis is performed
-CurDynRef = 1:0.5:7;       % values of current where small-signal analysis is performed
+CurDynRef = 1:1:3;       % values of current where small-signal analysis is performed
 
-minPerc=5;
+minPerc=10;
 
 IOLDsw=0;
 
 iSavNome=1;
 
-IPLOT=1;  % Structure details + live plots of simulation results
+% IPLOT=-1;  % Structure details + live plots of simulation results
+IPLOT=1;  % live plots of simulation results
 % IPLOT=-2;   % Structure details plot
-% IPLOT=0;    % Not intermediate plots
+% IPLOT=0;    % No intermediate plots
 
 % Imassimo=1;  % massima corrente analizzata
 PotMin=.1;        % potenza finale
@@ -55,6 +56,7 @@ Last_Workspace=[nomeSW,Last_Workspac];
 % radi='_JSTQE_dotLU3'; % JSTQE results
 % radi='_OX'; % OC-VCSEL: use for comparison with TJ!
 radi='_OXelementi'; % OC-VCSEL: use for comparison with TJ!
+% radi='_OXelementi_1D'; % OC-VCSEL: use for comparison with TJ!
 
 rad_settingV{100}=radi;    %vale anche per IPAR = 0
 for k=1:70
@@ -132,21 +134,22 @@ DDin=[0:0.4:1.2 1.3:0.1:1.5];
 % Different bias conditions ABOVE threshold are investigated for different temperatures
 TTve=[110:-30:20];
 TTve=20
+
 Tpelt=TTve;
 for itemp=1:length(TTve)
     Temperaturei=TTve(itemp);
     if Temperaturei == 110
-        Vadd=[1.55:0.02:2.2];
+        Vadd=[1.55:0.02:2.4];
         Imassimo=8;  % massima corrente analizzata
     elseif Temperaturei == 80
-        Vadd=[1.55:0.03:2.4];
+        Vadd=[1.55:0.03:2.6];
         Imassimo=11;  % massima corrente analizzata
     elseif Temperaturei == 50
-        Vadd=[1.55:0.04:2.7];
+        Vadd=[1.55:0.04:2.8];
         Imassimo=13;  % massima corrente analizzata
     elseif Temperaturei == 20
 %         Imassimo=16;  % massima corrente analizzata
-        Vadd=[1.55:0.05:2.8];
+        Vadd=[1.55:0.05:3.1];
 %         Vadd=[1.62:0.02:1.8 1.85:0.05:2.3];
 %         Imassimo=7;
         Imassimo=14;

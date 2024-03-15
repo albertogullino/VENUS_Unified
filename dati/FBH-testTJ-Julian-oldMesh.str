@@ -1,0 +1,67 @@
+$ DATAFORDD_START
+% P_i e P_f sono il paio di inizio e fine dello strato equivalente, da sinistra verso destra
+% P_i = P_f per eliminare strato equivalente, oppure togliere o commentare con % il campo mirroreq
+% se scrivi con il simbolo di dollaro, la funzione riconosce il simbolo e agisce.
+% mirroreq_p P_i=0 P_f=12 x_eq=0.44 Dop_eq=9.5e17 Mateq=AlGaAs Nmesh=25 f_any=1
+% mirroreq_n2 P_i=3 P_f=12 x_eq=0.44 Dop_eq=1.5e18 Mateq=AlGaAs  Nmesh=30 f_any=1
+% mirroreq_n P_i=0 P_f=37 x_eq=0.44 Dop_eq=1.5e18 Mateq=AlGaAs Nmesh=21 f_any=1
+$ mesa Dpass=1
+% PassivationSection passiv_size=6 passiv_mesh=12
+$ PassivationSection passiv_size=15 passiv_mesh=10 passiv_depth=3.5
+% PassivationSection passiv_size=15 passiv_mesh=3
+% Allarga la simulazione di passive_size dall'ossido in poi
+% Metalring radius_i=5.25 width=6
+% Devono essere uguali a quelli ottici
+% DD_radial_sections radii radie: significa che sono aggiunte due colonne, i cui limiti
+% sono oxide-radii oxide+radie
+% DD_radial_sections radii=0. radie=0. Radial_mesh=.5+10j 
+% DD_radial_sections radii=0. radie=0. Radial_mesh=.14+100j .25+500j .4+15j
+$ DD_radial_sections radii=0. radie=0. Radial_mesh=.1+18j 
+%  Radial_mesh organizza la mesh radiale: per ogni colonna, si da il passo (parte reale)
+% e il n. max di punti (parte immaginaria)
+$ buffer thick=0.001 thick_dd=300 size=50
+$ Thermal metal=3e-4 pass=5e-7 air=2.5e-8 cavity=1.5e-5 substrate=4.6e-5 dbr=1.5e-5
+$ DATAFORDD_END
+
+
+% FBH test structure for TJ characterization
+
+Wavelength 850 nm
+FATTORE_Z 1.00
+
+Reference Ref 3.6 0 2.5
+
+LcPor FF_ang@10cm 1 1000 Ref 1 0
+
+% Top contact
+Lc  1 150. Ref 1  0.  circle 8|P2 Au    circle 11|P3 Ref 1  0 
+Lc  1  30. Ref 1  0.  circle 8|P2 Pt    circle 11|P3 Ref 1  0   
+LcDD  1  20. Ref 1  0.  circle 8|P2 Ti  circle 11|P3 Ref 1  0 
+ 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% "GRIN"
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Lc         	 Nd=2e18      	      1  20          AlGaAs 0       1       Nmesh=10
+Lg         	 Nd=2.5e18  Nd=2.5e18 1  60          AlGaAs 0.00 0.45    1 1 Ndis=1   Nmesh=20
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% "CONF"
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Lc         	 Nd=1e18              1  300         AlGaAs 0.45    0     circle 3|P1 Ref 1.6 0    Nmesh=50
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% "TJ"
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+LcaNEGF      Nd=3e19 1 20   AlGaAs 0.25  1 Nmesh=20
+LcaNEGF      Na=8e19 1 15  	AlGaAs 0.25  1 Nmesh=15
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% "Bulk"
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+LcPor        Na=1e18              1  300         AlGaAs 0.45    0       Nmesh=50
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% "Con"
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%LcPor      	 Na=2e19              1  20          AlGaAs 0.45    0       Nmesh=10

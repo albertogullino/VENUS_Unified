@@ -89,11 +89,11 @@ end
 
 
 mode.OptScaling=0;    % area reduction w.r.t. to the eletrical area
-if mode.quasi1D==1 && mode.flgBTJ==1
-    mode.fPdifScaling=1.15; % 1 for Oxide or 3D simulations; 1.2 for TJ (1D)
-else
-    mode.fPdifScaling=1; % 1 for Oxide or 3D simulations; 1.2 for TJ (1D)
-end
+% if mode.quasi1D==1 && mode.flgBTJ==1
+%     mode.fPdifScaling=1.15; % 1 for Oxide or 3D simulations; 1.2 for TJ (1D)
+% else
+%     mode.fPdifScaling=1; % 1 for Oxide or 3D simulations; 1.2 for TJ (1D)
+% end
 
 mode.fPdifScaling=1; % 1 for Oxide or 3D simulations; 1.2 for TJ (1D)
 
@@ -109,9 +109,9 @@ end
 % Gain and quantum models
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% epsNLg=4e-17;
+epsNLg=4e-17;
 % epsNLg=3e-17;
-epsNLg=1.5e-17;
+% epsNLg=1.5e-17;
 
 Qc=0.6;
 FLos=1;
@@ -176,8 +176,8 @@ for ks=1:length(LUT)
     LUT{ks}=[nomeLUT,LUT{ks}];
 end
 
+% Deltalam=3;
 Deltalam=-70;
-
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Thermal and optical coefficients
@@ -185,12 +185,15 @@ Deltalam=-70;
 C_Temp=1;  % Coeff. Temperatura totale
 C_TempGain=1;  % Coeff. Temperatura Gain
 dndT=2.3e-4;  % dn/dT  2.3e-4 da dati sperimentali
-dndT1D=4e-4;  % for 1D fitting
+dndT1D=2.3e-4;  % for 1D fitting
 fat_RAD=0.50;   % self-absorption heating from spont. recombination
 fat_RAD=5e-2   % self-absorption heating from spont. recombination
 
 mode.FatQtot=115;    % scaling factor for Q to fit 3D and 1D deltaT
-mode.FatV=46;   % kT scaling between substrate and VCSEL regions
+% mode.FatV=46;   % kT scaling between substrate and VCSEL regions
+mode.FatV=80;   % kT scaling between substrate and VCSEL regions
+% mode.FatQtot=1;    % scaling factor for Q to fit 3D and 1D deltaT
+% mode.FatV=1;   % kT scaling between substrate and VCSEL regions
 mode.FatQcontact=1.00; % 1D simulation: scaling at the contact (0.65 for Oxide; 1.00 for TJ)
 
 % fCondTer=1;   % transverse thermal conducibility
@@ -220,23 +223,25 @@ mode.ABSh0=7;
 % Fat_Perd0=2.6;  % con Log 1
 Fat_Perd0=2.9  % con Log 1
 
-% increase ABS_Texp with Tvelm=DeltaT+T0, in f_CallVELM:
+% Increase ABS_Texp with Tvelm=DeltaT+T0, in f_CallVELM:
 % ABS_Texp=mode.ABS_Texp+mode.PerCoefExT*Tvelm;
 PerCoefExT=0
-%PerCoefExT=2e-3 
+% PerCoefExT=2e-2
 
-% changes Fat_Perd0 in ASSEGNO_mode: Fat_Perd_mod=Fat_Perd0+Fat_PerCoefTemp*(mode.T0-T300);
+% Changes Fat_Perd0 in ASSEGNO_mode: Fat_Perd_mod=Fat_Perd0+Fat_PerCoefTemp*(mode.T0-T300);
 % Fat_PerCoefTemp=(.9-Fat_Perd0)/90;
 % Fat_PerCoefTemp=0   
-Fat_PerCoefTemp=0.002
+% Fat_PerCoefTemp=0.002
+Fat_PerCoefTemp=-0.00375
+
 if IPAR==42
     Fat_PerCoefTemp=0;
 end
 
 
 % ABS_Texp=2.4
-ABS_Texp=0      % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
-% ABS_Texp=1.2      % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
+% ABS_Texp=0      % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
+ABS_Texp=1.5      % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
 
 ABS_Apor=0;   %dipendenza lineare !!!!!!!
 ABS_Ader=0;
@@ -287,6 +292,7 @@ load COT
  FAT_Diff_E=0.4;   % factor to be multiplied times QW electron mobility
 % FAT_Diff_E=0.5   % factor to be multiplied times QW electron mobility
 FAT_Diff_H=1;   % factor to be multiplied times QW hole mobility
+% FAT_Diff_H=0.2   % factor to be multiplied times QW hole mobility
 mode.idiffusioneQW=3;   % 0: no QW diffusion; 1: QW diffusion; 2: NO; 3: drift-diffusion in QW
 % mode.idiffusioneQW=2;   % 0: no QW diffusion; 1: QW diffusion; 2: NO; 3: drift-diffusion in QW
 mode.iambipolarQW=0;    % use ambipolar mobility in QW
@@ -333,8 +339,7 @@ mode.verbVELM=0;
 if mode.quasi1D==1
     mode.verbVELM=-1;   % <0 to see VELM results only the first time; >0: always
 end
-mode.verbVELM=-2;   % <0 to see VELM results only the first time; >0: always
-
+% mode.verbVELM=-2;   % <0 to see VELM results only the first time; >0: always
 
 itutmir=0; % if 1, the "entire" optical structure is studied with thermal (strong discretization)
 
@@ -361,7 +366,7 @@ end
 
 NUM_Azim=NUM_Azim_v(Isize); % numero massimo variazioni radiali, modi azimutali nu (if =3 -> palle: 1,2,4)
 NUMERO_MODI=NUMERO_MODI_v(Isize);   % numero modi in VENUS (nmodes)
-Pf.nmasce=-4;  % modi radiali per ogni modo azimutale, in FREQUENZA sul plot(Fint,alvet)
+Pf.nmasce=-2;  % modi radiali per ogni modo azimutale, in FREQUENZA sul plot(Fint,alvet)
  
 VelmOptions.isoga=0;    % order modes in VELM, based on wavelength (0), gain (1)
 
@@ -371,32 +376,25 @@ if NUMERO_MODI>1
 end
 NP_k=[30 30 25 20 20 20];
 VelmOptions.NP_k=NP_k(Isize);
-% VelmOptions.NP_k=20;
+VelmOptions.NP_k=30;
 % VelmOptions.NP_k=60; % 2 etched TJ case
 VelmOptions.num_azim=NUM_Azim; % example, 3 is 0, 1, 2
-% VelmOptions.Dlam=[-.5 4.5 5 0 .4]; % ORIGINAL
-% VelmOptions.Dlam=[-.5 10 10 0 .4]; % ORIGINAL, -10????
-% if NUMERO_MODI<=2
-%     VelmOptions.Dlam=[-0.5 2 4 0 .4]; % ORIGINAL, Isise=4, 2 TJ (etched)
-% %     VelmOptions.Dlam=[-10 5 5 0 .4]; % ORIGINAL, Isise=4, 2 TJ (etched)
-% end
+VelmOptions.Dlam=[-.5 4.5 5 0 .4]; % ORIGINAL
+if NUMERO_MODI<=2
+    VelmOptions.Dlam=[-.5 3.5 5 0 .4]; % ORIGINAL
+%     VelmOptions.Dlam=[1 5 5 0 .4]; % ORIGINAL, 2 modes, dox=2 um
+    VelmOptions.Dlam=[-0.5 2 4 0 .4]; % ORIGINAL, Isise=4, 2 TJ (etched)
+%     VelmOptions.Dlam=[-10 5 5 0 .4]; % ORIGINAL, Isise=4, 2 TJ (etched)
+end
 % KMax=[.21 .18 .15 .12];
 % KMax=[.18 .15 .14 .12 .11 .10];
-KMax=[.25 .20 .18 .16 .14 .12];
+KMax=[.25 .20 .16 .12 .11 .10];
 VelmOptions.krel_max=KMax(Isize);               %kmax; 0.1 va bene per aperture normali (3-4 um)
-
-%     VelmOptions.Dlam=[-5 +5 10 0 .4]; % ORIGINAL, -10???? (30°C)
-    VelmOptions.Dlam=[-.5 +7 10 0 .4]; % ORIGINAL, -10???? (30°C)
-%     VelmOptions.Dlam=[-6 -2 10 0 .4]; % ORIGINAL, -10???? (room T)
-    VelmOptions.NP_k=30;
-    VelmOptions.krel_max=.12;
-
-% mode.mintempVELM=200; % degrees, minimum temperature such that VELM is called
+mode.mintempVELM=200; % degrees, minimum temperature such that VELM is called
 mode.mintempVELM=1; % degrees, minimum temperature such that VELM is called
 mode.IsoThermal=0;
 mode.DT0=100; % degrees, minimum temperature for estimating Dlam_mod
-% mode.DT0=10; % degrees, minimum temperature for estimating Dlam_mod
-% mode.frsp=1/90; %.5 x sopra e sotto,  .3 per cono ricezione, 100 fattore tras specchio
+mode.frsp=1/90; %.5 x sopra e sotto,  .3 per cono ricezione, 100 fattore tras specchio
 mode.frsp=1/150; %.5 x sopra e sotto,  .3 per cono ricezione, 100 fattore tras specchio
 %
 
@@ -425,7 +423,7 @@ mode.nflg=1; % include electron continuity equation
 mode.pflg=1; % include hole continuity equation
 mode.tflg=0; % include trap equations
 mode.Tflg=0; % include thermal effects
-mode.oflg=0; % include quantum effects and stimulated recombination
+mode.oflg=1; % include quantum effects and stimulated recombination
 mode.RAD_spalmato=1;
 if mode.oflg==0
     mode.RAD_spalmato=0;
@@ -469,8 +467,6 @@ if Temperaturei==20
 elseif Temperaturei==80
     mode.Imin=3e-3/mode.CarrierNorm;  % 1.5 in case of "etched" TJ
 end
-mode.Istep=0.2e-3/mode.CarrierNorm; % A, current step for current driving below Imin
-mode.IstepLarge=0.5e-3/mode.CarrierNorm; % A, current step for current driving above Imin
 
 if mode.Idrive==1
     Imassimo=18;

@@ -50,8 +50,8 @@ else
             ParVet=[Oxide Oxide Oxide Oxide Oxide Oxide];
             
             if mode.flgBTJ==1
-                %                 ParVet=[Oxide Oxide Oxide];
-                ParVet=[Oxide Oxide Oxide Oxide Oxide Oxide];
+                                ParVet=[Oxide Oxide Oxide];
+%                 ParVet=[Oxide Oxide Oxide Oxide Oxide Oxide];
             end
         end
         
@@ -198,6 +198,8 @@ NOMELUT=LUT{iLUT};
 mode.Fasano=[nomeSR,'Fasano'];
 mode.GLUT=[NOMELUT,'_Der.mat'];
 geom.GLUTm=[NOMELUT,'_more.mat'];
+% geom.GLUTm='LUT4D_Feb24_Markus_nMark_xW=0_xB=0.2_more.mat';
+% geom.GLUTm='LUT4D_Feb24_Markus_nMark_xW=0_xB=0.38_more.mat';
 mode.FAT_idiffusioneQW_E=FAT_Diff_E;
 mode.FAT_idiffusioneQW_H=FAT_Diff_H;
 

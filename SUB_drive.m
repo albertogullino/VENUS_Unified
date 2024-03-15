@@ -170,7 +170,7 @@ if irest==0
     end
     %
     % total number of equations/unknowns
-    neq=nn+mode.nflg*nn+mode.pflg*nn+mode.tflg*nl*nn+2*nm+mode.oflg*not(mode.firstrun)*2*NQW*length(mesh.xgrid)+mode.oflg*mode.nmodes;
+    neq=nn+mode.nflg*nn+mode.pflg*nn+mode.tflg*nl*nn+2*nm+mode.qflg*not(mode.firstrun)*2*NQW*length(mesh.xgrid)+mode.Oflg*mode.nmodes;
     
     % We first compute the solution vector with all the information we have at this point;
     % notice that here the solution is in frequency domain
@@ -191,7 +191,7 @@ if irest==0
         end
     end
     
-    if(mode.oflg && isfield(mode,'Pst'))
+    if(mode.Oflg && isfield(mode,'Pst'))
         uvet(ss+(1:mode.nmodes))=mode.Pst*mode.Cpot/1e3;
     end
     %
@@ -419,7 +419,7 @@ while(indv<=NVbias && DeltaTmax<DTM0 && I_mA<abs(Imassimo) && CondPotBreak==0) %
     DeltaTmax_OptAbs=max(max(DeltaTOptAbs));
     
     % giusto per non buttare via quel plot, faccio così.
-    if(mode.oflg)
+    if(mode.qflg)
         n2Dtmp=0; p2Dtmp=0; n3Dtmp=0; p3Dtmp=0;
         for indQW=1:NQW
             n2Dtmp=n2Dtmp+mode.n2D{indQW};
@@ -443,7 +443,7 @@ while(indv<=NVbias && DeltaTmax<DTM0 && I_mA<abs(Imassimo) && CondPotBreak==0) %
         mode.n3MaxVet(indv)=n3Max;
         mode.p3MaxVet(indv)=p3Max;
         
-        if iold==2
+        if iold==2 && mode.Oflg==1
             % calcolo guadagno e derivate
             %    'qui derivate', keyboard
             NUOVA_Gain
@@ -462,7 +462,7 @@ while(indv<=NVbias && DeltaTmax<DTM0 && I_mA<abs(Imassimo) && CondPotBreak==0) %
     
     mode.rAperture=ParVet(1);   % needed to define the TJ radius
     
-    if(mode.oflg)
+    if mode.qflg==1 && mode.Oflg==1
         %     flagPort=(flagCallVELM.*abs(DeltaTmax-DeltaTempVELMLast)>=mode.mintempVELM);
         DELTAT=abs(DeltaTmax-DeltaTempVELMLast)
         flagTemp=(DELTAT>=mode.mintempVELM);
@@ -533,8 +533,10 @@ while(indv<=NVbias && DeltaTmax<DTM0 && I_mA<abs(Imassimo) && CondPotBreak==0) %
             else
                 verbVELM=mode.verbVELM;
                 % File does not exist.
-                if isfield(mode,'quasi1D') && mode.quasi1D==1
-                    [velm] = f_CallVELM_1D(mesh,mode,mode1,ParVet,VelmOptions,fil_str,mode.quasi1D);
+                if isfield(mode,'quasi1D') && mode.quasi1D==1 
+                    if mode.Oflg==1
+                        [velm] = f_CallVELM_1D(mesh,mode,mode1,ParVet,VelmOptions,fil_str,mode.quasi1D);
+                    end
                 else
                     if v0_dd==0
                         save(['dati/VELM/VELM_',strSave],'mesh','mode','mode1','ParVet','VelmOptions','fil_str')
@@ -741,7 +743,7 @@ clear Res
         uvet(pp+1:3*nn)=abs(uvet(pp+1:3*nn));
         uvet(nn+1:pp)=abs(uvet(nn+1:pp));
 
-        if mode.oflg==1
+        if mode.Oflg==1
             uvet(ss+1)=abs(uvet(ss+1));
             uvet(vv:ss)=abs(uvet(vv:ss));
         end
@@ -771,9 +773,14 @@ clear Res
         mode.indv=indv;
         if mode.mp==0
             if mode.IdriveON==0
+%                 Zmat=100;%*pi*(StrTT.Rox*1e-4)^2;
+                if Zmat>0
+                    fprintf(['Input impedance Rs = ',num2str(Zmat),' Ohm ! \n'])
+                end
+                mode.Zmat=Zmat;
                 [Kmat0,Jmat0,Jmat1,Jmat2,uvet,rvet,mode,tvet]=assem_GBT(geom,mesh,mode,uvet,v0_dd);
             else
-                mode.Zmat=mode.Ymat ;
+                mode.Zmat=mode.Ymat;
                 [Kmat0,Jmat0,Jmat1,Jmat2,uvet,rvet,mode,tvet]=assem_GBT(geom,mesh,mode,uvet,i0_dd);
             end
         else
@@ -784,7 +791,7 @@ clear Res
             end
         end
                          
-        if(mode.oflg)
+        if(mode.Oflg)
             if full(mode.Scheck)>1
                 iterMag1=iterMag1+1;
                 if iterMag1>1
@@ -853,7 +860,7 @@ clear Res
         mode.res(indv)=res; % save residual
 
         Res(iter+1)=res;
-        if mode.oflg==1
+        if mode.Oflg==1
             if max(mode.Scheck)>.2 & iprimoRunna==1
 %                 RunnaVELM=1;
                 RunnaVELM=0
@@ -952,7 +959,7 @@ clear Res
         %        plot(rvet,'o')
         %        drawnow
         
-        if mode.oflg==1
+        if mode.Oflg==1
             fprintf('parte cancellata\n')
             Scheck=mode.gmod./mode.lmod';
             indWrongScheck=find(Scheck>=1);
@@ -975,7 +982,7 @@ clear Res
         mesh=mesh_old;
         flagConv=0;
         flagCallVELM=0 ;
-        if(mode.oflg)
+        if(mode.Oflg)
             if(flagVELMWasCalled==1)
                 
                 VELMInfo(indVELM)=[];
@@ -1066,7 +1073,7 @@ clear Res
         v_dd=uvet(qq+1); % saving voltage
         i_dd=uvet(rr+1)*mode.CarrierNorm; % saving current
         
-        if(mode.oflg==0)
+        if(mode.Oflg==0)
             mode.ii_dd(indv)=i_dd;
             mode.vv_dd(indv)=v_dd;
             mode.vv0_dd(indv)=v0_dd;
@@ -1075,6 +1082,21 @@ clear Res
             efieldy_t=-mode.phi*mesh.grady*1e-4; efieldy_t(it)=0;
             mode.efield_x=reshape(pdeprtni(mesh.node,mesh.triangle(1:4,:),efieldx_t),1,mesh.nn);
             mode.efield_y=reshape(pdeprtni(mesh.node,mesh.triangle(1:4,:),efieldy_t),1,mesh.nn);
+            if(mode.qflg==1)
+                mode.nQW{indv}=mode.n2D;
+                mode.pQW{indv}=mode.p2D;
+                % da togliere
+                mode.IntCcapN(indv,:)=mode.IntCcapn;
+                mode.IntCcapP(indv,:)=mode.IntCcapp;
+                mode.IntRecN(indv,:)=mode.IntRecN;
+                mode.IntRecP(indv,:)=mode.IntRecP;
+                %               mode.IntCcapN(indv,:)=mode.IntCcapn;
+                %               mode.IntCcapP(indv,:)=mode.IntCcapp;
+                mode.IntREc(indv,:)=mode.IntRec;
+
+                % calcolo leakage
+                leakage
+            end
             if(mode.Tflg==1)
                 mode=f_EvalHeatingTerms(geom,mesh,mode);
             end
@@ -1142,7 +1164,7 @@ clear Res
                         end
                     end
                 end
-                if mode.oflg==1
+                if mode.Oflg==1
                     mode.Pst_dd(:,indv)=Pst(:)/mode.Cpot*1e3;
                     mode.Psp_dd(:,indv)=mode.Psp(end)/mode.Cpot*1e3;
                     mode.PspBulk_dd(:,indv)=mode.PspBulk(end);
@@ -1161,12 +1183,13 @@ clear Res
                 mode.DeltaTmax_RAD(indv)=DeltaTmax_RAD;
                 mode.DeltaTmax_OptAbs(indv)=DeltaTmax_OptAbs;
                 
+                mode.PTherm(:,indv)=PTherm;
+
                 mode.Gmod(:,indv)=full(mode.gmod);
                 mode.Lmod(:,indv)=mode.lmod;
                 mode.nQW{indv}=mode.n2D;
                 mode.pQW{indv}=mode.p2D;
-                mode.PTherm(:,indv)=PTherm;
-                % da togliere
+                                % da togliere
                 mode.IntCcapN(indv,:)=mode.IntCcapn;
                 mode.IntCcapP(indv,:)=mode.IntCcapp;
                 mode.IntRecN(indv,:)=mode.IntRecN;
@@ -1174,7 +1197,6 @@ clear Res
                 %               mode.IntCcapN(indv,:)=mode.IntCcapn;
                 %               mode.IntCcapP(indv,:)=mode.IntCcapp;
                 mode.IntREc(indv,:)=mode.IntRec;
-                
                 
                 % calcolo leakage
                 leakage
@@ -1189,7 +1211,7 @@ clear Res
         end
     end
     
-    if IPLOT==100 && mode.oflg==1 && flagConv==1
+    if IPLOT==100 && mode.qflg==1 && flagConv==1
         figure(portfig)
         len=1:length(mode.ii_dd);
         plot(1000*mode.ii_dd,1e-12*mode.nMaxVet(len)/mesh.NMQW,'o-',...
@@ -1209,7 +1231,7 @@ clear Res
     %               plot(1000*mode.ii_dd,1e-12*mode.nMaxVet(1:end-1),'o-',...
     %           1000*mode.ii_dd,1e-12*mode.pMaxVet(1:end-1),'+-')
     
-    if(mode.oflg)
+    if(mode.Oflg)
         vind=[];
         for indplot=1:length(VELMInfo)
             vind=[vind,VELMInfo(indplot).indVoltage];
@@ -1558,7 +1580,7 @@ clear Res
             mp_savePlotD
         end
         %
-        if mode.oflg==1 %&& mode.quasi1D==1
+        if mode.Oflg==1 %&& mode.quasi1D==1
             PPst=sum(modePlot.Pst_dd,1)+(modePlot.Psp_dd/mode.frsp + modePlot.PspBulk_dd)*(1-mode.fat_RAD);
             PElec=modePlot.ii_dd*1e3.*modePlot.vv_dd;
             if mode.flgBTJ==1 && mode.flgHeatTJ==2
@@ -1648,7 +1670,7 @@ clear Res
             end
         end
         %
-        if mode.oflg==1 && mode.Pst_dd(end)>0.90 && mode.quasi1D==1
+        if mode.Oflg==1 && mode.Pst_dd(end)>0.90 && mode.quasi1D==1
             if isfield(mode,'Pst_max')==1 && mode.Pst_dd(end)<mode.Pst_dd(end-1)
                 mode.Pst_max=mode.Pst_dd(end-1);
             end
@@ -1687,7 +1709,7 @@ clear Res
     end
     
     % CURRENT DRIVING SECTION
-    if mode.oflg==1
+    if mode.qflg==1 && mode.Oflg==1
         if (mode.Idrive==1 && mode.IdriveON==0 && (sum(Pst)>mode.Pmin || mode.vv_dd(end)>mode.Vmin))
             mode.IdriveON=1;
             if mode.Ilog==1
@@ -1695,8 +1717,12 @@ clear Res
             else
                 i_dd=i_dd/mode.CarrierNorm;
                 Imax=Imassimo*1e-3/mode.CarrierNorm;
+                
                 Iadd=[(i_dd+mode.Istep):mode.Istep:(mode.Imin-mode.Istep) mode.Imin:mode.IstepLarge:Imax];
                % Iadd=[(mode.ii_dd(end)/mode.CarrierNorm+mode.Istep): mode.Istep : mode.Imax/mode.CarrierNorm/1e3] ; 
+                if mode.Pmin_Pfit>20
+                    Iadd=repelem(Iadd,2);
+                end
             end
             mode.VIdrive=mode.vv_dd(end);   % last bias step at which Vdrive is used
             disp('Idrive ON')%,keyboard
@@ -1718,7 +1744,13 @@ clear Res
             
             Iadd=[(i_dd+mode.Istep):mode.Istep:(mode.Imin-mode.Istep) mode.Imin:mode.IstepLarge:Imax];
     
-            mode.i0_dd=[mode.ii_dd/mode.CarrierNorm Iadd];
+            if mode.Pmin_Pfit>20
+                mode.i0_dd=[mode.ii_dd/mode.CarrierNorm repelem(Iadd,2)];
+            else
+                % Repeated bias vector to avoid any fitting
+                mode.i0_dd=[mode.ii_dd/mode.CarrierNorm Iadd];
+                pausak
+            end
             NVbias=length(mode.i0_dd);
             
             fitStart=2; % for VELM fitting

@@ -56,6 +56,8 @@ switch material
         %-- Incomplete ionization parameters
         T300=mesh.T300;
         [Ed,Ea]=ActivEner(xmol);
+%         Ed=-150;
+%         Ea=-150;
         macro.DeltaEa=1e-3*Ea.*(1+mesh.CTemp_Ion*(T-T300)./T300); % (eV)
         macro.DeltaEd=1e-3*Ed.*(1+mesh.CTemp_Ion*(T-T300)./T300); % (eV)
 

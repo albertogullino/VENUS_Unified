@@ -5,7 +5,14 @@ LUT_GBTBT   % where NEGF results are stored
 
 Vint=[0:0.01:1];
 
-iT=1;       % temperature index in NEGF results
+figure,hold on
+plot(T_vet-273,'o')
+ylabel('Temperature, °C')
+
+Tin=input('\nWhich Temperature?     ') + 273;   % in K
+[~,iT]=min(abs(Tin-T_vet));     % find closest current index to Cor (DD)
+% iT=1;       % temperature index in NEGF results
+plot(iT,Tin-273,'*')
 
 cT=mode.cBTBT(iT,:);
 pDeg=size(mode.cBTBT,2)-1;

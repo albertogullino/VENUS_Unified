@@ -48,7 +48,10 @@ vind=modePlot.vind;
 NVbias=modePlot.NVbias;
 %Imeas_res=modePlot.Imeas_res;
 %Rmeas=modePlot.Rmeas;
-if(modePlot.oflg)
+if isfield(modePlot,'oflg') && modePlot.oflg==1
+    modePlot.Oflg=1;
+end
+if(modePlot.Oflg)
     xfi=mode.x;
     Ca=mode.E2;
     

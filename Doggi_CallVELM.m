@@ -1,4 +1,4 @@
-close all
+% close all
 % clear
 clear global
 colordef black
@@ -15,8 +15,9 @@ addpathVENUS
 % load out\LW_MarkusN_TJ_oxBelow_LgDBR_20C_lambda_radial.mat
 
 % load out\LW_MarkusN_FINALE_LgDBR_new.mat % 1D
-% load out\LW_MarkusN_FINALE_LgDBR_1D_PerCoefExT=2e-2.mat % 1D
 load out\LW_MarkusN_FINALE_LgDBR_20C_radial.mat % 3D
+% 
+% load out\LW_MarkusN_TJ_oxBelow_LgDBR_try.mat
 
 ParVet=MODEplot{1}.ParVet;
 VelmOptions=MODEplot{1}.VelmOptions;
@@ -28,7 +29,7 @@ strName=structureName(fis(end)+1:end);
 % fil_str=[structureName,'.str'];
 fil_str=['dati\',strName,'.str'];
     
-verVE=2   % verbVELM
+verVE=2  % verbVELM
 
 IPLOT=1
 
@@ -280,4 +281,28 @@ if IPLOT==1
     plot(I(ves),lambda,'g*')
     pausak
     %
+    zvelm=max(velm.SW(:,1))-flip(velm.SW(:,1));
+    SW=flip(abs(velm.SW(:,2)).^2)./max(abs(velm.SW(:,2)).^2);
+    nref=flip(real(velm.SW(:,3)));
+    fiQW=velm.SW(1,4);
+    fi=length(zvelm);
+    zQW=zvelm(fi-fiQW);                     % in VELM mesh
+    yQW=mesh.ygrid(mesh.inMQW{1}(1))*1e4;   % in DD mesh
+    z=zvelm-zQW+yQW;                        % shifted to align both mesh
+
+    
+    figure(50)
+    colororder({'b','r'})
+
+    yyaxis left
+    hold on, grid on
+    plot(z,nref)
+    axis([114.6 115.9 1 3.7])
+    yticks([3 3.7])
+%     plot(zvelm,log10(SW)+max(nref))
+    yyaxis right
+    hold on
+    plot(z,SW*max(nref))
+    yticks([])
+    xlabel('z, \mum')
 end

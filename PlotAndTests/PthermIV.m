@@ -5,7 +5,12 @@ else
     modep=MODEplot{1};
 end
 
-for iV=1:length(mode.ii_dd)
+I=mode.ii_dd'*1e3;
+
+PTherm=zeros(length(I),1);
+PJoule=PTherm; Prad=PTherm; Pfca=PTherm; Pcap=PTherm; Pnr=PTherm;
+
+for iV=1:length(I)
     
     
     Joulep=(squeeze(modep.HeatJoule(iV,:,:)));
@@ -25,3 +30,15 @@ for iV=1:length(mode.ii_dd)
     Pfca(iV)=HeatIntegral(mesh,OptAbsp);  % Extract Ptherm for a given thermal source
     Pcap(iV)=HeatIntegral(mesh,Rec_Capp);  % Extract Ptherm for a given thermal source
 end
+
+figure,plot(I,PTherm,'k','linewidth',2)
+grid on,chold
+plot(I,PJoule,'c','linewidth',2)
+plot(I,Pfca,'g','linewidth',2)
+plot(I,Pcap,'r','linewidth',2)
+plot(I,Prad,'b','linewidth',2)
+plot(I,Pnr,'y','linewidth',2)
+xlabel('Current, mA'),ylabel('Dissipated power, mW')
+legend('Tot','Joule','FCA','Ccap','Rad','NR','location','northwest')
+ylim([0 30])
+set(gca,'FontSize',16,'FontName','Times','Box','on')

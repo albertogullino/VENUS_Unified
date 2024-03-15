@@ -1957,7 +1957,7 @@ end
 % keyboard
 
 %%% inizializzazione variabili
-pack
+% pack
 
 si2=[length(Pusa) length(Pusa)];
 P=ones(2*lKA,2*lKA)*(1+i);

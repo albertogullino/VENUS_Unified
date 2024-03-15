@@ -1,5 +1,7 @@
 mode.flgBTJ=1;  % flag to TJ presence
 mode.flgBTJ_lithographic=0; % 0: no etching; 1: etching in VELM only; 2: etching in VELM and in DD
+mode.iLtunn=1; % 1: fitting on the tunneling length (see "TJcharacteristic_test.m")
+% mode.iLtunn=0; % 0: fitting of JNEGF (see "TJcharacteristic_test.m"), OLD
 
 % HeatTJ flag: 
 % - 0 for the DD sigma; 
@@ -107,9 +109,10 @@ if mode.quasi1D==0
     Contact_e=Contact+Width_Contact;    
 else
     % quasi 1D simulation
-    OX=9.52*ones(1,Isize);    % DIAMETERS (D1ANA - MDPIAS)
+%     OX=9.52*ones(1,Isize);    % DIAMETERS (D1ANA - MDPIAS)
     %             OX=10.50*ones(1,Isize);    % DIAMETERS (D1ANA - MDPIAS) - TJ fitting od 3D case
-    
+    OX=18*ones(1,Isize);    % DIAMETERS (D1ANA - 2020Tibaldi_PRAPP)
+
     Contact=OX;
     Contact_e=OX;
     
@@ -169,8 +172,10 @@ mode.KT=1;		% variazione di KT con temperatura
 if mode.quasi1D==0
     mode.BGN=0;     % Enables band gap narrowing (BGN)
 else
-%     mode.BGN=1;     % Enables band gap narrowing (BGN)
-    mode.BGN=0;     % Enables band gap narrowing (BGN)
+    mode.BGN=1;     % Enables band gap narrowing (BGN)
+%     mode.BGN=0;     % Enables band gap narrowing (BGN)
+    mode.X_A=3;     % 3 original
+    mode.X_D=3.5;   % 3.5 original
 end
 
 %Tcap_EXP=0;     % Fat_cap=(1+(T-T0)/T_tauscat0).^Tcap_EXP; Inf: exponential
@@ -208,7 +213,7 @@ for ks=1:length(LUT)
     LUT{ks}=[nomeLUT,LUT{ks}];
 end
 
-Deltalam=+18;
+Deltalam=+3;
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -312,8 +317,9 @@ end
 
 Fat_Dop=1.;
 CTemp_Ion=0;
-% mode.Zmat=8.5; % linear network embedding nonlinear device
-Zmat=0; % linear network embedding nonlinear device
+
+% linear network embedding nonlinear device;
+Zmat=0; % Zmat=6 (or Rs=6) to reproduce 2020Tibaldi_PRAPP
 
 % mode.DopingMobilityModel='none'; % 'none' or 'Hilsum'
 % mode.DopingMobilityModel='Hilsum'; % 'none' or 'Hilsum'
@@ -368,8 +374,11 @@ VelmOptions.iany=0;
 VelmOptions.imod_acc=0;  % 0 per LP
 
 fat_ag=1;     % fattore antiguiding (per ridurlo o aumentarlo); per toglierlo, agire su ianti_gui [0 o 1]
-% VelmOptions.ianti_gui=1; % 1 in VENUS quasi 1D (as in D1ANA); 0 in VENUS 3D
-VelmOptions.ianti_gui=0;
+if mode.quasi1D==0
+	VelmOptions.ianti_gui=1; % 0 in VENUS quasi 1D (as in D1ANA); 1 in VENUS 3D
+else
+	VelmOptions.ianti_gui=0;
+end
 VelmOptions.gain_gui=1;
 
 mode.verbVELM=0;
@@ -452,16 +461,17 @@ mode.maxiter=15; % maximum number of iterations (DD+PB)
 mode.Verbose=0; % 0: stop if not convergent; 1: verbose; 2: always move on
 ContaBisezMax=10;
 % mode.tolconv=1e-6; % expected relative tolerance
-mode.tolconv=1e-5; % expected relative tolerance
+mode.tolconv=1e-4; % expected relative tolerance
 mode.dlossflg=1; % dielectric losses (MW solver)
 mode.report=1; % verbose mode
 mode.nflg=1; % include electron continuity equation
 mode.pflg=1; % include hole continuity equation
 mode.tflg=0; % include trap equations
-mode.Tflg=1; % include thermal effects
-mode.oflg=1; % include quantum effects and stimulated recombination
+mode.Tflg=0; % include thermal effects
+mode.qflg=0; % include quantum effects and stimulated recombination
+mode.Oflg=0; % include optical simulation
 mode.RAD_spalmato=1;
-if mode.oflg==0
+if mode.Oflg==0
     mode.RAD_spalmato=0;
 end
 mode.BULK=1; % include quantum effects and stimulated recombination
@@ -482,6 +492,9 @@ mode.mobility='none'; % mobility model
 mode.ntrap=0; % number of trap levels
 mode.stats='Fermi'; % "Fermi" or "Boltzmann" are available
 mode.ionization='Incomplete'; % "Full" or "Incomplete" are available
+% mode.ionization='Full'; % "Full" or "Incomplete" are available
+% mode.EaTJ=-150e-3;
+% mode.EdTJ=-150e-3;
 mode.symmetry='Cylindrical-Y'; % rotation around y axis
 mode.taucarrier=0;      %mette Vallone se 1
 

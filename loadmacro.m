@@ -105,9 +105,18 @@ end %@@@@@@@@@@@@@@@@@@@@@@@@@@@@100
 if(isfield(mode,'BGN') && mode.BGN == 1)
 %     IBTJ=unique(cell2mat(mesh.IBTJ));
 %     mesh.Eg(IBTJ)= mesh.Eg(IBTJ) - 3.5e-8.*mesh.dop_d(IBTJ).^(1/3) - 3e-8.*mesh.dop_a(IBTJ).^(1/3); % eV
-    mesh.Eg= mesh.Eg - 3.5e-8.*(mesh.dop_d*mode.CarrierNorm).^(1/3) - 3e-8.*(mesh.dop_a*mode.CarrierNorm).^(1/3); % eV
+    if isfield(mode,'X_D')
+        mesh.Eg= mesh.Eg - mode.X_D*1e-8.*(mesh.dop_d*mode.CarrierNorm).^(1/3) - mode.X_A*1e-8.*(mesh.dop_a*mode.CarrierNorm).^(1/3); % eV
+    else
+        mesh.Eg= mesh.Eg - 3.5e-8.*(mesh.dop_d*mode.CarrierNorm).^(1/3) - 3e-8.*(mesh.dop_a*mode.CarrierNorm).^(1/3); % eV
+    end
 end
 %
+% if mode.flgBTJ==1  % flag to TJ presence
+%     IBTJ=unique(cell2mat(mesh.IBTJ));
+%     mesh.DeltaEa(IBTJ)=mode.EaTJ;
+%     mesh.DeltaEd(IBTJ)=mode.EdTJ;
+% end
 % reference potential, V
 mesh.phi_r(iq)=-mesh.affinity(iq)-1/2.*mesh.Eg(iq)+1/2.*Vt(iq).*log(mesh.Nv(iq)./mesh.Nc(iq));
 iq_r=find(iq); iq_r=iq_r(1);
@@ -142,6 +151,10 @@ if(isfield(geom,'QWorientation'))
             mesh.mobpQW{indQW}=0.5*(macroQW.mobpint(1:end-1)+macroQW.mobpint(2:end));
             mesh.tauscatnMQW{indQW}=macroQW.tauscatn;
             mesh.tauscatpMQW{indQW}=macroQW.tauscatp;
+        end
+        if abs(mesh.xmol_barrierLUT-mesh.xmol(mesh.inMQW{1}(1)))>0
+            mesh.DeltaEcQW{indQW}=mesh.DeltaEgLUT*mesh.xmol(mesh.inMQW{indQW}(1))*mesh.QcLUT;
+            mesh.DeltaEvQW{indQW}=mesh.DeltaEgLUT*mesh.xmol(mesh.inMQW{indQW}(1))*(1-mesh.QcLUT);
         end
     end
 end

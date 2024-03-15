@@ -1,0 +1,70 @@
+$ DATAFORDD_START
+% P_i e P_f sono il paio di inizio e fine dello strato equivalente, da sinistra verso destra
+% P_i = P_f per eliminare strato equivalente, oppure togliere o commentare con % il campo mirroreq
+% se scrivi con il simbolo di dollaro, la funzione riconosce il simbolo e agisce.
+% mirroreq_p P_i=0 P_f=16 x_eq=0.44 Dop_eq=1e19 Mateq=AlGaAs Nmesh=30 f_any=1
+% mirroreq_n P_i=3 P_f=36 x_eq=0.44 Dop_eq=4.5e18 Mateq=AlGaAs Nmesh=21 f_any=1
+$ mesa Dpass=1
+% PassivationSection passiv_size=6 passiv_mesh=12
+$ PassivationSection passiv_size=15 passiv_mesh=9 passiv_depth=3.5
+% PassivationSection passiv_size=15 passiv_mesh=3
+% Allarga la simulazione di passive_size dall'ossido in poi
+% Metalring radius_i=5.25 width=6
+% Devono essere uguali a quelli ottici
+% DD_radial_sections radii radie: significa che sono aggiunte due colonne, i cui limiti
+% sono oxide-radii oxide+radie
+% DD_radial_sections radii=0.5 radie=0.4 Radial_mesh=.1+11j .01+6j .01+2j .01+11j  0.01+8j 
+% DD_radial_sections radii=0.5 radie=0.5 Radial_mesh=.1+10j .01+5j .01+4j .01+10j  0.01+7j 
+$ DD_radial_sections radii=0.6 radie=0.5 Radial_mesh=.1+8j .01+7j .01+3j 
+%  Radial_mesh organizza la mesh radiale: per ogni colonna, si da il passo (parte reale)
+% e il n. max di punti (parte immaginaria)
+$ buffer thick=1 thick_dd=200 size=50
+$ Thermal metal=3e-4 pass=5e-7 air=2.5e-8 cavity=1.5e-5 substrate=4.6e-5 dbr=1.5e-5
+$ DATAFORDD_END
+
+
+
+Wavelength 850 nm
+
+FATTORE_Z 1.00
+
+Reference Ref 3.6 0 2.5
+
+LcPor FF_ang@10cm 1 1000 Ref 1 0
+
+
+Lc  1 150. Ref 1  0.  circle 8|P2 Au    circle 11|P3 Ref 1  0 
+Lc  1  30. Ref 1  0.  circle 8|P2 Pt    circle 11|P3 Ref 1  0   
+LcDD  1  20. Ref 1  0.  circle 8|P2 Ti  circle 11|P3 Ref 1  0 
+
+
+Lc  Na=6.17e19  1  60    Ref 1  0. circle 8|P2    AlGaAs 0.0  8000  Nmesh=3
+
+Lc  Na=1.40e19  1  78.2    AlGaAs 0.0   8000  Nmesh=3
+Lc  Na=1.40e19  1  77      AlGaAs 0.09  1  circle 3|P1 Ref 1.6 0   Nmesh=3
+
+Lga  Na=1.05e19 Na=1.68e19 1  40.5      AlGaAs 0.17 0.86 1 1 Ndis=5 Nmesh=7
+Lca  Na=1.73e19 		   1  32        AlGaAs 0.90      1          Nmesh=2
+
+Lga  Na=1.68e19 Na=2.91e19 16 18.6      AlGaAs 0.90 0.57 1 1 Ndis=2 Nmesh=3
+Lga  Na=1.33e19 Na=1.08e19 16 14.9      AlGaAs 0.57 0.23 1 1 Ndis=2 Nmesh=3
+Lga  Na=8.62e18 Na=1.14e19 16 31.9      AlGaAs 0.17 0.17 1 1 Ndis=2 Nmesh=3
+Lga  Na=1.14e19 Na=1.68e19 16 33.5      AlGaAs 0.17 0.86 1 1 Ndis=4 Nmesh=6
+Lca  Na=1.73e19 		   16 32        AlGaAs 0.90      1 			Nmesh=2
+							
+Lga  Na=1.73e19 Na=1.04e19 1   0.1      AlGaAs 0.90 0.90 1 1 Ndis=1 Nmesh=1
+
+Lga  Na=1.20e19 Na=7.60e18 4  33.5      AlGaAs 0.90 0.23 1 1 Ndis=3 Nmesh=5
+Lga  Na=6.00e18 Na=7.25e18 4  31.9      AlGaAs 0.17 0.17 1 1 Ndis=2 Nmesh=3
+Lga  Na=1.00e19 Na=6.64e18 4  14.9      AlGaAs 0.17 0.57 1 1 Ndis=2 Nmesh=3
+Lga  Na=7.00e18 Na=1.00e19 4  18.6      AlGaAs 0.57 0.86 1 1 Ndis=2 Nmesh=3
+Lca  Na=1.04e19 		   4  32        AlGaAs 0.90      1     		Nmesh=2
+
+Lga  Na=1.00e19 Na=8.60e18 1  33.5      AlGaAs 0.86 0.23 1 1 Ndis=2 Nmesh=4
+Lga  Na=6.41e18 Na=7.62e18 1  32        AlGaAs 0.17 0.17 1 1 Ndis=2 Nmesh=3
+
+
+% buffer region 1
+LcPor       Na=2e18               1  200         AlGaAs 0.00 0       Nmesh=15
+
+

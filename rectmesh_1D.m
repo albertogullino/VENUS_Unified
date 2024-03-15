@@ -1,5 +1,5 @@
 
-function mesh=rectmesh(geom)
+function mesh=rectmesh_1D(geom)
 
 %
 % History: created Francesco Bertazzi, still in writing!

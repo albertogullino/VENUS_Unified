@@ -8,78 +8,49 @@ clear global
 colordef white
 dbstop if error
 
-addpath('Termico')
-addpath('Ottico')
-addpath(genpath('Dati'))
-addpath('Gain')
-addpath('out')
+addpathVENUS    % add the folders needed for a VENUS simulation
+
+% Flag to avoid slow geom generation of lithographic structures (load geom file)
+% flgGEOM=1;     % 1, carica vecchia geom
+flgGEOM=0;     % carica vecchia geom
 
 % Dynamic Analysis
 iDyn = 0;                   % flag, 1 to turn on the dynamic analysis
-% fvet = logspace(8,11,36);   % frequencies for small-signal simulation, Hz
-fvet = logspace(7,11,121);   % frequencies for small-signal simulation, Hz
+fvet = 5*logspace(8,10,81);   % frequencies for small-signal simulation, Hz
+% fvet = logspace(7,11,121);   % frequencies for small-signal simulation, Hz
 % CurDynRef = [1:3:13];       %     values of current where small-signal analysis is performed
-CurDynRef = 1:0.5:7;       % values of current where small-signal analysis is performed
+CurDynRef = 1:1:3;       % values of current where small-signal analysis is performed
 
-minPerc = 5;
+minPerc=10;
 
 IOLDsw=0;
 
-% Bias parameters
-% paVolt = 0.03;  % voltage step 
-% maVolt=2.14;
-% maVolt=3;
-% maVolt=1.5;     % maximum voltage reached
-% V0_save=2.36;
-
 iSavNome=1;
-% IPLOT=1;
-IPLOT=0;
+
+IPLOT=-1;  % Structure details + live plots of simulation results
+% IPLOT=1;  % live plots of simulation results
+% IPLOT=-2;   % Structure details plot
+% IPLOT=0;    % No intermediate plots
 
 % Imassimo=1;  % massima corrente analizzata
 PotMin=.1;        % potenza finale
 
-%% Path and input/output files definition
-% Change the path for the geometry generation and for Optical simulation
-% (keep inewpat = 1, by default)
-inewpat=1;
-if inewpat==1
-    rmpath('generageom')
-    rmpath('Ottico')
-    rmpath('Ottico\new17Optica')
-    
-    addpath('generageomBar')
-    addpath('OtticoBar')
-    addpath('OtticoBar\new17Optica')
-else
-    rmpath('generageomBar')
-    rmpath('OtticoBar\new17Optica')
-    
-    addpath('generageom')
-    addpath('Ottico\new17Optica')
-end 
-
-Dir=cd;
-datiOut='out';
-datiIn='dati';
-nomeSW=[Dir,'\',datiOut,'\'];
-nomeSR=[Dir,'\',datiIn,'\'];
-
-%
+%% 
 prompt = 'Insert the prefix to append at the begin pmat file: ';
 nomeSav = input(prompt,'s'); % Suffix appended at the end of the save file, to distinguish the various tries
 %
 nomeSave=[nomeSW,nomeSav];
 %eval(['save ',nomeSave,' h'])
 
-iStruttura=4;
+% iStruttura=4;
+iStruttura=93;
 
 %  Last_Workspac='dud';  
 Last_Workspac='LW';  
 
 Last_Workspace=[nomeSW,Last_Workspac];
 
-radi='_resistor2D'; %OK
+radi='_OXelementi_1D'; % OC-VCSEL: use for comparison with TJ!
 
 rad_settingV{100}=radi;    %vale anche per IPAR = 0
 for k=1:70
@@ -90,11 +61,9 @@ end
 %% Investigated parameters
 
 % VELMinput='VelmSe';
-
 VELMinput='VelmSa';
 % VELMinput='Velmdu1';
 
-irel=0; % if 1, relief; if 0, standard VCSEL
 
 iPrimo=1;
 
@@ -124,14 +93,13 @@ effetti0=[0 0 0 0 0 0 0 0 0 0];  %Effetti_Temp
 %                                              5                          7                 9
 %          [fPES  Gam_z fPdif  E2 lambda TempVELM anti_gui  Diffus  Str  Lut]
             
-effetti=effetti0;            
+effetti=effetti0;
 
 %'dopo primo save', keyboard
 
 %iloop=1          % =1 provo i loops, to launch a simulation set it to 0
 if IPvet(1)~=0
-    % load iba
-    iba = 0;
+    iba=0;
     if iba==0
         iloop=input(' Controllo loops ? [1, SI; Enter, NO] ');
     else
@@ -146,7 +114,7 @@ end
 
 if iloop==0 && iSavNome==1
     Fun_Nome
-    save 	 nomeSave nomeSW nomeSR
+    save 	 nomeSave nomeSW nomeSR nomeLUT
 %    save ultimonome nomeSave nomeSW nomeSR
     eval(['save ',nomeSW,'Contributi_',nomeSav,' ',' HARD nomeSave nomeSR nomeSW effetti0 VELMinput'])
 end
@@ -226,7 +194,7 @@ for IPAR=IPvet
    
     % Save parameters in PMAT and save IPvet (i.e., to be analysed parameters)
     if iPrimo==1
-        eval(['save ',nomeSave,'_pmat  PMAT IPvet tit nomeSave strSave irel nomeSW nomeSR'])
+        eval(['save ',nomeSave,'_pmat  PMAT IPvet tit nomeSave strSave irel nomeSW nomeSR nomeLUT'])
     end
 
     clear MODE MESH VInf VInp VelmOptions MODEplot
@@ -287,7 +255,7 @@ for IPAR=IPvet
             pausak
         end
         
-        %'controllo Par', keyboard
+%        'controllo Par', keyboard
         
         % In case of testing loop is de-activated
         if iloop==0
@@ -295,10 +263,22 @@ for IPAR=IPvet
             if (Ikcont==1 || Iclear==1)
                 if IREST==0
                     'RIGENERO STRUTTURA'
-                    structureName
-                    Sub_Str_from_VELM
-                    
-                    if mode.oflg==1
+                    structureName;
+					if flgGEOM==0
+						Sub_Str_from_VELM
+					else
+						fprintf('flgGEOM=1! Loading structure from "geom" file\n'),keyboard
+						fis= strfind(structureName,'\');
+						strName=structureName(fis(end)+1:end);
+						DirName=structureName(1:fis(end));
+						%%%% save geom
+						load([DirName,'geom_' strName])
+						ParMore=StrDD.ParMore;
+						mode.nBTJ=StrDD.nBTJ;
+						fprintf('Structure loaded\n'),keyboard
+                    end
+					
+                    if mode.Oflg==1
                         Glut4Dinc(mode)
                     end
                 end
@@ -310,31 +290,27 @@ for IPAR=IPvet
                     Glut4Dinc(mode)
                 elseif (IPAR==1 || IPAR==13 || IPAR==21 || IPAR==36 || IPAR==37 || IPAR==41 || IPAR==45 || IPAR==46)
                     'RIGENERO STRUTTURA'
-                    structureName
+                    structureName;
                     Sub_Str_from_VELM
                 end
             end
             
         end %iloop
-        if mode.oflg==1
+        if mode.qflg==1
             geom.QWorientation=Gs.QWorientation;
         end
         
         % 'ver par', keyboard
         if iloop==0
-            % SUB_Feb18New
-            %'save;;', keyboard
-            % SUB_Mar18R2
             
-ticSUB=tic;
-%             SUB_dyn
+            ticSUB=tic;
             SUB_drive % for both current and voltage driving
-tocSUB=toc(ticSUB)/60        
+            tocSUB=toc(ticSUB)/60        
 
             MODE{kpar}=mode;
             MESH{kpar}=mesh;
             
-            if mode.oflg
+            if mode.Oflg
                 VInf{kpar}=VELMInfo;
                 VO{kpar}=VelmOptions;
             end
@@ -346,7 +322,7 @@ tocSUB=toc(ticSUB)/60
             %  eval(['save ',nomeSave,num2str(IPAR),'.mat MODEplot VInf VInp VO'])
             %  eval(['save ',nomeSave,num2str(IPAR),'.mat MODEplot VO'])
             
-            'fine ciclo'
+            fprintf('fine ciclo\n')
             %keyboard
 %             clear modePlot VELMInput VelmOptions VELMInfo mode mesh
             if (IPAR==1 || IPAR==13 || IPAR==21 || IPAR==29)
@@ -378,3 +354,4 @@ tocSUB=toc(ticSUB)/60
     end
     
 end
+%  catch

@@ -424,6 +424,10 @@ if(isfield(geom,'QWorientation'))
         NC=size(Ban.SBC,1);
         mesh.meffnMQW{indQW}=ones(NC,1)*meshQW.meffn;
         mesh.meffpMQW{indQW}=MefH.';
+        mesh.xmol_barrierLUT=meshQW.xmol_barrier;
+        mesh.xmol_wellLUT=meshQW.xmol_well;
+        mesh.QcLUT=meshQW.Qc;
+        mesh.DeltaEgLUT=meshQW.DeltaEg;
         mesh.DeltaEcQW{indQW}=meshQW.DeltaEg*meshQW.xmol_barrier*meshQW.Qc;
         mesh.DeltaEvQW{indQW}=meshQW.DeltaEg*meshQW.xmol_barrier*(1-meshQW.Qc);
         %

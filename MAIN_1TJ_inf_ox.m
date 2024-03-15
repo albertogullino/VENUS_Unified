@@ -15,7 +15,7 @@ dbstop if error
 addpathVENUS    % add the folders needed for a VENUS simulation
 
 % Flag to avoid slow geom generation of lithographic structures (load geom file)
-flgGEOM=1;     % 1, carica vecchia geom
+% flgGEOM=1;     % 1, carica vecchia geom
 flgGEOM=0;     % carica vecchia geom
 
 % Dynamic Analysis
@@ -32,8 +32,8 @@ IOLDsw=0;
 iSavNome=1;
 
 % IPLOT=-1;  % Structure details + live plots of simulation results
-IPLOT=1;  % live plots of simulation results
-% IPLOT=-2;   % Structure details plot
+% IPLOT=1;  % live plots of simulation results
+IPLOT=-2;   % Structure details plot
 % IPLOT=0;    % No intermediate plots
 
 % Imassimo=1;  % massima corrente analizzata
@@ -46,8 +46,8 @@ nomeSav = input(prompt,'s'); % Suffix appended at the end of the save file, to d
 nomeSave=[nomeSW,nomeSav];
 %eval(['save ',nomeSave,' h'])
 % 
-% iStruttura=25;      % (20,25,27) radially infinite TJ, ABOVE long-rad. graded OX (Lg graded)
-iStruttura=26; % (21, 26, 28) radially infinite TJ, BELOW long-rad. graded OX (Lg graded)
+iStruttura=25;      % (20,25,27) radially infinite TJ, ABOVE long-rad. graded OX (Lg graded)
+% iStruttura=26; % (21, 26, 28) radially infinite TJ, BELOW long-rad. graded OX (Lg graded)
 % iStruttura=22; % (22, 27) radially infinite TJ, DOUBLE-side long-rad. graded OX (Lg graded)
 
 
@@ -62,8 +62,8 @@ Last_Workspac='LW';
 Last_Workspace=[nomeSW,Last_Workspac];
 
 % radi='_1TJ'; % 1 TJ structure (several structures are accessible with "iStruttura")
-% radi='_1TJ_elementi'; % 1 TJ structure (several structures are accessible with "iStruttura")
-radi='_1TJ_1D'; % 1D simulation of 1 TJ structure
+radi='_1TJ_elementi'; % 1 TJ structure (several structures are accessible with "iStruttura")
+% radi='_1TJ_1D'; % 1D simulation of 1 TJ structure
 
 
 rad_settingV{100}=radi;    %vale anche per IPAR = 0
@@ -143,7 +143,7 @@ DDin=[0:0.4:1.2 1.3:0.1:1.7];
 
 % Different bias conditions ABOVE threshold are investigated for different temperatures
 TTve=[110:-30:20];
-TTve=80
+TTve=20
 
 Tpelt=TTve;
 for itemp=1:length(TTve)
@@ -201,6 +201,11 @@ for IPAR=IPvet
         
     end
     eval(['settings_vari',rad_setting])
+
+    if mode.Pmin_Pfit>20
+        DD0=repelem(DD0,2);
+        pausak
+    end
    
     % Save parameters in PMAT and save IPvet (i.e., to be analysed parameters)
     if iPrimo==1
@@ -288,7 +293,7 @@ for IPAR=IPvet
 						fprintf('Structure loaded\n'),keyboard
                     end
 					
-                    if mode.oflg==1
+                    if mode.Oflg==1
                         Glut4Dinc(mode)
                     end
                 end
@@ -306,7 +311,7 @@ for IPAR=IPvet
             end
             
         end %iloop
-        if mode.oflg==1
+        if mode.qflg==1
             geom.QWorientation=Gs.QWorientation;
         end
         
@@ -320,7 +325,7 @@ for IPAR=IPvet
             MODE{kpar}=mode;
             MESH{kpar}=mesh;
             
-            if mode.oflg
+            if mode.Oflg
                 VInf{kpar}=VELMInfo;
                 VO{kpar}=VelmOptions;
             end

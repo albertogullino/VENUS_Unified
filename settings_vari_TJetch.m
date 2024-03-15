@@ -4,6 +4,15 @@ if exist('ILITHO')
     mode.flgBTJ_lithographic=ILITHO; % 0: no etching; 1: etching in VELM only; 2: etching in VELM and in DD
 end
 
+% HeatTJ flag: 
+% - 0 for the DD sigma; 
+% - 1 for TJ equivalent sigma; 
+% - 2 for HeatJoule=HeatTJ and Pelec-PTJ balancing: use Fat_VTJ!
+%       - HeatTJ=(1-Fat_TJ)*(Vint*JTJ/LTJ) -> computed in assem_GBT.m
+%       - Pelec=I*(V-VTJ*Fat_VTJ) -> computed in f_EvalHeatingTerms.m
+mode.flgHeatTJ=2;   
+mode.Fat_VTJ=1;   % Scales VTJ as a source of heating 
+
 irel=0; % if 1, relief; if 0, standard VCSEL
 
 etch.growth=1; % replace etched layers. 0: with etch structure param; 1: with previous layer params
@@ -134,9 +143,9 @@ end
 % Gain and quantum models
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% epsNLg=4e-17;
+epsNLg=4e-17;
 % epsNLg=3e-17;
-epsNLg=1.5e-17;
+% epsNLg=1.5e-17;
 
 Qc=0.6;
 FLos=1;
@@ -209,18 +218,22 @@ Deltalam=3;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 C_Temp=1;  % Coeff. Temperatura totale
 C_TempGain=1;  % Coeff. Temperatura Gain
-% dndT=2.3e-4;  % dn/dT  2.3e-4 da dati sperimentali
-dndT=2.8e-4;  % dn/dT  2.3e-4 da dati sperimentali
-dndT1D=4e-4;  % for 1D fitting
+dndT=2.3e-4;  % dn/dT  2.3e-4 da dati sperimentali
+dndT1D=2.3e-4;  % for 1D fitting
 fat_RAD=0.50;   % self-absorption heating from spont. recombination
+fat_RAD=5e-2   % self-absorption heating from spont. recombination
 
 mode.FatQtot=115;    % scaling factor for Q to fit 3D and 1D deltaT
-mode.FatV=46;   % kT scaling between substrate and VCSEL regions
+% mode.FatV=46;   % kT scaling between substrate and VCSEL regions
+mode.FatV=80;   % kT scaling between substrate and VCSEL regions
+% mode.FatQtot=1;    % scaling factor for Q to fit 3D and 1D deltaT
+% mode.FatV=1;   % kT scaling between substrate and VCSEL regions
 mode.FatQcontact=1.00; % 1D simulation: scaling at the contact (0.65 for Oxide; 1.00 for TJ)
 
-fCondTer=1;   % transverse thermal conducibility
-fCondTerZ=0.8;   % Longitudinal thermal conducibility
-%fCondTerZ=.8;   % Longitudinal thermal conducibility
+% fCondTer=1;   % transverse thermal conducibility
+% fCondTerZ=.8;   % Longitudinal thermal conducibility
+fCondTer=0.9;   % transverse thermal conducibility
+fCondTerZ=0.8*fCondTer;   % Longitudinal thermal conducibility
 
 
 AlTarocco=1;    % multiplication factor for optical absorption heating
@@ -231,30 +244,43 @@ if mode.quasi1D==1
     fatt_dndT=1;  % dn/dT  2.3e-4 da dati sperimentali
 else
     Exp_Temp0=-1.30;	% VENUS
+    Exp_Temp0=-1.1
 %     fatt_dndT=0.95;  % dn/dT  2.3e-4 da dati sperimentali
-    fatt_dndT=1;  % dn/dT  2.3e-4 da dati sperimentali
+    fatt_dndT=1.03  % dn/dT  2.3e-4 da dati sperimentali
 end
 TARde=1;
 mode.ABSe=5;
 mode.ABSh=11;
-mode.ABSe0=3;
+mode.ABSe0=3;   % these are multiplied by Fat_Perd0 in ASSEGNO_mode: f_alpha in 2019Debernardi_JSTQE, (7)
 mode.ABSh0=7;
 
-% Fat_Perd0=2.6  % con Log 1
-Fat_Perd0=2.4  % con Log 1
-% Fat_Perd0=2.5  % con Log 1
-% Fat_Perd0=2.0  % con Log 1, 80C, Lg!!!
-%Fat_PerCoefTemp=0;
-PerCoefExT=0;
-Fat_PerCoefTemp=(.9-Fat_Perd0)/90;
+% Different value w.r.t. original VENUS is related to where elecABS,
+% holeABS and Tvelm are taken in f_CallVELM:
+% - OLD: fianti=NPxQW (last radial node before mesa) 
+% - NEW: indox=2*rox/3
+
+% Fat_Perd0=2.6;  % con Log 1
+Fat_Perd0=2.9  % con Log 1
+
+% Increase ABS_Texp with Tvelm=DeltaT+T0, in f_CallVELM:
+% ABS_Texp=mode.ABS_Texp+mode.PerCoefExT*Tvelm;
+PerCoefExT=0
+% PerCoefExT=2e-2
+
+% Changes Fat_Perd0 in ASSEGNO_mode: Fat_Perd_mod=Fat_Perd0+Fat_PerCoefTemp*(mode.T0-T300);
+% Fat_PerCoefTemp=(.9-Fat_Perd0)/90;
+% Fat_PerCoefTemp=0   
+% Fat_PerCoefTemp=0.002
+Fat_PerCoefTemp=-0.00375
+
 if IPAR==42
     Fat_PerCoefTemp=0;
 end
 
 
-% ABS_Texp=2.5;
-ABS_Texp=2.4;
-ABS_Texp=1.2       % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
+% ABS_Texp=2.4
+% ABS_Texp=0      % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
+ABS_Texp=1.5      % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
 
 ABS_Apor=0;   %dipendenza lineare !!!!!!!
 ABS_Ader=0;
@@ -274,15 +300,17 @@ mode.xmolPiatto=0;   % =1 toglie tutta la variazione di x_mol
 ExpH=0.4;       % exponent for thermal dependence of hole mobility
 FattoreExpE=1;  % electron/hole ratio for thermal dependence of mobility
 
-if mode.quasi1D==0
-    IHILS=0;   % 0 fisso, 1 variabile, original VENUS
-else
-    IHILS=1;   % 0 fisso, 1 variabile
-end
-N_X=2.5e17;      % Hilsum model parameter
+% if mode.quasi1D==0
+%     IHILS=0;   % 0 fisso, 1 variabile, original VENUS
+% else
+%     IHILS=1;   % 0 fisso, 1 variabile
+% end
+IHILS=0;   % 0 fisso, 1 variabile, original VENUS
+% N_X=1.5e17;      % Hilsum model parameter
+N_X=2.5e17      % Hilsum model parameter
 NxCoe=.011;
 if IPAR==4
-    NxCoe=0
+    NxCoe=0;
 end
 
 Fat_Dop=1.;
@@ -301,9 +329,10 @@ mode.FatMob=1;
 % cot=[3.5e-2 1.2];   % factor for mobility dependence on T: f(T)=cot(1)*T+cot(2)
 load COT
 
-% FAT_Diff_E=0.4;   % factor to be multiplied times QW electron mobility
-FAT_Diff_E=0.2;   % factor to be multiplied times QW electron mobility
+ FAT_Diff_E=0.4;   % factor to be multiplied times QW electron mobility
+% FAT_Diff_E=0.5   % factor to be multiplied times QW electron mobility
 FAT_Diff_H=1;   % factor to be multiplied times QW hole mobility
+% FAT_Diff_H=0.2   % factor to be multiplied times QW hole mobility
 mode.idiffusioneQW=3;   % 0: no QW diffusion; 1: QW diffusion; 2: NO; 3: drift-diffusion in QW
 % mode.idiffusioneQW=2;   % 0: no QW diffusion; 1: QW diffusion; 2: NO; 3: drift-diffusion in QW
 mode.iambipolarQW=0;    % use ambipolar mobility in QW
@@ -317,8 +346,10 @@ else
     mode.GR={'SRH','rad','Auger'}; % generation/recombination, {} for none
 end
 % mode.GR={}; % generation/recombination, {} for none
-mode.taun = 1e-9; % electron SRH time, s
-mode.taup = 1e-9; % hole SRH time, s
+% mode.taun = 1e-9; % electron SRH time, s
+% mode.taup = 1e-9; % hole SRH time, s
+mode.taun = 10e-9; % electron SRH time, s
+mode.taup = 10e-9; % hole SRH time, s
 mode.taunQW = 100e-9; % QW electron SRH time, s
 mode.taupQW = 100e-9; % QW hole SRH time, s
 % Brad = 1.8e-10; % Brad 3D
@@ -346,10 +377,10 @@ VelmOptions.gain_gui=1;
 
 mode.verbVELM=0;
 if mode.quasi1D==1
-    mode.verbVELM=-1;   % <0 to see VELM results only the first time; >0: always
+%     mode.verbVELM=-1;   % <0 to see VELM results only the first time; >0: always
 end
-% mode.verbVELM=-1;   % <0 to see VELM results only the first time; >0: always
-% 
+% mode.verbVELM=-2;   % <0 to see VELM results only the first time; >0: always
+
 itutmir=0; % if 1, the "entire" optical structure is studied with thermal (strong discretization)
 
 
@@ -444,7 +475,7 @@ mode.iTfig=0; % if 1 the thermal simulator plots intermediate results, -1 solo l
 mode.maxScheckRepeat=0; % maximum times of Scheck>1 condition before acting
 mode.ScheckMultiplicationFactor=200; % multiplication factor to reset Pst
 mode.minthermalvoltage=0.01; % min. voltage to activate thermic simulator
-mode.Pmin_Pfit=0.01; % prediction of PDiss (PDissPred); set 50 to avoid it
+mode.Pmin_Pfit=.1; % prediction of PDiss (PDissPred); set 50 to avoid it; 100 for old StimaTempWU=1.05
 mode.minPorVELM=.5e12; % 1/cm2, minimum 2D carrier such that VELM is called
 
 mode.tolconv_neutr=1e-13; % expected relative tolerance

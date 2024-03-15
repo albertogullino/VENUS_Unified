@@ -8,31 +8,35 @@ clc
 %==========================================================================
 % Quantum well parameters
 %==========================================================================
-mesh.L=25e-9; % Total length of the domain, m
-mesh.nn=251; % Number of spatial mesh nodes
+mesh.NQW=1; 
+mesh.L=25e-9; % Total length of the domain, m (25 nm, 1 QW; 50 nm, 3 QWs) 
+mesh.nn=251; % Number of spatial mesh nodes (251 pts, 1 QW; 1001 pts, 3 QWs)
 mesh.Lz=7.7e-9; % quantum well width, m
-mesh.xmol_barrier=0.286; % Al molar fraction (barrier)
+mesh.xmol_barrier=0.38; % Al molar fraction (barrier)
 mesh.xmol_well=0.0; % Al molar fraction (well)
 mesh.Eg=1.412; % fitted from Gerlach PL measurements
-mesh.DeltaEg=1.247; % DeltaEg
+mesh.DeltaEg=1.247; % DeltaEg = Eg(barrier) - Eg(well)
 mesh.Qc=+0.62; % conduction band-offset percentage of DeltaEg
-mesh.Delta=0.34; % spin-orbit coupling, eV
+mesh.Delta=0.34; % spin-orbit coupling, eV (GaAs)
 mesh.meffn=0.067; % electron conduction mass
-mesh.ncinit=4; % number of conduction subbands to be computed
-mesh.nvinit=6; % number of valence subbands to be computed
+mesh.ncinit=4*mesh.NQW; % number of conduction subbands to be computed
+mesh.nvinit=6*mesh.NQW; % number of valence subbands to be computed
 mesh.num_kvectors=282; % number of k points
 mesh.max_k=0.14*2; % maximum k point, angstrom
 mesh.parabolic=0; % if 1 the parabolic approximation is applied
 %==========================================================================
 % Optical response: settings
 %==========================================================================
-mode.fileNameLUT='LUT4D_Jun_Markus_nMark_40'; % filename for LUT
+mode.fileNameLUT='LUT4D_Feb24_Markus_nMark'; % filename for LUT
 mode.LUT=1; % if 0 enables additional saves/plots
 mode.DeltaDensity_Perc=1+0.005; % increment of carrier density for Jacobian derivatives
-mode.iplot=0; % if 1, several intermediate plots are produced
+mode.iplot=1; % if 1, several intermediate plots are produced
 mode.flagLimitMaxDensity=0; % 1: limits max carrier density; 0: doesn't
 mode.iline='nMark'; % 'nMark' ; 'lorentzian'; 'Landsberg'; Landsberg_extended' and Landsberg_modified  models 
 mode.Expgammak=6; % exponent for carrier-carrier scattering corrections
+mesh.gammak=1e13;     % 1/s
+mesh.tnm=4e-14;  % s, for non markovian effects
+%
 mode.iren=1; % enable gap renormalization computation
 mode.ieh_equal=0; % 1: e- and h- densities are assumed equal; 0: they aren't
 mode.ifit=1; % 1: use a larger k grid by fitting it with spline; 0: don't
@@ -43,31 +47,36 @@ mode.viv=[]; % if empty, all transitions are computed
 % % mode.vic=1;
 % % mode.viv=1:2;
 %==========================================================================
+% Region to investigate
+%==========================================================================
+% vz_offset=0;
+% vz_offset=[-mesh.Lz,mesh.Lz]; % 2 QWs case
+vz_offset=[-(mesh.NQW-1)*mesh.Lz,0,(mesh.NQW-1)*mesh.Lz]; % 3 QWs case
+%
+mesh.vz_offset=vz_offset;
+%==========================================================================
 % Optical response: parameters
 %==========================================================================
-% Tvet=[300 350];
-% lambdavet=linspace(800,870,101)*1e-9;
-% Densityv=[ 0.01 5 10]*1e12;
-Tvet=[290:10:520];
-Densityv=[0.0001 0.001 0.01 0.1 1 2 2.5:.5:8 9:20]*1e12;
-lambdavet=[800:1:900]*1e-9;% linspace(830,870,41)*1e-9;
+Tvet=[300 350];
+lambdavet=linspace(800,870,101)*1e-9;
+Densityv=[ 0.01 5 10]*1e12;
+% Tvet=[290:10:520];
+% Densityv=[0.0001 0.001 0.01 0.1 1 2 2.5:.5:8 9:20]*1e12;
+% lambdavet=[800:1:900]*1e-9;% linspace(830,870,41)*1e-9;
 %==========================================================================
-%
-%
-%
 %
 %
 %==========================================================================
 % Computing or loading subbands
 %==========================================================================
-mesh.fileName=['subbands_WQW=',num2str(mesh.Lz*1e9),'nm_',num2str(mesh.num_kvectors),'k_',num2str(mesh.max_k),'kMax.mat'];
+mesh.fileName=['subbands_WQW=',num2str(mesh.Lz*1e9),'nm_xB=',num2str(mesh.xmol_barrier),'_',num2str(mesh.num_kvectors),'k.mat'];
 %
-if(exist(mesh.fileName,'file'))
-    disp('Loading existing subbands file')
-    load(mesh.fileName)
-else
+% if(exist(mesh.fileName,'file'))
+%     disp('Loading existing subbands file')
+%     load(mesh.fileName)
+% else
     [Ban,mesh]=f_ComputeQWSubbands(mesh,mode);
-end
+% end
 %==========================================================================
 % Loading constants
 %==========================================================================
@@ -259,8 +268,9 @@ DeltaN_Perc=mode.DeltaDensity_Perc;
 var=[' port_2D port_2De port_2Dh eD1 hD1 lav Tv G Es Rsp DeltaN '];
 varder='GH GE EsE EsH RspE RspH DeltaNE DeltaNH DeltaN_Perc ';
 var_more=['MefH Ban meshQW modeQW'];
-eval(['save ',mode.fileNameLUT,'_more.mat ',var_more])
+eval(['save ',mode.fileNameLUT,'_xB=',num2str(mesh.xmol_barrier),'_xW=',num2str(mesh.xmol_well),'_more.mat ',var_more])
 
+fprintf('Bands are saved!\n'),keyboard
 eval(['save ',mode.fileNameLUT,'.mat ',var, varder])
 
 

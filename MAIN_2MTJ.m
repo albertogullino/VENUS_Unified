@@ -43,7 +43,7 @@ nomeSave=[nomeSW,nomeSav];
 % 
 % iStruttura=30   % 1TJ for recycling for a 2nd AR; TOP p-DBR!
 iStruttura=31   % 1TJ for recycling for a 2nd AR; TOP p-DBR! (alternative)
-% iStruttura=60    
+% iStruttura=61  % 60,61: Julian's  
 % 
 
 if ~exist('iStruttura')
@@ -277,7 +277,7 @@ for IPAR=IPvet
 						%%%% save geom
 						load([DirName,'geom_' strName])
 						ParMore=StrDD.ParMore;
-						mesh.nBTJ=StrDD.nBTJ;
+						mode.nBTJ=StrDD.nBTJ;
 						fprintf('Structure loaded\n'),keyboard
                     end
 					

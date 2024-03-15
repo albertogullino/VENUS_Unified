@@ -451,7 +451,7 @@ Kmat0=Kmat0+sparse(rr+(1:nm),rr+(1:nm),-1,neq,neq);
 % =============================================================================================100
 % Assembling quantum corrections and related jacobians
 % =============================================================================================100
-if(mode.oflg)
+if(mode.qflg)
     N2Dtot=0; P2Dtot=0;
     for indQW=1:mesh.NMQW
         %

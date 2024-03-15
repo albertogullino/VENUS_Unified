@@ -1,5 +1,7 @@
 mode.flgBTJ=1;  % flag to TJ presence
 mode.flgBTJ_lithographic=0; % 0: no etching; 1: etching in VELM only; 2: etching in VELM and in DD
+% mode.iLtunn=1; % 1: fitting on the tunneling length (see "TJcharacteristic_test.m")
+mode.iLtunn=0; % 0: fitting of JNEGF (see "TJcharacteristic_test.m"), OLD
 
 % HeatTJ flag: 
 % - 0 for the DD sigma; 
@@ -205,7 +207,7 @@ for ks=1:length(LUT)
     LUT{ks}=[nomeLUT,LUT{ks}];
 end
 
-Deltalam=3;
+Deltalam=+3;
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -290,11 +292,12 @@ mode.xmolPiatto=0;   % =1 toglie tutta la variazione di x_mol
 ExpH=0.4;       % exponent for thermal dependence of hole mobility
 FattoreExpE=1;  % electron/hole ratio for thermal dependence of mobility
 
-if mode.quasi1D==0
-    IHILS=0;   % 0 fisso, 1 variabile, original VENUS
-else
-    IHILS=1;   % 0 fisso, 1 variabile
-end
+% if mode.quasi1D==0
+%     IHILS=0;   % 0 fisso, 1 variabile, original VENUS
+% else
+%     IHILS=1;   % 0 fisso, 1 variabile
+% end
+IHILS=0;   % 0 fisso, 1 variabile, original VENUS
 % N_X=1.5e17;      % Hilsum model parameter
 N_X=2.5e17      % Hilsum model parameter
 NxCoe=.011;
@@ -304,8 +307,9 @@ end
 
 Fat_Dop=1.;
 CTemp_Ion=0;
-% mode.Zmat=8.5; % linear network embedding nonlinear device
-Zmat=0; % linear network embedding nonlinear device
+
+% linear network embedding nonlinear device;
+Zmat=0; % Zmat=6 (or Rs=6) to reproduce 2020Tibaldi_PRAPP
 
 % mode.DopingMobilityModel='none'; % 'none' or 'Hilsum'
 % mode.DopingMobilityModel='Hilsum'; % 'none' or 'Hilsum'
@@ -360,8 +364,11 @@ VelmOptions.iany=0;
 VelmOptions.imod_acc=0;  % 0 per LP
 
 fat_ag=1;     % fattore antiguiding (per ridurlo o aumentarlo); per toglierlo, agire su ianti_gui [0 o 1]
-VelmOptions.ianti_gui=1; % 1 in VENUS quasi 1D (as in D1ANA); 0 in VENUS 3D
-% VelmOptions.ianti_gui=0;
+if mode.quasi1D==0
+	VelmOptions.ianti_gui=1; % 0 in VENUS quasi 1D (as in D1ANA); 1 in VENUS 3D
+else
+	VelmOptions.ianti_gui=0;
+end
 VelmOptions.gain_gui=1;
 
 mode.verbVELM=0;
@@ -452,9 +459,10 @@ mode.nflg=1; % include electron continuity equation
 mode.pflg=1; % include hole continuity equation
 mode.tflg=0; % include trap equations
 mode.Tflg=1; % include thermal effects
-mode.oflg=1; % include quantum effects and stimulated recombination
+mode.qflg=1; % include quantum effects and stimulated recombination
+mode.Oflg=1; % include optical simulation
 mode.RAD_spalmato=1;
-if mode.oflg==0
+if mode.Oflg==0
     mode.RAD_spalmato=0;
 end
 mode.BULK=1; % include quantum effects and stimulated recombination
@@ -475,6 +483,9 @@ mode.mobility='none'; % mobility model
 mode.ntrap=0; % number of trap levels
 mode.stats='Fermi'; % "Fermi" or "Boltzmann" are available
 mode.ionization='Incomplete'; % "Full" or "Incomplete" are available
+% mode.ionization='Full'; % "Full" or "Incomplete" are available
+% mode.EaTJ=-150e-3;
+% mode.EdTJ=-150e-3;
 mode.symmetry='Cylindrical-Y'; % rotation around y axis
 mode.taucarrier=0;      %mette Vallone se 1
 

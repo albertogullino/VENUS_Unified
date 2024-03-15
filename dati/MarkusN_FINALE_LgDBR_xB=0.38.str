@@ -1,0 +1,129 @@
+$ DATAFORDD_START
+% P_i e P_f sono il paio di inizio e fine dello strato equivalente, da sinistra verso destra
+% P_i = P_f per eliminare strato equivalente, oppure togliere o commentare con % il campo mirroreq
+% se scrivi con il simbolo di dollaro, la funzione riconosce il simbolo e agisce.
+$ mirroreq_p P_i=0 P_f=16 x_eq=0.44 Dop_eq=1e19 Mateq=AlGaAs Nmesh=30 f_any=1
+$ mirroreq_n P_i=3 P_f=36 x_eq=0.44 Dop_eq=4.5e18 Mateq=AlGaAs Nmesh=21 f_any=1
+$ mesa Dpass=1
+% PassivationSection passiv_size=6 passiv_mesh=12
+$ PassivationSection passiv_size=15 passiv_mesh=9 passiv_depth=3.5
+% PassivationSection passiv_size=15 passiv_mesh=3
+% Allarga la simulazione di passive_size dall'ossido in poi
+% Metalring radius_i=5.25 width=6
+% Devono essere uguali a quelli ottici
+% DD_radial_sections radii radie: significa che sono aggiunte due colonne, i cui limiti
+% sono oxide-radii oxide+radie
+% DD_radial_sections radii=0.5 radie=0.4 Radial_mesh=.1+11j .01+6j .01+2j .01+11j  0.01+8j 
+% DD_radial_sections radii=0.5 radie=0.5 Radial_mesh=.1+10j .01+5j .01+4j .01+10j  0.01+7j 
+$ DD_radial_sections radii=0.6 radie=0.5 Radial_mesh=.1+8j .01+7j .01+3j .01+11j  0.01+8j 
+%  Radial_mesh organizza la mesh radiale: per ogni colonna, si da il passo (parte reale)
+% e il n. max di punti (parte immaginaria)
+$ buffer thick=110 thick_dd=109990 size=50
+$ Thermal metal=3e-4 pass=5e-7 air=2.5e-8 cavity=1.5e-5 substrate=4.6e-5 dbr=1.5e-5
+$ DATAFORDD_END
+
+
+
+Wavelength 850 nm
+%Wavelength 20112
+
+FATTORE_Z 1.0031
+FATTORE_Z 1.004
+FATTORE_Z 1.0015
+
+Reference Ref 3.6 0 2.5
+
+LcPor FF_ang@10cm 1 1000 Ref 1 0
+
+
+Lc  1 150. Ref 1  0.  circle 8|P2 Au    circle 11|P3 Ref 1  0 
+Lc  1  30. Ref 1  0.  circle 8|P2 Pt    circle 11|P3 Ref 1  0   
+LcDD  1  20. Ref 1  0.  circle 8|P2 Ti  circle 11|P3 Ref 1  0 
+
+
+Lc  Na=6.17e19  1  60    Ref 1  0. circle 8|P2    AlGaAs 0.0  8000  Nmesh=3
+
+Lc  Na=1.40e19  1  78.2    AlGaAs 0.0   8000  Nmesh=3
+Lc  Na=1.40e19  1  77      AlGaAs 0.09  1     Nmesh=3
+
+Lga  Na=1.05e19 Na=1.68e19 1  40.5      AlGaAs 0.17 0.86 1 1 Ndis=5 Nmesh=7
+Lca  Na=1.73e19 		   1  32        AlGaAs 0.90      1          Nmesh=2
+
+Lga  Na=1.68e19 Na=2.91e19 16 18.6      AlGaAs 0.90 0.57 1 1 Ndis=2 Nmesh=3
+Lga  Na=1.33e19 Na=1.08e19 16 14.9      AlGaAs 0.57 0.23 1 1 Ndis=2 Nmesh=3
+Lga  Na=8.62e18 Na=1.14e19 16 31.9      AlGaAs 0.17 0.17 1 1 Ndis=2 Nmesh=3
+Lga  Na=1.14e19 Na=1.68e19 16 33.5      AlGaAs 0.17 0.86 1 1 Ndis=4 Nmesh=6
+Lca  Na=1.73e19 		   16 32        AlGaAs 0.90      1 			Nmesh=2
+							
+Lga  Na=1.73e19 Na=1.04e19 1   0.1        AlGaAs 0.90 0.90 1 1 Ndis=1 Nmesh=1
+
+Lga  Na=1.20e19 Na=7.60e18 4  33.5      AlGaAs 0.90 0.23 1 1 Ndis=3 Nmesh=5
+Lga  Na=6.00e18 Na=7.25e18 4  31.9      AlGaAs 0.17 0.17 1 1 Ndis=2 Nmesh=3
+Lga  Na=1.00e19 Na=6.64e18 4  14.9      AlGaAs 0.17 0.57 1 1 Ndis=2 Nmesh=3
+Lga  Na=7.00e18 Na=1.00e19 4  18.6      AlGaAs 0.57 0.86 1 1 Ndis=2 Nmesh=3
+Lca  Na=1.04e19 		   4  32        AlGaAs 0.90      1     		Nmesh=2
+
+
+% Oxide region
+
+Lga  Na=1.00e19 Na=8.60e18 1  33.5      AlGaAs 0.86 0.23 1 1 Ndis=2 Nmesh=4
+Lga  Na=6.41e18 Na=7.62e18 1  32        AlGaAs 0.17 0.17 1 1 Ndis=2 Nmesh=3
+Lga  Na=1.50e19 Na=8.74e18 1  14.9      AlGaAs 0.23 0.50 1 1 Ndis=2 Nmesh=3
+Lga  Na=3.78e18 Na=3.78e18 1  35.2      AlGaAs 0.50 0.50 1 1 Ndis=2 Nmesh=3
+Lga  Na=3.78e18 Na=1.88e18 1  19.7      AlGaAs 0.50 0.29 1 1 Ndis=2 Nmesh=2
+Lca  Na=1.88e18 	       1  14.6      AlGaAs 0.29      1          Nmesh=1
+Lga  Na=1.88e18 Na=3.78e18 1  20.2      AlGaAs 0.29 0.50 1 1 Ndis=2 Nmesh=2
+Lga  Na=3.78e18 Na=2.20e18 1  14.3      AlGaAs 0.50 0.75 1 1 Ndis=2 Nmesh=2
+Lca  Na=2.00e18  1  3        AlGaAs 0.78  1 circle 2|P6 Ref 1.6 0  Nmesh=1
+Lca  Na=1.50e18  1  6        AlGaAs 0.85  1 circle 2|P5 Ref 1.6 0  Nmesh=1
+Lca  Na=6.83e18  1  2.       AlGaAs 0.99  1 circle 1|P4 Ref 1.6 0  Nmesh=1
+Lca  Na=6.83e18  1  26.6     AlGaAs 0.99  1 circle 8|P1 Ref 1.6 0  Nmesh=3
+Lca  Na=6.83e18  1  2.       AlGaAs 0.99  1 circle 1|P4 Ref 1.6 0  Nmesh=1
+Lca  Na=1.30e18  1  6        AlGaAs 0.85  1 circle 2|P5 Ref 1.6 0  Nmesh=1
+Lca  Na=1.25e18  1  3        AlGaAs 0.78  1 circle 2|P6 Ref 1.6 0  Nmesh=1
+Lga  Na=1.22e18 Na=1.06e18  1 14.3      AlGaAs 0.75 0.50 1 1 Ndis=2 Nmesh=2
+
+
+Lga  Na=1.06e18 Na=5.50e17 1  20.2      AlGaAs 0.50 0.29 1 1 Ndis=2 Nmesh=2
+Lca  Na=5.50e17 	       1  14.6      AlGaAs 0.29      1   Nmesh=2
+Lga  Na=5.50e17 Na=1.06e18 1  19.7      AlGaAs 0.29 0.50 1 1 Ndis=1 Nmesh=3
+
+% Cavity region
+LcaC Na=1.00e18 1  7.4         AlGaAs 0.50  1 Nmesh=2
+Lga     1  25.8                AlGaAs 0.50  0.38 0 0 Ndis=2 Nmesh=4
+Lca     1  40.7                AlGaAs 0.38  0 Nmesh=10
+Lc     -1  7.7                 AlGaAs 0  0 Nmesh=8
+Lc      1  5                   AlGaAs 0.38  0 Nmesh=5
+Lcr    -1  7.7                 AlGaAs 0  0  circle 3|P1 Nmesh=8
+Lc      1  5                   AlGaAs 0.38  0 Nmesh=5
+Lc     -1  7.7                 AlGaAs 0  0 Nmesh=8
+Lc      1  40.7                AlGaAs 0.38  0 Nmesh=10
+Lga     1  25.8                AlGaAs 0.38  0.50 0 0 Ndis=2 Nmesh=4
+LgaC Nd=3.29e17 Nd=1.00e18 1 102.1   AlGaAs 0.50 0.50 0 0 Ndis=1 Nmesh=11
+
+
+
+Lga  Nd=1.00e18 Nd=3.10e18 1  14.9      AlGaAs 0.50 0.23 1 1 Ndis=3 Nmesh=3
+Lca  Nd=2.24e18 		   1  32        AlGaAs 0.17 1  Nmesh=2
+Lga  Nd=3.11e18 Nd=3.57e18 1  33.5      AlGaAs 0.17 0.86 1 1 Ndis=3 Nmesh=4
+Lca  Nd=3.75e18 		   1  32        AlGaAs 0.90 1  Nmesh=2
+Lga  Nd=3.57e18 Nd=9.00e18 1  18.6      AlGaAs 0.90 0.57 1 1 Ndis=2 Nmesh=3
+
+% back mirror 36 pairs
+Lga  Nd=9.00e18 Nd=3.11e18 36 14.9      AlGaAs 0.57 0.23 1 1 Ndis=2 Nmesh=2
+Lca  Nd=2.24e18 		   36 31.9      AlGaAs 0.17 1  Nmesh=2
+Lga  Nd=3.11e18 Nd=3.57e18 36 33.5      AlGaAs 0.17 0.86 1 1 Ndis=3 Nmesh=4
+Lca  Nd=3.75e18 		   36 32        AlGaAs 0.90 1  Nmesh=2
+Lga  Nd=3.57e18 Nd=9.00e18 36 18.6      AlGaAs 0.90 0.57 1 1 Ndis=2 Nmesh=3
+
+Lga  Nd=9.00e18 Nd=3.24e18 1  21.9      AlGaAs 0.57 0.17 1 1 Ndis=1 Nmesh=2
+
+
+Lca  Nd=3.54e18 		   1  39        AlGaAs 0.09 1  Nmesh=4
+
+% buffer region 1
+
+LcPor       Nd=2e18               1  1000         AlGaAs 0.00 0       Nmesh=25
+
+
+

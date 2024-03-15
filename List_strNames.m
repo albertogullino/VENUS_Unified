@@ -66,4 +66,21 @@ STR{51}='Stephan_GR1';     % Torrelli GR
 STR{60}='Julian_TJ_2AR_pDBR';
 STR{61}='Julian_TJ_2AR_pDBR_fake';
 
+% FBH TJ test structure
+STR{70}='FBH-testTJ-Julian';
+STR{71}='FBH-testTJ-Julian-oldMesh';
+STR{75}='btj_testChalmers2020'; % 75 (Chalmers test structure, 2020Tibaldi_PRAPP)
+
+% FBH kink voltage analysis (varying barrier xmol: xB), no LUT recomputed!
+STR{80}='MarkusN_FINALE_LgDBR_xB=0.20'; 
+STR{81}='MarkusN_FINALE_LgDBR_xB=0.38';     
+
+% DBR analysis
+STR{90}='nDBR_x17_90';  % bottom DBR of Markus structure
+STR{91}='pDBR_x17_90';  % top DBR of Markus structure
+
+STR{92}='nDBR_x10_90';  % bottom DBR of Markus structure
+STR{93}='pDBR_x10_90';  % bottom DBR of Markus structure
+
+STR{95}='MarkusN_FINALE_LgDBR_x=010';  % bottom DBR of Markus structure
 

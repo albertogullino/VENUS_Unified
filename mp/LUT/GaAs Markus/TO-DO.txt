@@ -1,0 +1,3 @@
+
+Tibaldi, 07/12/2017
+Verificare: sembra che con Landsberg_extended, con una concentrazione di portatori tale per cui la differenza dei livelli di Fermi è inferiore al gap, non si abbia emissione spontanea!!! :-\

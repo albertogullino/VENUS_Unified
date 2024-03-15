@@ -40,7 +40,7 @@ end
 %'entro savePlot', keyboard
 modePlot.ii_dd=mode.ii_dd;
 %                modePlot.len=len;
-if(mode.oflg)
+if(mode.qflg)
     modePlot.nMaxVet=mode.nMaxVet;
     modePlot.pMaxVet=mode.pMaxVet;
     modePlot.n3MaxVet=mode.n3MaxVet;
@@ -48,12 +48,14 @@ if(mode.oflg)
     modePlot.nQW=mode.nQW;
     modePlot.NMQW=mesh.NMQW;
     
+    if(mode.Oflg)
     modePlot.Pst_dd=mode.Pst_dd;
     modePlot.Psp_dd=mode.Psp_dd;
     modePlot.PspBulk_dd=mode.PspBulk_dd;
     
     modePlot.vind=vind;
-    
+    end
+
 end
 %                modePlot.Vmeas=Vmeas;
 %                modePlot.Imeas=Imeas;
@@ -81,16 +83,16 @@ modePlot.DeltaTmax=mode.DeltaTmax;
 modePlot.vv_dd=mode.vv_dd;
 modePlot.NVbias=NVbias;
 
-if mode.oflg==0
+if mode.Oflg==0
     fprintf(['\nCurrent: ',num2str(abs(mode.ii_dd(end))*1e3),' mA | Voltage: ',num2str(abs(mode.vv_dd(end))), ' V\n\n'])
 else
     fprintf(['\nCurrent: ',num2str(abs(mode.ii_dd(end))*1e3),' mA | Voltage: ',num2str(abs(mode.vv_dd(end))), ' V | Opt. power: ',num2str(sum(mode.Pst_dd(:,end),1),'%.2f'), ' mW | dT(max): ',num2str(abs(mode.DeltaTmax(end)),'%.1f'), ' K\n\n'])
 end
 
-if mode.oflg==1
+if mode.Oflg==1
     modePlot.Gmod=mode.Gmod;
     modePlot.Lmod=mode.Lmod;
-    modePlot.oflg=mode.oflg;
+    modePlot.Oflg=mode.Oflg;
     modePlot.FLos=mode.FLos;
     modePlot.nmodes=mode.nmodes;
     modePlot.lambda=mode.lambda;
@@ -105,8 +107,7 @@ if mode.oflg==1
     %                'in savePlot', keyboard
     modePlot.dn(indv,1:length(mode.DeltaN))=mode.DeltaN';
     modePlot.Tqw(indv,:)=mesh.T(mesh.inMQW{1})';
-    modePlot.Elqw(indv,:)=mode.nQW{end}{2}';
-    modePlot.Hoqw(indv,:)=mode.pQW{end}{2}';
+    
     if isfield(mode,'Fat_cap_e')
         modePlot.Fate(indv,:)=mode.Fat_cap_e';
         modePlot.Fath(indv,:)=mode.Fat_cap_h';
@@ -120,6 +121,11 @@ if mode.oflg==1
     else
         modePlot.FatCap(indv,:)=ones(size(mode.nQW{end}{2}'));
     end
+end
+
+if(mode.qflg)
+    modePlot.Elqw(indv,:)=mode.nQW{end}{2}';
+    modePlot.Hoqw(indv,:)=mode.pQW{end}{2}';
     modePlot.yQW=mesh.yMQW{2}*1e4;
 end
 modePlot.y=mesh.ygrid*1e4;
@@ -137,7 +143,7 @@ RHodo0=reshape(mesh.dop_a,mesh.nny,mesh.nnx);
 REldo=reshape(mode.dop_dp,mesh.nny,mesh.nnx);
 RHodo=reshape(mode.dop_am,mesh.nny,mesh.nnx);
 
-if mode.oflg==1
+if mode.qflg==1
     REl2du=reshape(mode.N2D,mesh.nny,mesh.nnx);
     RHo2du=reshape(mode.P2D,mesh.nny,mesh.nnx);
     
@@ -244,7 +250,7 @@ end
 modePlot.Rtn(indv,:,:)=Rtn;
 modePlot.Rtp(indv,:,:)=Rtp;
 
-if mode.oflg==1
+if mode.qflg==1
     modePlot.Cn(indv,:)=Cn;
     modePlot.Cp(indv,:)=Cp;
     modePlot.El2D(indv,:)=REl2du(:,1)';
@@ -276,7 +282,7 @@ modePlot.Hodr0(indv,:)=RHodo0(:,1)';
 
 modePlot.xmol=mesh.xmol(1:mesh.nny);
 
-if indv>1 && mode.oflg==1
+if indv>1 && mode.qflg==1
     modePlot.Ic(indv,:)=curr_n;
     modePlot.Iv(indv,:)=curr_p;
     fP=abs((curr_n)+(curr_p));
@@ -296,7 +302,7 @@ if indv>1 && mode.oflg==1
 end
 % da togliere
 
-if mode.oflg==1
+if mode.qflg==1
     modePlot.nQW=mode.nQW;
     modePlot.pQW=mode.pQW;
 end
@@ -334,7 +340,7 @@ modePlot.FAT_idiffusioneQW_E= mode.FAT_idiffusioneQW_E;
 modePlot.FAT_idiffusioneQW_H= mode.FAT_idiffusioneQW_H;
 modePlot.tausE= mode.tausE;
 modePlot.tausH= mode.tausH;
-if mode.oflg==1
+if mode.Oflg==1
     modePlot.Gamma= sum(mode.Gamma_z);
 end
 modePlot.VelmOptions= VelmOptions;

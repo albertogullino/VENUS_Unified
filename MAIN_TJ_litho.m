@@ -40,9 +40,10 @@ IOLDsw=0;
 
 iSavNome=1;
 
-IPLOT=1;  % Structure details + live plots of simulation results
+IPLOT=-1;  % Structure details + live plots of simulation results
+% IPLOT=1;  % live plots of simulation results
 % IPLOT=-2;   % Structure details plot
-IPLOT=0;    % Not intermediate plots
+% IPLOT=0;    % No intermediate plots
 
 % Imassimo=1;  % massima corrente analizzata
 PotMin=.1;        % potenza finale

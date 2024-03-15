@@ -46,7 +46,7 @@ TotalHeat(1:nn) = (Joule + Thomson + Rec_Cap + Rec_srhAu + OptAbs + Rec_RAD); %
 % end
 
 %
-if mode.oflg==1
+if mode.Oflg==1
     PTherm=TotalHeat(2:end)*diff(node')*1e3; % mW/cm2 VENUS
     fattore_correttivo=(mode.PDissPred(end))/PTherm/mode.AreaOx; % divided by area to convert PDiss in mW/cm^2
 else

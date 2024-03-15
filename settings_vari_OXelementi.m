@@ -188,18 +188,24 @@ Auger_broad=10;   %(nm)
 iLUT=2;         % LUT index (old LUT)
 % iLUT=5;         % LUT index (new LUT)
 
+% iLUT=6;
+% iLUT=7;
+
 LUT{1}='LUT4D_Jun_Markus_Lorentzian';
 LUT{2}='LUT4D_Jun_Markus_nMark_40';
 LUT{3}='LUT4D_Julian_nMark';
 LUT{4}='LUT4D_Julian_nMark_xmol=0.06';
 LUT{5}='LUT4D_Stephan_nMark_xmolQW=0_xmolBarr=0.3QWthick=7.7';
 
+LUT{6}='LUT4D_Feb24_Markus_nMark_xW=0_xB=0.2';
+LUT{7}='LUT4D_Feb24_Markus_nMark_xW=0_xB=0.38';
+
 
 for ks=1:length(LUT)
     LUT{ks}=[nomeLUT,LUT{ks}];
 end
 
-Deltalam=3;
+Deltalam=+3;
 
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -304,8 +310,9 @@ end
 
 Fat_Dop=1.;
 CTemp_Ion=0;
-% mode.Zmat=8.5; % linear network embedding nonlinear device
-Zmat=0; % linear network embedding nonlinear device
+
+% linear network embedding nonlinear device;
+Zmat=0; % Zmat=6 (or Rs=6) to reproduce 2020Tibaldi_PRAPP
 
 % mode.DopingMobilityModel='none'; % 'none' or 'Hilsum'
 % mode.DopingMobilityModel='Hilsum'; % 'none' or 'Hilsum'
@@ -360,8 +367,11 @@ VelmOptions.iany=0;
 VelmOptions.imod_acc=0;  % 0 per LP
 
 fat_ag=1;     % fattore antiguiding (per ridurlo o aumentarlo); per toglierlo, agire su ianti_gui [0 o 1]
-VelmOptions.ianti_gui=1; % 1 in VENUS quasi 1D (as in D1ANA); 0 in VENUS 3D
-% VelmOptions.ianti_gui=0;
+if mode.quasi1D==0
+	VelmOptions.ianti_gui=1; % 0 in VENUS quasi 1D (as in D1ANA); 1 in VENUS 3D
+else
+	VelmOptions.ianti_gui=0;
+end
 VelmOptions.gain_gui=1;
 
 mode.verbVELM=0;
@@ -451,9 +461,10 @@ mode.nflg=1; % include electron continuity equation
 mode.pflg=1; % include hole continuity equation
 mode.tflg=0; % include trap equations
 mode.Tflg=1; % include thermal effects
-mode.oflg=1; % include quantum effects and stimulated recombination
+mode.qflg=1; % include quantum effects and stimulated recombination
+mode.Oflg=1; % include optical simulation
 mode.RAD_spalmato=1;
-if mode.oflg==0
+if mode.Oflg==0
     mode.RAD_spalmato=0;
 end
 mode.BULK=1; % include quantum effects and stimulated recombination
@@ -474,6 +485,9 @@ mode.mobility='none'; % mobility model
 mode.ntrap=0; % number of trap levels
 mode.stats='Fermi'; % "Fermi" or "Boltzmann" are available
 mode.ionization='Incomplete'; % "Full" or "Incomplete" are available
+% mode.ionization='Full'; % "Full" or "Incomplete" are available
+% mode.EaTJ=-150e-3;
+% mode.EdTJ=-150e-3;
 mode.symmetry='Cylindrical-Y'; % rotation around y axis
 mode.taucarrier=0;      %mette Vallone se 1
 

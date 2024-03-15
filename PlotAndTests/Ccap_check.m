@@ -1,3 +1,5 @@
+% clear 
+
 kB=1.3806488e-23;       % Boltzmann constant (J/K)
 qel=1.6021766208e-019;  % Elementary charge (C)
 
@@ -15,37 +17,71 @@ PTqw=squeeze(MODEplot{1}.Temp(:,PinQW,Px));
 Pvtqw=PTqw*kB/qel;
 
 % PCcapn=cell2mat(mode.Ccapn(2,:)');    % the first index is the QW identifier (2: central QW)
+x=mesh.xgrid*1e4;
+I=mode.ii_dd*1e3;
+WQW=mesh.vWMQW{1};
 
-figure,plot(mesh.xgrid(Px)*1e4,PEfn2D')
-figure,plot(mesh.xgrid(Px)*1e4,PEfn3D')
-figure,plot(mesh.xgrid(Px)*1e4,PEfn2D'-PEfn3D')
-figure,plot(mesh.xgrid(Px)*1e4,(PEfn2D'-PEfn3D')./Pvtqw')
+figure
+hold on,grid on,box on
+plot(I,PEfn3D(:,1),'LineWidth',2)
+plot(I,PEfp3D(:,1),'LineWidth',2)
+plot(I,PEfn2D(:,1),'--','LineWidth',2)
+plot(I,PEfp2D(:,1),'--','LineWidth',2)
+title('Fermi levels')
+legend('Efn 2D','Efp 2D','Efn 3D','Efp 3D')
+xlabel('Current, mA'),ylabel('Energy, eV')
+
+figure
+hold on,grid on,box on
+plot(I,Pn3D(:,1),'LineWidth',2)
+plot(I,Pp3D(:,1),'LineWidth',2)
+plot(I,Pnqw(:,1)/WQW,'LineWidth',2)
+plot(I,Ppqw(:,1)/WQW,'LineWidth',2)
+title('QW carriers')
+legend('n 3D','p 3D','n 2D','p 2D')
+xlabel('Current, mA'),ylabel('Carrier levels, cm^{-3}')
+
+figure
+hold on,grid on,box on
+plot(I,PCcapn(:,1),'LineWidth',2)
+plot(I,PCcapp(:,1),'LineWidth',2)
+title('Capture terms')
+legend('n','p')
+xlabel('Current, mA'),ylabel('Capture rates, cm^{-3}\cdots^{-1}')
+
+keyboard
+
+figure,plot(x(Px),PEfn2D')
+figure,plot(x(Px),PEfn3D')
+figure,plot(x(Px),PEfn2D'-PEfn3D')
+figure,plot(x(Px),(PEfn2D'-PEfn3D')./Pvtqw')
 Pcap_escn=1-exp((PEfn2D'-PEfn3D')./Pvtqw');
-figure,plot(mesh.xgrid(Px)*1e4,Pcap_escn),title('capture/escape')
+figure,plot(x(Px),Pcap_escn),title('capture/escape')
 Pfillingn=exp(-Pnqw/mode.N2{1}(1));
-figure,plot(mesh.xgrid(Px)*1e4,Pfillingn),title('state filling')
+figure,plot(x(Px),Pfillingn),title('state filling')
 Ptaun=Pn3D/mode.tausE;
-figure,plot(mesh.xgrid(Px)*1e4,Ptaun),title('capture')
+figure,plot(x(Px),Ptaun),title('capture')
 PCcapn_calcolato=Pfillingn.*Ptaun.*Pcap_escn';
-figure,plot(mesh.xgrid(Px)*1e4,PCcapn_calcolato),title('Ccapn')
-figure,plot(mesh.xgrid(Px)*1e4,PCcapn'),title('Ccapn-saved')
+figure,plot(x(Px),PCcapn_calcolato),title('Ccapn')
+figure,plot(x(Px),PCcapn'),title('Ccapn-saved')
 
 Pcap_escp=1-exp(-(PEfp2D'-PEfp3D')./Pvtqw');
 Pfillingp=exp(-Ppqw/mode.P2{1}(1));
 Ptaup=Pp3D/mode.tausH;
 PCcapp_calcolato=Pfillingp.*Ptaup.*Pcap_escp';
-figure,plot(mesh.xgrid(Px)*1e4,PCcapp_calcolato),title('Ccapp')
-figure,plot(mesh.xgrid(Px)*1e4,PCcapp'),title('Ccapp-saved')
+figure,plot(x(Px),PCcapp_calcolato),title('Ccapp')
+figure,plot(x(Px),PCcapp'),title('Ccapp-saved')
 
 
-Prho=mesh.xgrid*1e4;
-Pdrho=[0 diff(rho)];
+Prho=x;
+Pdrho=[0 diff(Prho)];
 Prhodrho=Prho.*Pdrho;
 Prhodrho=Prhodrho(Px);
 
-figure,plot(mode.ii_dd*1e3,PCcapn_calcolato*Prhodrho'),title('Ccapn')
-figure,plot(mode.ii_dd*1e3,PCcapn*Prhodrho'),title('Ccapn-saved')
+figure,plot(I,PCcapn_calcolato*Prhodrho'),title('Ccapn')
+figure,plot(I,PCcapn*Prhodrho'),title('Ccapn-saved')
 
+keyboard
 
 [Anqw,Apqw,AEfn2D,AEfp2D]=Extract_carrierQWcell(A.mode);
 

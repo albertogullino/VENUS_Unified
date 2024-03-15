@@ -3,11 +3,11 @@ clear
 % close all
 clc
 
-Dact = 3; % available 2, 3, 4, 5, 6, 7, 8
+Dact = 4; % available 2, 3, 4, 5, 6, 7, 8
 
 % Different currents are available for each temperature.
 cser='rgbmc';
-Temperature = 50; % available 20, 50, 80, 110
+Temperature = 20; % available 20, 50, 80, 110
 Currents = {' 2.000',' 3.000',' 6.000',' 9.000','12.000'};
 %Currents = {' 2.000',' 3.000',' 6.000',' 9.000','12.000','14.000','20.000'};
 %Currents = {'2.000','3.000','5.000','8.000','10.000','14.000'};

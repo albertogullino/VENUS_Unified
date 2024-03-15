@@ -95,7 +95,7 @@ mode.HeatRec_nr_bulk=qel.*mesh.Eg.*(mode.RSRH+mode.RAuger)*1e-12*mode.CarrierNor
 mode.HeatRec_rad_bulk=qel.*mesh.Eg.*(mode.Rrad)*1e-12*mode.CarrierNorm;
 mode.HeatThomson=(HeatThomson_x+HeatThomson_y)*1e-12*mode.CarrierNorm;
 %'thom',keyboard
-if(mode.oflg)
+if(mode.qflg)
     mode.HeatRec_nr_QW=qel.*mesh.Eg.*(mode.RSRHQW+mode.RAugerQW)*1e-12*mode.CarrierNorm;
     mode.HeatRec_rad_QW=qel.*mesh.Eg.*(mode.RradQW)*1e-12*mode.CarrierNorm;
     mode.HeatRec_nrParziale=mode.HeatRec_nr_QW+mode.HeatRec_nr_bulk;
@@ -285,7 +285,7 @@ else
 end
 
 % FCA compuation
-if(mode.oflg)
+if(mode.Oflg)
     Pst=reshape(mode.Pst,mode.nmodes,1)/1000; % mW
     
     % OptAbsorption (um)

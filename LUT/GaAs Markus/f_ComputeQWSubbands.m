@@ -5,9 +5,8 @@ function [Ban,mesh]=f_ComputeQWSubbands(mesh,mode)
 % Definition of FEM grid and structure parameters
 %==========================================================================
 
-vz_offset=0;
-% vz_offset=[-mesh.Lz,mesh.Lz]; % 2 QWs case
-% vz_offset=[-2*mesh.Lz,0,2*mesh.Lz]; % 3 QWs case
+vz_offset=mesh.vz_offset;
+
 s_LoadConstants
 s_GaAsConstants
 
@@ -52,14 +51,14 @@ if mode.iplot==1
     plot(mesh.xc*1e9,mesh.evb,'ro')
     xlabel('z (nm)')
     ylabel('Valence band structure, eV')
-    drawnow
+    drawnow 
 end
 
 kx=linspace(0,mesh.max_k,mesh.num_kvectors); % kx grid points, angstrom
 kx(1)=1e-5; % k grid points along x, angstrom
 
 ky=zeros(1,mesh.num_kvectors); % k grid points along y, angstrom
-kgrid=sqrt(kx.^2+ky.^2)*1e10; % k vectors grid, conversion to 1/m
+kgrid=sqrt(kx.^2+ky.^2)*1e10; % k vectors grid, conversion to 1/m (k=kx)
 
 SBC=zeros(mesh.ncinit,mesh.num_kvectors); % CB subbands
 XVC=zeros(4*mesh.nn,mesh.ncinit,mesh.num_kvectors); % CB eigenfunctions
@@ -101,7 +100,31 @@ elseif(vnorm2(1)>1e-5)
     mesh.indlh=find(vnorm1>1e-5);
 end
 
-
+if mode.iplot==1
+    figure,hold on,grid on
+    plot(mesh.x*1e9,abs(xvC(:,1)).^2/trapz(mesh.x*1e9,abs(xvC(:,1)).^2),'.-')
+    plot(mesh.x*1e9,abs(xvV1(:,mesh.indhh(1))).^2/trapz(mesh.x*1e9,abs(xvV1(:,mesh.indhh(1))).^2),'.-')
+    plot(mesh.x*1e9,abs(xvV2(:,mesh.indlh(1))).^2/trapz(mesh.x*1e9,abs(xvV2(:,mesh.indlh(1))).^2),'.-')
+    xlabel('z, nm'),ylabel('Wavefunction')
+    legend('el','hh','lh','location','best')
+    keyboard
+    
+%     
+%     figure,hold on,grid on
+%     if mesh.NQW==1
+%         plot(mesh.x*1e9,sum(abs(xvC(:,1)).^2,2),'.')
+%         plot(mesh.x*1e9,sum(abs(xvV1(:,mesh.indhh(1))).^2,2),'.')
+%         plot(mesh.x*1e9,sum(abs(xvV2(:,2)).^2,mesh.indlh(1)),'.')
+%     else
+%         plot(mesh.x*1e9,sum(abs(xvC(:,1:3)).^2,2),'.')
+%         plot(mesh.x*1e9,sum(abs(xvV1(:,mesh.indhh(1:3))).^2,2),'.')
+%         plot(mesh.x*1e9,sum(abs(xvV2(:,mesh.indlh(1:3))).^2,2),'.')
+%     end
+%     xlabel('z, nm'),ylabel('Wavefunction')
+%     legend('el','hh','lh','location','best')
+%     title('k=0')
+%     disp('k=0 - Check that 1QW = 3QW'),keyboard
+end
 
 
 disp('Computing subbands')
@@ -385,13 +408,11 @@ end
 
 save(mesh.fileName,'Ban','mesh')
 
-
-
 %==========================================================================
 % Plot dispersion curves
 %==========================================================================
 if mode.iplot==1
-    figure(2)
+    figure(3)
     set(gcf,'Position',[1060 512 560 420])
     hold on
     grid on
@@ -401,7 +422,7 @@ if mode.iplot==1
     ylabel('Energy, eV')
     title('Valence subbands')
     
-    figure(3)
+    figure(4)
     set(gcf,'Position',[633 59 560 420])
     hold on
     grid on
@@ -409,6 +430,6 @@ if mode.iplot==1
     set(gca,'FontSize',14,'FontName','Arial','Box','on')
     xlabel('k_{||}, nm^{-1}')
     ylabel('Energy, eV')
-    title('Valence subbands')
+    title('Conduction subbands')
 end
 

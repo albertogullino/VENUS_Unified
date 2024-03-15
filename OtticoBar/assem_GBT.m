@@ -41,7 +41,7 @@ else
 end
 %
 % total number of equations/unknowns
-neq=nn+mode.nflg*nn+mode.pflg*nn+mode.tflg*nl*nn+2*nm+mode.oflg*not(mode.firstrun)*2*NQW*length(mesh.xgrid)+mode.oflg*nmodes;
+neq=nn+mode.nflg*nn+mode.pflg*nn+mode.tflg*nl*nn+2*nm+mode.qflg*not(mode.firstrun)*2*NQW*length(mesh.xgrid)+mode.Oflg*nmodes;
 %
 % =============================================================================================100
 % Loading and computing geometry parameters
@@ -237,9 +237,10 @@ if(mode.pflg)
     
 end % hole concentration
 
-if(mode.oflg)
+if(mode.qflg)
+    if mode.Oflg==1
     Pst=abs(uvet(ss+(1:nmodes)));
-    
+    end
     for indQW=1:NQW
         n2Dc{indQW} = abs(uvet(vv+(indQW-1)*length(mesh.xgrid)+(1:nnQW)));
         p2Dc{indQW} = abs(uvet(ww+(indQW-1)*length(mesh.xgrid)+(1:nnQW)));
@@ -417,7 +418,8 @@ if(not(mode.firstrun)) % At equilibrium, R=0
         elseif (strcmp(mode.GR{indGR},'BTBT')==1)
             %
             % Load the NEGF LUT
-            if (abs(v0_dd)==0)
+%             if (abs(v0_dd)==0)
+            if isfield(mode,'cBTBT')==0
                 LUT_GBTBT
             end
             %
@@ -453,6 +455,11 @@ if(not(mode.firstrun)) % At equilibrium, R=0
                 % - BTJ is np (2020Tibaldi_PRAPP): n --> mesh.inTJ(1); p --> mesh.inTJ(end)
                 %
                 Vint=mode.EFp(ITJp_vet)-mode.EFn(ITJn_vet);
+%                 if mesh.dop_d(ITJn_vet(1))>0
+%                     Vint=mode.EFp(ITJn_vet)-mode.EFn(ITJp_vet);
+%                 else
+%                     Vint=mode.EFp(ITJp_vet)-mode.EFn(ITJn_vet);
+%                 end
                 Vint(isnan(Vint))=0;
                 mode.VTJ(indexBTJ,mode.ind_v0,:)=Vint;
                 % Initialization of Vinterp derivatives for Jacobian matrix
@@ -481,7 +488,7 @@ if(not(mode.firstrun)) % At equilibrium, R=0
                 if mode.flgBTJ_lithographic>0
                     [~,iRagTJ]=min(abs(mesh.xgrid*1e4-mode.rAperture));
                 else
-                    if mode.oflg==1
+                    if mode.qflg==1
                         iRagTJ=nnQW;
                     else
 %                     iRagTJ=37
@@ -501,10 +508,14 @@ if(not(mode.firstrun)) % At equilibrium, R=0
                     
                     VV(iRad,:) = Vint(iRad).^[pDeg:-1:0];
                     dVV(iRad,:) = Vint(iRad).^[pDeg-1:-1:0];
-                    
                 end
-                
-                I_interp=10.^(VV*cT')-mode.I0_NEGF(iT); % A/cm^2 !!!!
+                % Extrapolation from NEGF results
+                if mode.iLtunn==1
+                    I_interp=mode.J0*Vint'.*exp(-VV*cT'./mode.L0);
+                else
+                    I_interp=10.^(VV*cT')-mode.I0_NEGF(iT); % A/cm^2 !!!!
+                end
+
                 I_interp(iRagTJ+1:end)=0;
                 mode.JTJ(indexBTJ,mode.ind_v0,:)=I_interp;
                 
@@ -528,7 +539,11 @@ if(not(mode.firstrun)) % At equilibrium, R=0
                 
                 mode.HeatTJ(indexBTJ,mode.ind_v0,:)=abs(JTJ.*Vint'./repmat(LTJ,mesh.nnx,1));
                 
-                dI_interp=log(10)*10.^(VV*cT').*(dVV*dc');
+                if mode.iLtunn==1
+                    dI_interp=mode.J0*exp(-VV*cT'./mode.L0).*(1-Vint*dVV*dc'./mode.L0);
+                else
+                    dI_interp=log(10)*10.^(VV*cT').*(dVV*dc');
+                end
                 dII=1/LTJ*(-dI_interp/qel)'/mode.CarrierNorm;
                 
                 dRnTJ(IBTJ) = dII(IIBTJP(IBTJ)).*dVint_dn(IIBTJP(IBTJ));
@@ -1043,7 +1058,7 @@ Kmat0=Kmat0+sparse(rr+(1:nm),rr+(1:nm),-1,neq,neq);
 % =============================================================================================100
 % Assembling quantum corrections and related jacobians
 % =============================================================================================100
-if(mode.oflg)
+if(mode.qflg)
     iTappo=mode.iTappo;
     N2Dtot=0; P2Dtot=0; Psp=0;
     mode.gmod=zeros(nmodes,1);
@@ -1709,47 +1724,52 @@ if(mode.oflg)
         %            np=(nQW+pQW)/2-(n2Di+p2Di)/2/WQW;
         %            IntRecQW3Dn
         
-        np_E=n2D-n2Di;
-        np_H=p2D-p2Di;
-        
-        np_E=n2D;
-        np_H=p2D;
-        
-        [Rsp,dRspE,dRspH]=f_InterpRsp_lin(np_E,np_H,indQW);
-        
-        Rsp=Rsp*mode.fat_gain;
-        dRspE=dRspE*mode.fat_gain;
-        dRspH=dRspH*mode.fat_gain;
-%             if mode.CarrierNorm>1
-%                 Rrad2D_SBE = Rsp; % from 1/(s*cm^3) to 1/(s*cm^2)
-%                 Rrad2D = Rsp; % from 1/(s*cm^3) to 1/(s*cm^2)
-%                 dRrad2D_n2D = dRspE; % 1/cm and cm simplify
-%                 dRrad2D_p2D = dRspH; % 1/cm and cm simplify
-%             else
-        Rrad2D_SBE = Rsp*WQW; % from 1/(s*cm^3) to 1/(s*cm^2)
-        Rrad2D = Rsp*WQW; % from 1/(s*cm^3) to 1/(s*cm^2)
-        dRrad2D_n2D = dRspE*WQW; % 1/cm and cm simplify
-        dRrad2D_p2D = dRspH*WQW; % 1/cm and cm simplify
-%             end
-        
-        VI=Rrad2D;
-        MM = qel.*[Lp1.*VI(iiQW1) Lp2.*VI(iiQW2)];
-        IntRad=IntRad+sum(MM);
-        mode.IRsp(mode.indv,indQW) = sum (MM);
+        if mode.Oflg==1
+            np_E=n2D-n2Di;
+            np_H=p2D-p2Di;
 
-        MM = [Lp1.*Rrad2D(iiQW1) Lp2.*Rrad2D(iiQW2)];
-        frsp=mode.frsp;
-        Psp=Psp+frsp*1000*sum(sparse(MM))*h*(Clight*1e-2/mean(1e-9*mode.vlambda)); % milliwatt
-        
-        % "Brad" model
-%         Brad2D = mesh.brad(inQW)./WQW; % Brad in cm^2/s (/WQW!)
-%         Rrad2D = Brad2D.*np2D; % cm^(-2)/s
-%         dRrad2D_n2D = Brad2D.*p2D;
-%         dRrad2D_p2D = Brad2D.*n2D;
-        %
-        R2D = R2D + Rrad2D;
-        dR2D_n2D = dR2D_n2D + dRrad2D_n2D;
-        dR2D_p2D = dR2D_p2D + dRrad2D_p2D;
+            np_E=n2D;
+            np_H=p2D;
+
+            [Rsp,dRspE,dRspH]=f_InterpRsp_lin(np_E,np_H,indQW);
+
+            Rsp=Rsp*mode.fat_gain;
+            dRspE=dRspE*mode.fat_gain;
+            dRspH=dRspH*mode.fat_gain;
+            %             if mode.CarrierNorm>1
+            %                 Rrad2D_SBE = Rsp; % from 1/(s*cm^3) to 1/(s*cm^2)
+            %                 Rrad2D = Rsp; % from 1/(s*cm^3) to 1/(s*cm^2)
+            %                 dRrad2D_n2D = dRspE; % 1/cm and cm simplify
+            %                 dRrad2D_p2D = dRspH; % 1/cm and cm simplify
+            %             else
+            Rrad2D_SBE = Rsp*WQW; % from 1/(s*cm^3) to 1/(s*cm^2)
+            Rrad2D = Rsp*WQW; % from 1/(s*cm^3) to 1/(s*cm^2)
+            dRrad2D_n2D = dRspE*WQW; % 1/cm and cm simplify
+            dRrad2D_p2D = dRspH*WQW; % 1/cm and cm simplify
+            %             end
+
+            VI=Rrad2D;
+            MM = qel.*[Lp1.*VI(iiQW1) Lp2.*VI(iiQW2)];
+            IntRad=IntRad+sum(MM);
+            mode.IRsp(mode.indv,indQW) = sum (MM);
+
+            MM = [Lp1.*Rrad2D(iiQW1) Lp2.*Rrad2D(iiQW2)];
+            frsp=mode.frsp;
+            Psp=Psp+frsp*1000*sum(sparse(MM))*h*(Clight*1e-2/mean(1e-9*mode.vlambda)); % milliwatt
+
+            % "Brad" model
+            %         Brad2D = mesh.brad(inQW)./WQW; % Brad in cm^2/s (/WQW!)
+            %         Rrad2D = Brad2D.*np2D; % cm^(-2)/s
+            %         dRrad2D_n2D = Brad2D.*p2D;
+            %         dRrad2D_p2D = Brad2D.*n2D;
+            %
+            R2D = R2D + Rrad2D;
+            dR2D_n2D = dR2D_n2D + dRrad2D_n2D;
+            dR2D_p2D = dR2D_p2D + dRrad2D_p2D;
+        else
+            Rrad2D=zeros(size(RSRH2D));
+            Rrad2D_SBE=zeros(size(RSRH2D));
+        end
         %
         % Auger recombination model
 %             if mode.CarrierNorm>1
@@ -1928,153 +1948,154 @@ if(mode.oflg)
         %
         mode.Ccapn3D=mode.Ccapn3D-Ccapn3D; mode.Ccapp3D=mode.Ccapp3D-Ccapp3D;
         %
-        % =========================================================================
-        % Assembling photon rate equations: stimulated emission
-        % =========================================================================
-        vph=Clight./mode.nindexQW; % phase velocity in GaAs quantum well
-        TQW=mesh.T(inQW);
-        diffMQW=find(abs(diff(cell2mat(mesh.MQWcell)))>2);
-        %
-        for indMode=1:nmodes
-            Gamma_z=mode.Gamma_z(indMode,indQW);
-            if isempty(diffMQW)
-                % 1 MQW region
-                Campo_attivo=mode.Gamma_z(indMode,:)./mode.Gamma_z(indMode,ceil(end/2));
-            else
-                % more than one MQW region
-                Campo_attivo=mode.Gamma_z(indMode,:)./mode.Gamma_z(indMode,ceil(diffMQW(1)/2));
-            end
-            Fattore_attivo=Campo_attivo(indQW);
-            
-            [g,dgE,dgH,rsp,drspE,drspH] = f_InterpGain_lin(n2D,p2D,indQW,indMode);
-            
-            %            
-            % Non-linear gain
-            if isfield(mode,'nlG')
-                % Gain compression factor: g=g/(1+epsNL*S); [epsNL]=cm^3
-                % S --> Photon density ([S]=1/cm^3)
-                % Notice that in VENUS g(s^-1)=vph*g(cm^-1) is used 
-                % --> S = fPdif*Pst , with [Pst]=W
-                % Rst: Stimulated emission recombination term (see below)
-                % Rst=g*fPdif*Pst*WQW; [Rst]=1/(cm^2*s)
-                % fPdif=Rst/(g*Pst*WQW);
-                % [fPdif]=1/(cm^2*s)/(1/s*W*cm)=1/(cm^3*W) 
-                nlG=1./(1+(mode.epsNLg.*Pst.*mode.fPdif)*mode.E2);
-%                 dnlGdP=-(mode.epsNLg.*mode.fPdif*mode.E2)./(1+mode.epsNLg.*Pst.*mode.fPdif*mode.E2).^2;
-                dnlGdP=1;
-                
-                mode.nlG=nlG(1:nnQW);
-            else
-                nlG=1;
-                dnlGdP=1;
-            end
-            
-            g=vph*g.*nlG*mode.fat_gain;
-            
-            mode.g{indQW,indMode}=g; % saving just for the last mode..
-            
-            dgE=vph*dgE.*nlG*mode.fat_gain;
-            dgH=vph*dgH.*nlG*mode.fat_gain;
-            
-            rsp=rsp*mode.fat_gain;
-            drspE=drspE*mode.fat_gain;
-            drspH=drspH*mode.fat_gain;
+        if mode.Oflg==1
+            % =========================================================================
+            % Assembling photon rate equations: stimulated emission
+            % =========================================================================
+            vph=Clight./mode.nindexQW; % phase velocity in GaAs quantum well
+            TQW=mesh.T(inQW);
+            diffMQW=find(abs(diff(cell2mat(mesh.MQWcell)))>2);
             %
-            %-- Stimulated emission: rate equation
-            mode.matgain=mode.matgain+g/vph; % saving material gain for VELM
-            %            mode.DeltaN=mode.DeltaN+DeltaN;
-            %
-            E2 = mode.E2(indMode,1:nnQW); % electric field intensity (normalized)
-            %
-            FLos=mode.FLos;
-            Lm = FLos*mode.Lm(indMode); % losses, 1/s
-            %
-            gE = g.*E2; % gain-field product
-            MM = [Lp1.*gE(iiQW1) Lp2.*gE(iiQW2)];
-            
-            mode.gE(mode.indv,indQW,indMode,:)=gE;
-            
-            gm = sum(diag(sparse(ijrQW,ijrQW,MM,nnQW,nnQW)));
-            dgm_nE = dgE.*E2;
-            dgm_nH = dgH.*E2;
-            %
-            rspE = rsp.*E2;
-            MM = [Lp1.*rspE(iiQW1) Lp2.*rspE(iiQW2)];
-            rspMod = sum(diag(sparse(ijrQW,ijrQW,MM,nnQW,nnQW)));
-            dRsp_nE = drspE.*E2;
-            dRsp_nH = drspH.*E2;
-            %
-            % Assembling spontaneous emission power
-            Sq=Gamma_z.*mode.fPES(indMode).*rspMod;
-            mode.Sq(mode.ind_v0)=Sq;
-            tvet(ss+indMode)=tvet(ss+indMode)+Sq;
-            %
-            % Assembling derivatives of photon equation w.r.t. carriers
-            PJacobE = Gamma_z.*dgm_nE*Pst(indMode) + dRsp_nE.*Gamma_z.*mode.fPES(indMode);
-            MM = [Lp1.*PJacobE(iiQW1) Lp2.*PJacobE(iiQW2)];
-            Jmat0 = Jmat0+sparse(ss+indMode,VV+ijrQW,MM,neq,neq);
-            PJacobH = Gamma_z.*dgm_nH*Pst(indMode) + dRsp_nH.*Gamma_z.*mode.fPES(indMode);
-            MM = [Lp1.*PJacobH(iiQW1) Lp2.*PJacobH(iiQW2)];
-            Jmat0 = Jmat0+sparse(ss+indMode,WW+ijrQW,MM,neq,neq);
-            %
-            % Assembling derivative w.r.t. Pst of photon rate equation (linear)
-            MM = (Gamma_z.*gm-Lm/NQW);    % la somma su tutti i QW deve dare Lm
-            MMgain=MM+MMgain;
-            Kmat0=Kmat0+sparse(ss+indMode,ss+indMode,MM,neq,neq);
-            %
-%             MM=(Gamma_z*dnlGdP*gm*Pst);
-%             Jmat0=Jmat0+sparse(ss+1,ss+1,MM,neq,neq);
-            %
-            % for display only
-            mode.gmod(indMode)=mode.gmod(indMode)+Gamma_z.*gm./vph;
-            mode.lmod(indMode)=Lm./vph;
-            %
-            % Equazione Portatori 2D
-            %-- Stimulated emission: recombination term
-            Rst = gE.*Pst(indMode).*Fattore_attivo*mode.fPdif(indMode)/mode.CarrierNorm2D*WQW;
-            % 2D electron equation recombination term ---------------------------------
-            MM = qel.*[Lp1.*Rst(iiQW1) Lp2.*Rst(iiQW2)];
-            mode.Irst(mode.indv,indQW)=sum(MM);
-            IntStim=IntStim+sum(MM);
-            
-            tvet = tvet + sparse(VV+ijrQW,1,MM,neq,1);
-            tvet = tvet + sparse(WW+ijrQW,1,MM,neq,1);
-            %
-            % Derivative of electrons equation Rst with respect to electrons
-            dRst_n2D = Fattore_attivo*dgm_nE.*Pst(indMode).*mode.fPdif(indMode)/mode.CarrierNorm2D*WQW;
-            MM = qel.*[Lp1.*dRst_n2D(iiQW1) Lp2.*dRst_n2D(iiQW2)];
-            Jmat0 = Jmat0+sparse(VV+ijrQW,VV+ijrQW,MM,neq,neq);
-            %
-            % Derivative of holes equation Rst with respect to holes
-            dRst_p2D = Fattore_attivo*dgm_nH.*Pst(indMode).*mode.fPdif(indMode)/mode.CarrierNorm2D*WQW;
-            MM = qel.*[Lp1.*dRst_p2D(iiQW1) Lp2.*dRst_p2D(iiQW2)];
-            Jmat0 = Jmat0+sparse(WW+ijrQW,WW+ijrQW,MM,neq,neq);
-            %
-            % Derivative of electrons equation Rst with respect to holes
-            MM = qel.*[Lp1.*dRst_p2D(iiQW1) Lp2.*dRst_p2D(iiQW2)];
-            Jmat0 = Jmat0+sparse(VV+ijrQW,WW+ijrQW,MM,neq,neq);
-            %
-            % Derivative of holes equation with Rst respect to electrons
-            MM = qel.*[Lp1.*dRst_n2D(iiQW1) Lp2.*dRst_n2D(iiQW2)];
-            Jmat0 = Jmat0+sparse(WW+ijrQW,VV+ijrQW,MM,neq,neq);
-            %
-            % Derivatives of electrons and holes Rst equation w.r.t. Pst
-            %Rst = gE.*Pst(indMode).*mode.fPdif(indMode)*WQW;
-            dRst_Pi = Fattore_attivo*gE.*mode.fPdif(indMode)*WQW/mode.CarrierNorm2D;
-            MM = qel.*[Lp1.*dRst_Pi(iiQW1) Lp2.*dRst_Pi(iiQW2)];
-            Jmat0 = Jmat0 + sparse(VV+ijrQW,ss+indMode,MM,neq,neq);
-            Jmat0 = Jmat0 + sparse(WW+ijrQW,ss+indMode,MM,neq,neq);
-            %
-            % Non linear gain
-%             MM=qel.*Fattore_attivo.*(dnlGdP.*mode.fPdif(indMode)*WQW*Pst)/mode.CarrierNorm2D;
-%             Jmat0=Jmat0+sparse(vv+indQW,ss+indMode,MM,neq,neq);
-%             Jmat0=Jmat0+sparse(ww+indQW,ss+indMode,MM,neq,neq);
-            %
-            % Optical power dynamics
-            Jmat1 = Jmat1+sparse(ss+indMode,ss+indMode,1,neq,neq);
-            %
-        end   %modes
-        
+            for indMode=1:nmodes
+                Gamma_z=mode.Gamma_z(indMode,indQW);
+                if isempty(diffMQW)
+                    % 1 MQW region
+                    Campo_attivo=mode.Gamma_z(indMode,:)./mode.Gamma_z(indMode,ceil(end/2));
+                else
+                    % more than one MQW region
+                    Campo_attivo=mode.Gamma_z(indMode,:)./mode.Gamma_z(indMode,ceil(diffMQW(1)/2));
+                end
+                Fattore_attivo=Campo_attivo(indQW);
+
+                [g,dgE,dgH,rsp,drspE,drspH] = f_InterpGain_lin(n2D,p2D,indQW,indMode);
+
+                %
+                % Non-linear gain
+                if isfield(mode,'nlG')
+                    % Gain compression factor: g=g/(1+epsNL*S); [epsNL]=cm^3
+                    % S --> Photon density ([S]=1/cm^3)
+                    % Notice that in VENUS g(s^-1)=vph*g(cm^-1) is used
+                    % --> S = fPdif*Pst , with [Pst]=W
+                    % Rst: Stimulated emission recombination term (see below)
+                    % Rst=g*fPdif*Pst*WQW; [Rst]=1/(cm^2*s)
+                    % fPdif=Rst/(g*Pst*WQW);
+                    % [fPdif]=1/(cm^2*s)/(1/s*W*cm)=1/(cm^3*W)
+                    nlG=1./(1+(mode.epsNLg.*Pst.*mode.fPdif)*mode.E2);
+                    %                 dnlGdP=-(mode.epsNLg.*mode.fPdif*mode.E2)./(1+mode.epsNLg.*Pst.*mode.fPdif*mode.E2).^2;
+                    dnlGdP=1;
+
+                    mode.nlG=nlG(1:nnQW);
+                else
+                    nlG=1;
+                    dnlGdP=1;
+                end
+
+                g=vph*g.*nlG*mode.fat_gain;
+
+                mode.g{indQW,indMode}=g; % saving just for the last mode..
+
+                dgE=vph*dgE.*nlG*mode.fat_gain;
+                dgH=vph*dgH.*nlG*mode.fat_gain;
+
+                rsp=rsp*mode.fat_gain;
+                drspE=drspE*mode.fat_gain;
+                drspH=drspH*mode.fat_gain;
+                %
+                %-- Stimulated emission: rate equation
+                mode.matgain=mode.matgain+g/vph; % saving material gain for VELM
+                %            mode.DeltaN=mode.DeltaN+DeltaN;
+                %
+                E2 = mode.E2(indMode,1:nnQW); % electric field intensity (normalized)
+                %
+                FLos=mode.FLos;
+                Lm = FLos*mode.Lm(indMode); % losses, 1/s
+                %
+                gE = g.*E2; % gain-field product
+                MM = [Lp1.*gE(iiQW1) Lp2.*gE(iiQW2)];
+
+                mode.gE(mode.indv,indQW,indMode,:)=gE;
+
+                gm = sum(diag(sparse(ijrQW,ijrQW,MM,nnQW,nnQW)));
+                dgm_nE = dgE.*E2;
+                dgm_nH = dgH.*E2;
+                %
+                rspE = rsp.*E2;
+                MM = [Lp1.*rspE(iiQW1) Lp2.*rspE(iiQW2)];
+                rspMod = sum(diag(sparse(ijrQW,ijrQW,MM,nnQW,nnQW)));
+                dRsp_nE = drspE.*E2;
+                dRsp_nH = drspH.*E2;
+                %
+                % Assembling spontaneous emission power
+                Sq=Gamma_z.*mode.fPES(indMode).*rspMod;
+                mode.Sq(mode.ind_v0)=Sq;
+                tvet(ss+indMode)=tvet(ss+indMode)+Sq;
+                %
+                % Assembling derivatives of photon equation w.r.t. carriers
+                PJacobE = Gamma_z.*dgm_nE*Pst(indMode) + dRsp_nE.*Gamma_z.*mode.fPES(indMode);
+                MM = [Lp1.*PJacobE(iiQW1) Lp2.*PJacobE(iiQW2)];
+                Jmat0 = Jmat0+sparse(ss+indMode,VV+ijrQW,MM,neq,neq);
+                PJacobH = Gamma_z.*dgm_nH*Pst(indMode) + dRsp_nH.*Gamma_z.*mode.fPES(indMode);
+                MM = [Lp1.*PJacobH(iiQW1) Lp2.*PJacobH(iiQW2)];
+                Jmat0 = Jmat0+sparse(ss+indMode,WW+ijrQW,MM,neq,neq);
+                %
+                % Assembling derivative w.r.t. Pst of photon rate equation (linear)
+                MM = (Gamma_z.*gm-Lm/NQW);    % la somma su tutti i QW deve dare Lm
+                MMgain=MM+MMgain;
+                Kmat0=Kmat0+sparse(ss+indMode,ss+indMode,MM,neq,neq);
+                %
+                %             MM=(Gamma_z*dnlGdP*gm*Pst);
+                %             Jmat0=Jmat0+sparse(ss+1,ss+1,MM,neq,neq);
+                %
+                % for display only
+                mode.gmod(indMode)=mode.gmod(indMode)+Gamma_z.*gm./vph;
+                mode.lmod(indMode)=Lm./vph;
+                %
+                % Equazione Portatori 2D
+                %-- Stimulated emission: recombination term
+                Rst = gE.*Pst(indMode).*Fattore_attivo*mode.fPdif(indMode)/mode.CarrierNorm2D*WQW;
+                % 2D electron equation recombination term ---------------------------------
+                MM = qel.*[Lp1.*Rst(iiQW1) Lp2.*Rst(iiQW2)];
+                mode.Irst(mode.indv,indQW)=sum(MM);
+                IntStim=IntStim+sum(MM);
+
+                tvet = tvet + sparse(VV+ijrQW,1,MM,neq,1);
+                tvet = tvet + sparse(WW+ijrQW,1,MM,neq,1);
+                %
+                % Derivative of electrons equation Rst with respect to electrons
+                dRst_n2D = Fattore_attivo*dgm_nE.*Pst(indMode).*mode.fPdif(indMode)/mode.CarrierNorm2D*WQW;
+                MM = qel.*[Lp1.*dRst_n2D(iiQW1) Lp2.*dRst_n2D(iiQW2)];
+                Jmat0 = Jmat0+sparse(VV+ijrQW,VV+ijrQW,MM,neq,neq);
+                %
+                % Derivative of holes equation Rst with respect to holes
+                dRst_p2D = Fattore_attivo*dgm_nH.*Pst(indMode).*mode.fPdif(indMode)/mode.CarrierNorm2D*WQW;
+                MM = qel.*[Lp1.*dRst_p2D(iiQW1) Lp2.*dRst_p2D(iiQW2)];
+                Jmat0 = Jmat0+sparse(WW+ijrQW,WW+ijrQW,MM,neq,neq);
+                %
+                % Derivative of electrons equation Rst with respect to holes
+                MM = qel.*[Lp1.*dRst_p2D(iiQW1) Lp2.*dRst_p2D(iiQW2)];
+                Jmat0 = Jmat0+sparse(VV+ijrQW,WW+ijrQW,MM,neq,neq);
+                %
+                % Derivative of holes equation with Rst respect to electrons
+                MM = qel.*[Lp1.*dRst_n2D(iiQW1) Lp2.*dRst_n2D(iiQW2)];
+                Jmat0 = Jmat0+sparse(WW+ijrQW,VV+ijrQW,MM,neq,neq);
+                %
+                % Derivatives of electrons and holes Rst equation w.r.t. Pst
+                %Rst = gE.*Pst(indMode).*mode.fPdif(indMode)*WQW;
+                dRst_Pi = Fattore_attivo*gE.*mode.fPdif(indMode)*WQW/mode.CarrierNorm2D;
+                MM = qel.*[Lp1.*dRst_Pi(iiQW1) Lp2.*dRst_Pi(iiQW2)];
+                Jmat0 = Jmat0 + sparse(VV+ijrQW,ss+indMode,MM,neq,neq);
+                Jmat0 = Jmat0 + sparse(WW+ijrQW,ss+indMode,MM,neq,neq);
+                %
+                % Non linear gain
+                %             MM=qel.*Fattore_attivo.*(dnlGdP.*mode.fPdif(indMode)*WQW*Pst)/mode.CarrierNorm2D;
+                %             Jmat0=Jmat0+sparse(vv+indQW,ss+indMode,MM,neq,neq);
+                %             Jmat0=Jmat0+sparse(ww+indQW,ss+indMode,MM,neq,neq);
+                %
+                % Optical power dynamics
+                Jmat1 = Jmat1+sparse(ss+indMode,ss+indMode,1,neq,neq);
+                %
+            end   %modes
+        end
         tvetQW(VV+[1:mesh.nnxQW{indQW}]) = tvet(VV+[1:mesh.nnxQW{indQW}]);
         tvetQW(WW+[1:mesh.nnxQW{indQW}]) = tvet(WW+[1:mesh.nnxQW{indQW}]);
         
@@ -2095,6 +2116,8 @@ if(mode.oflg)
     end
     %         figure,plot(mesh.xgrid,mode.JnQW{1},mesh.xgrid,mode.Jn_x(mesh.inMQW{indQW}),'--'),title('Electron currents'),legend('2D','3D')
     %         figure,plot(mesh.xgrid,mode.JpQW{1},mesh.xgrid,mode.Jp_x(mesh.inMQW{indQW}),'--'),title('Hole currents'),legend('2D','3D')
+
+    if mode.Oflg==1
     Scheck=mode.gmod'./mode.lmod; % stimulated emission check
     %
     % Debug prints
@@ -2103,14 +2126,15 @@ if(mode.oflg)
         fprintf('Gamma_z*Gm/Lm = %.8e\n\n',full(Scheck(indMode)))
     end
     
-    mode.N2D=N2Dtot; mode.P2D=P2Dtot;
-    %
     % saving variables
     mode.Pst=Pst; mode.Scheck=Scheck;
     %mode.nQW{mode.ind_v0}=nQW; mode.pQW{mode.ind_v0}=pQW;
     mode.matgain=mode.matgain/(NQW*nmodes);
     mode.Psp=Psp;
-    
+    end
+
+    mode.N2D=N2Dtot; mode.P2D=P2Dtot;
+
     % assembling additional equations for passivation
     if(mesh.nnx-nnQW>0)
         iiP = nnQW+1:mesh.nnx;
@@ -2204,7 +2228,7 @@ Jmat0 = Kmat0 + Jmat0 + Jmat2;
 rvetTot=rvet+tvet3;
 JmatTot=Jmat0+Jmat3;
 
-if mode.oflg
+if mode.qflg
     Intot=sum([IntAug IntSRH IntRad IntStim IntLea]);
     IntCa=sum(IntCcapp);%/WQW
     

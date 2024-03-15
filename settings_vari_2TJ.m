@@ -60,29 +60,27 @@ mode.EqPermutazione=0;
 mode.Cpot=1e3; % 1e3 original VENUS
 
 if mode.quasi1D==0
+    % pin
+    MEsa=[22.5:1:27.5]+.35; % VENUS3 mesa vector (JSTQE)
+    % MEsa=[27.5:1:32.5]; % mesa vector for oxide diameters [6:11] um, VENUS1
+    OX=MEsa-10.75*2;
     
-    MEsa=[22.5:1:27.5]+.35; % VENUS3 mesa vector
-    %     OX=4.35*ones(1,Isize);    % DIAMETERS
-    
-    OX=MEsa-10.75*2;   % VENUS3 mesa vector
-    %         OX=MEsa-9*2;        % VENUS3 mesa vector (TJ)
-    
-    %         COnt=13.85*ones(1,Isize);  % TOP CONTACT DIAMETER
-    %         COnt=MEsa-4*2;
-    
-    % Radial grading of the Oxide
+    % DelOx=2
     DelOx=1.5;
-    %OX1=OX+0;
-    %OX2=OX1+0;
-    %OX3=OX2+0;
-    %OX4=OX3+0;
+%     DelOx=1 % smaller value --> earlier threshold of superior modes
     
     % Radial grading of the oxide
     OX1=OX+0.4;
+%     OX1=OX+0.2
     OX2=OX1+DelOx;
     OX3=OX2+DelOx;
     
-    Oxide=OX(Isize)/2;      % oxide radius, um
+%     OX1=OX;
+%     OX2=OX1;
+%     OX3=OX2;
+    
+    OxTot=[OX; OX1; OX2; OX3;];
+    OxT=OxTot(:,Isize)/2;
     
     Width_Contact=6;
     Relief=0;      % oxide radius, um
@@ -103,11 +101,11 @@ end
 
 
 mode.OptScaling=0;    % area reduction w.r.t. to the eletrical area
-if mode.quasi1D==1 && mode.flgBTJ==1
-    mode.fPdifScaling=1.15; % 1 for Oxide or 3D simulations; 1.2 for TJ (1D)
-else
-    mode.fPdifScaling=1; % 1 for Oxide or 3D simulations; 1.2 for TJ (1D)
-end
+% if mode.quasi1D==1 && mode.flgBTJ==1
+%     mode.fPdifScaling=1.15; % 1 for Oxide or 3D simulations; 1.2 for TJ (1D)
+% else
+%     mode.fPdifScaling=1; % 1 for Oxide or 3D simulations; 1.2 for TJ (1D)
+% end
 
 mode.fPdifScaling=1; % 1 for Oxide or 3D simulations; 1.2 for TJ (1D)
 
@@ -123,9 +121,9 @@ end
 % Gain and quantum models
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% epsNLg=4e-17;
+epsNLg=4e-17;
 % epsNLg=3e-17;
-epsNLg=1.5e-17;
+% epsNLg=1.5e-17;
 
 Qc=0.6;
 FLos=1;
@@ -161,10 +159,11 @@ end
 tauRat=1000;      % taucapture/tauescap ratio, only for iTappo=2 (Debernardi)
 fat_gain=1;     % factor to be multiplied times LUT parameters (gain, Rsp)
 % fat_gain=1e-3;     % factor to be multiplied times LUT parameters (gain, Rsp), EXCLUDE OPTICAL simulation
-CN_Auger=.5;
-FatNP_Auger=1;     % questo lo tratto come un fattore, vedi mw_phmat
-CTemp_Auger=1.;
-%CTemp_Auger=2;
+CN_Auger=.5;        % moltiplica 1e-30 in mw_phmat, original
+% CN_Auger=.1;        % moltiplica 1e-30 in mw_phmat
+FatNP_Auger=1;      % Cppn=FatNP_Auger*Cnnp, vedi mw_phmat
+CTemp_Auger=1.;     % beta_aug in (8) of 2019Debernardi_JSTQE, original
+% CTemp_Auger=.2;     % beta_aug in (8) of 2019Debernardi_JSTQE
 FatAuger23D=1;
 C_Temp_DD=1;
 
@@ -190,7 +189,7 @@ for ks=1:length(LUT)
 end
 
 Deltalam=3;
-% Deltalam=-70
+
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Thermal and optical coefficients
@@ -198,12 +197,15 @@ Deltalam=3;
 C_Temp=1;  % Coeff. Temperatura totale
 C_TempGain=1;  % Coeff. Temperatura Gain
 dndT=2.3e-4;  % dn/dT  2.3e-4 da dati sperimentali
-dndT1D=4e-4;  % for 1D fitting
+dndT1D=2.3e-4;  % for 1D fitting
 fat_RAD=0.50;   % self-absorption heating from spont. recombination
 fat_RAD=5e-2   % self-absorption heating from spont. recombination
 
 mode.FatQtot=115;    % scaling factor for Q to fit 3D and 1D deltaT
-mode.FatV=46;   % kT scaling between substrate and VCSEL regions
+% mode.FatV=46;   % kT scaling between substrate and VCSEL regions
+mode.FatV=80;   % kT scaling between substrate and VCSEL regions
+% mode.FatQtot=1;    % scaling factor for Q to fit 3D and 1D deltaT
+% mode.FatV=1;   % kT scaling between substrate and VCSEL regions
 mode.FatQcontact=1.00; % 1D simulation: scaling at the contact (0.65 for Oxide; 1.00 for TJ)
 
 % fCondTer=1;   % transverse thermal conducibility
@@ -233,23 +235,25 @@ mode.ABSh0=7;
 % Fat_Perd0=2.6;  % con Log 1
 Fat_Perd0=2.9  % con Log 1
 
-% increase ABS_Texp with Tvelm=DeltaT+T0, in f_CallVELM:
+% Increase ABS_Texp with Tvelm=DeltaT+T0, in f_CallVELM:
 % ABS_Texp=mode.ABS_Texp+mode.PerCoefExT*Tvelm;
 PerCoefExT=0
-%PerCoefExT=2e-3 
+% PerCoefExT=2e-2
 
-% changes Fat_Perd0 in ASSEGNO_mode: Fat_Perd_mod=Fat_Perd0+Fat_PerCoefTemp*(mode.T0-T300);
+% Changes Fat_Perd0 in ASSEGNO_mode: Fat_Perd_mod=Fat_Perd0+Fat_PerCoefTemp*(mode.T0-T300);
 % Fat_PerCoefTemp=(.9-Fat_Perd0)/90;
 % Fat_PerCoefTemp=0   
-Fat_PerCoefTemp=0.002
+% Fat_PerCoefTemp=0.002
+Fat_PerCoefTemp=-0.00375
+
 if IPAR==42
     Fat_PerCoefTemp=0;
 end
 
 
 % ABS_Texp=2.4
-ABS_Texp=0      % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
-% ABS_Texp=1.2      % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
+% ABS_Texp=0      % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
+ABS_Texp=1.5      % in VELM: ABS.eleccentro=ABS.eleccentro.*(1+Tvelm/T300).^ABS_Texp;
 
 ABS_Apor=0;   %dipendenza lineare !!!!!!!
 ABS_Ader=0;
@@ -300,6 +304,7 @@ load COT
  FAT_Diff_E=0.4;   % factor to be multiplied times QW electron mobility
 % FAT_Diff_E=0.5   % factor to be multiplied times QW electron mobility
 FAT_Diff_H=1;   % factor to be multiplied times QW hole mobility
+% FAT_Diff_H=0.2   % factor to be multiplied times QW hole mobility
 mode.idiffusioneQW=3;   % 0: no QW diffusion; 1: QW diffusion; 2: NO; 3: drift-diffusion in QW
 % mode.idiffusioneQW=2;   % 0: no QW diffusion; 1: QW diffusion; 2: NO; 3: drift-diffusion in QW
 mode.iambipolarQW=0;    % use ambipolar mobility in QW
@@ -346,8 +351,7 @@ mode.verbVELM=0;
 if mode.quasi1D==1
     mode.verbVELM=-1;   % <0 to see VELM results only the first time; >0: always
 end
-mode.verbVELM=-2;   % <0 to see VELM results only the first time; >0: always
-
+% mode.verbVELM=-2;   % <0 to see VELM results only the first time; >0: always
 
 itutmir=0; % if 1, the "entire" optical structure is studied with thermal (strong discretization)
 
@@ -396,7 +400,6 @@ if NUMERO_MODI<=2
 end
 % KMax=[.21 .18 .15 .12];
 % KMax=[.18 .15 .14 .12 .11 .10];
-% KMax=[.25 .20 .18 .16 .14 .12];
 KMax=[.25 .20 .16 .12 .11 .10];
 VelmOptions.krel_max=KMax(Isize);               %kmax; 0.1 va bene per aperture normali (3-4 um)
 mode.mintempVELM=200; % degrees, minimum temperature such that VELM is called
@@ -431,7 +434,7 @@ mode.report=1; % verbose mode
 mode.nflg=1; % include electron continuity equation
 mode.pflg=1; % include hole continuity equation
 mode.tflg=0; % include trap equations
-mode.Tflg=1; % include thermal effects
+mode.Tflg=0; % include thermal effects
 mode.oflg=1; % include quantum effects and stimulated recombination
 mode.RAD_spalmato=1;
 if mode.oflg==0

@@ -263,6 +263,11 @@ gth=Gvp0;
 if ~exist('St_wave')
  St_wave(:,1)=ztot';
  St_wave(:,2)=Ez';
+ St_wave(:,3)=nz;
+
+ zqw=sum(L_i(1:fiQW(1)))/1000;
+[~,imi]=min(abs(ztot-zqw));
+ St_wave(:,4)=imi;
 end
 
 return

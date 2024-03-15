@@ -15,7 +15,7 @@ dbstop if error
 addpathVENUS    % add the folders needed for a VENUS simulation
 
 % Flag to avoid slow geom generation of lithographic structures (load geom file)
-flgGEOM=1;     % 1, carica vecchia geom
+% flgGEOM=1;     % 1, carica vecchia geom
 flgGEOM=0;     % carica vecchia geom
 
 % Dynamic Analysis
@@ -47,6 +47,10 @@ nomeSave=[nomeSW,nomeSav];
 %eval(['save ',nomeSave,' h'])
 
 iStruttura=8;  % 6,7,8; look into "List_strNames.m" for a complete list of str files 
+% iStruttura=80  % 80: 0.20; 81: 0.39; Different barrier molar fraction (kink voltage analysis)
+% iStruttura=81 
+
+% iStruttura=95;  % same str of Markus, with xDBR=0.10 instead of 0.17
  
 %  Last_Workspac='dud';  
 Last_Workspac='LW';  
@@ -149,7 +153,7 @@ for itemp=1:length(TTve)
         Imassimo=13;  % massima corrente analizzata
     elseif Temperaturei == 20
 %         Imassimo=16;  % massima corrente analizzata
-        Vadd=[1.55:0.05:3.1];
+        Vadd=[1.53:0.05:3.1];
 %         Vadd=[1.62:0.02:1.8 1.85:0.05:2.3];
 %         Imassimo=7;
         Imassimo=14;
@@ -194,6 +198,11 @@ for IPAR=IPvet
         
     end
     eval(['settings_vari',rad_setting])
+
+    if mode.Pmin_Pfit>20
+        DD0=repelem(DD0,2);
+%         pausak
+    end
    
     % Save parameters in PMAT and save IPvet (i.e., to be analysed parameters)
     if iPrimo==1
@@ -207,7 +216,7 @@ for IPAR=IPvet
     
     for kpar = kpvet
         
-        eval(['save facendo-',nomeSav,' IPAR kpar kpvet IPvet'])
+%         eval(['save facendo-',nomeSav,' IPAR kpar kpvet IPvet'])
         
         % In case they are different, it means that there some
         % inconsistence between SETTA_loopsTemp and the input given by the
@@ -281,7 +290,7 @@ for IPAR=IPvet
 						fprintf('Structure loaded\n'),keyboard
                     end
 					
-                    if mode.oflg==1
+                    if mode.Oflg==1
                         Glut4Dinc(mode)
                     end
                 end
@@ -299,7 +308,7 @@ for IPAR=IPvet
             end
             
         end %iloop
-        if mode.oflg==1
+        if mode.qflg==1
             geom.QWorientation=Gs.QWorientation;
         end
         
@@ -313,7 +322,7 @@ for IPAR=IPvet
             MODE{kpar}=mode;
             MESH{kpar}=mesh;
             
-            if mode.oflg
+            if mode.Oflg
                 VInf{kpar}=VELMInfo;
                 VO{kpar}=VelmOptions;
             end

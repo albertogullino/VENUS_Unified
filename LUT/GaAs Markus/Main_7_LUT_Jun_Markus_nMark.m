@@ -60,6 +60,7 @@ mesh.vz_offset=vz_offset;
 Tvet=[300 350];
 lambdavet=linspace(800,870,101)*1e-9;
 Densityv=[ 0.01 5 10]*1e12;
+% Full LUT
 % Tvet=[290:10:520];
 % Densityv=[0.0001 0.001 0.01 0.1 1 2 2.5:.5:8 9:20]*1e12;
 % lambdavet=[800:1:900]*1e-9;% linspace(830,870,41)*1e-9;

@@ -11,9 +11,9 @@ clc
 mesh.NQW=3;
 mesh.L=50e-9; % Total length of the domain, m (25 nm, 1 QW) 
 mesh.nn=1001; % Number of spatial mesh nodes (251 pts, 1 QW)
-mesh.Lz=6.5e-9; % quantum well width, m
-mesh.xmol_barrier=0.33; % Al molar fraction (barrier)
-mesh.xmol_well=0.062; % Al molar fraction (well)
+mesh.Lz=7.7e-9; % quantum well width, m
+mesh.xmol_barrier=0.286; % Al molar fraction (barrier)
+mesh.xmol_well=0; % Al molar fraction (well)
 mesh.Eg=1.412; % fitted from Gerlach PL measurements
 mesh.DeltaEg=1.247; % DeltaEg = Eg(barrier) - Eg(well)
 mesh.Qc=+0.62; % conduction band-offset percentage of DeltaEg
@@ -34,10 +34,11 @@ mode.iplot=1; % if 1, several intermediate plots are produced
 mode.flagLimitMaxDensity=0; % 1: limits max carrier density; 0: doesn't
 mode.iline='nMark'; % 'nMark' ; 'lorentzian'; 'Landsberg'; Landsberg_extended' and Landsberg_modified  models
 mode.Expgammak=6; % exponent for carrier-carrier scattering corrections
-% mesh.gammak = .90e13;     % 1/s
-mesh.gammak=1.25e13;     % 1/s (Julian)
+mesh.gammak = 1e13;     % 1/s
+% mesh.gammak=1.25e13;     % 1/s (Julian)
+mesh.tnm=40e-15;  %s  for non markovian effects
 % mesh.tnm=70e-15;  %s  for non markovian effects
-mesh.tnm=120e-15;  %s  for non markovian effects
+% mesh.tnm=120e-15;  %s  for non markovian effects
 %
 mode.iren=1; % enable gap renormalization computation
 mode.ieh_equal=0; % 1: e- and h- densities are assumed equal; 0: they aren't
@@ -50,7 +51,7 @@ mode.viv=[]; % if empty, all transitions are computed
 % Full LUT parameters
 Tvet=298;
 Densityv=2*1e12;
-lambdavet=794*1-9;%  % 780-825 for Al(0.04)GaAs, step 2 nm
+lambdavet=850*1-9;%  % 780-825 for Al(0.04)GaAs, step 2 nm
 %
 %==========================================================================
 % Region to investigate
@@ -72,7 +73,7 @@ mesh.fileName=['subbands_WQW=',num2str(mesh.Lz*1e9),'nm_','xQW=',num2str(mesh.xm
 % Loading constants
 %==========================================================================
 s_LoadConstants
-s_AlGaAsConstants
+s_GaAsConstants
 %==========================================================================
 % Program: initialization of constants
 %==========================================================================

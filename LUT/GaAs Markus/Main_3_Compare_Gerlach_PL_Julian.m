@@ -8,6 +8,7 @@ clc
 %==========================================================================
 % Quantum well parameters
 %==========================================================================
+mesh.NQW=1;
 mesh.L=25e-9; % Total length of the domain, m
 mesh.nn=251; % Number of spatial mesh nodes
 mesh.Lz=6.5e-9; % quantum well width, m
@@ -15,7 +16,7 @@ mesh.xmol_barrier=0.33; % Al molar fraction (barrier)
 mesh.xmol_well=0.04; % Al molar fraction (well)
 mesh.Eg=1.412; % fitted from Gerlach PL measurements
 mesh.DeltaEg=1.247; % DeltaEg
-mesh.Qc=+0.62; % conduction band-offset percentage of DeltaEg (?)
+mesh.Qc=+0.62; % conduction band-offset percentage of DeltaEg
 mesh.Delta=0.34; % spin-orbit coupling, eV
 mesh.meffn=0.067; % electron conduction mass
 mesh.ncinit=4; % number of conduction subbands to be computed
@@ -51,6 +52,13 @@ mode.viv=[]; % if empty, all transitions are computed
 Tvet=[294];
 lambdavet=linspace(750,850,201)*1e-9;
 Densityv=[0.01]*1e12;
+%
+%==========================================================================
+% Region to investigate
+%==========================================================================
+vz_offset=[-(mesh.NQW-1)*mesh.Lz,0,(mesh.NQW-1)*mesh.Lz]; 
+%
+mesh.vz_offset=vz_offset;
 %
 %==========================================================================
 % Computing or loading subbands

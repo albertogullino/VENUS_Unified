@@ -1,6 +1,6 @@
 clear
 % close all
-% 
+%
 s_LoadConstants
 
 
@@ -16,6 +16,8 @@ LUTname{4}='LUT4D_Markus_nMark_xW=0_xB=0.39';
 LUTname{5}='LUT4D_Feb24_Markus_nMark_xW=0_xB=0.2';
 LUTname{6}='LUT4D_Feb24_Markus_nMark_xW=0_xB=0.286';
 LUTname{7}='LUT4D_Feb24_Markus_nMark_xW=0_xB=0.38';
+
+LUTname{8}='LUT4D_Mar24_Julian795_nMark_xW=0.06_xB=0.33';
 
 LUTname{iLUT}
 
@@ -84,26 +86,26 @@ SBVap=Ban.SBV(:,1)*ones(1,mesh.num_kvectors)+1./mh*(h2m0.*Ban.kgrid.^2/qel);
 % plot(Ban.kgrid,SBVap,'.','linewidth',2), ylim([0 .2])
 % chold
 % plot(Ban.kgrid,-Ban.SBC,'linewidth',1.5),
-pausak 
+pausak
 
 figure(11)
-    set(gcf,'Position',[1060 512 560 420])
-    hold on
-    grid on
-    plot(Ban.kgrid,(-Ban.SBV),'LineWidth',2),chold
-    plot(Ban.kgrid,-SBVap,'.','linewidth',2), ylim([-0.2 0])
-    set(gca,'FontSize',14,'FontName','Arial','Box','on')
-    xlabel('k_{||}, nm^{-1}')
-    ylabel('Energy, eV')
-    title('Valence subbands')
-    
-    figure(12)
-    set(gcf,'Position',[633 59 560 420])
-    hold on
-    grid on
-    plot(Ban.kgrid,(Ban.SBC),'LineWidth',2)
-    set(gca,'FontSize',14,'FontName','Arial','Box','on')
-    xlabel('k_{||}, nm^{-1}')
-    ylabel('Energy, eV')
-    title('Conduction subbands')
+set(gcf,'Position',[1060 512 560 420])
+hold on
+grid on
+plot(Ban.kgrid,(-Ban.SBV),'LineWidth',2),chold
+plot(Ban.kgrid,-SBVap,'.','linewidth',2), ylim([-0.2 0])
+set(gca,'FontSize',14,'FontName','Arial','Box','on')
+xlabel('k_{||}, nm^{-1}')
+ylabel('Energy, eV')
+title('Valence subbands')
+
+figure(12)
+set(gcf,'Position',[633 59 560 420])
+hold on
+grid on
+plot(Ban.kgrid,(Ban.SBC),'LineWidth',2)
+set(gca,'FontSize',14,'FontName','Arial','Box','on')
+xlabel('k_{||}, nm^{-1}')
+ylabel('Energy, eV')
+title('Conduction subbands')
 

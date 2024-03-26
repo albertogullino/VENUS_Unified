@@ -1,3 +1,0 @@
-load
-ass_par
-

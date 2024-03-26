@@ -8,8 +8,8 @@ function nindex=nAlGaAs(lambda,x)
 %       Model extended with the range 0.8µm - egamma from
 %       S.W. Corzine, Ph.D. Dissertation
 
-iAlGaAs_model = 1;  % 1 -> our model, 2 -> TRUMPF model
-% iAlGaAs_model = 2;  % 1 -> our model, 2 -> TRUMPF model
+% iAlGaAs_model = 1;  % 1 -> our model, 2 -> TRUMPF model
+iAlGaAs_model = 2;  % 1 -> our model, 2 -> TRUMPF model
 
 if iAlGaAs_model == 1
     nindex=nAlGaAs_Corzine(lambda,x);

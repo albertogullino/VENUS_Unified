@@ -1,3 +1,0 @@
-load sca
-
-Tscattuu
